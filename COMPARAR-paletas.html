@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AllPet — comparar paletas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+/* ---------- PALETA A: navy + dorado, con aire ---------- */
+body[data-tema="a"]{
+  --bg:#FFFFFF; --bg-alt:#F6F8FB; --surface:#FFFFFF;
+  --text:#0B3161; --text-soft:#5A7290; --text-faint:#93A6BC;
+  --accent:#CD963A; --accent-ink:#7F5B25; --accent-soft:#FBF3E7;
+  --header:#FFFFFF; --footer:#0B3161; --footer-text:#C6D3E3;
+  --border:#E4EAF1; --tile-1:#EEF3F8; --tile-2:#FBF3E7; --tile-3:#EAF0F6; --tile-4:#F5EEE3;
+}
+/* ---------- PALETA B: neutros cálidos tipo Wild One ---------- */
+body[data-tema="b"]{
+  --bg:#FAF7F2; --bg-alt:#F1EADF; --surface:#FFFFFF;
+  --text:#1F1C18; --text-soft:#6E6559; --text-faint:#A79C8C;
+  --accent:#CD963A; --accent-ink:#7F5B25; --accent-soft:#F4EADA;
+  --header:#FAF7F2; --footer:#25211C; --footer-text:#C6BCAC;
+  --border:#E5DCCE; --tile-1:#EFE7DA; --tile-2:#E8DFD2; --tile-3:#F0E4D6; --tile-4:#E4DCD0;
+}
+
+/* ---------- PALETA C: el mix — base cálida, tinta navy, dorado de acento ---------- */
+body[data-tema="c"]{
+  --bg:#FAF8F4; --bg-alt:#F0EBE1; --surface:#FFFFFF;
+  --text:#0B3161; --text-soft:#56657A; --text-faint:#9EA9B7;
+  --accent:#CD963A; --accent-ink:#7F5B25; --accent-soft:#F5EBDA;
+  --header:#FAF8F4; --footer:#0B3161; --footer-text:#C6D3E3;
+  --border:#E6DFD4; --tile-1:#EFE9DE; --tile-2:#F2E7D5; --tile-3:#E9EDF1; --tile-4:#E7DFD3;
+}
+
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;transition:background .25s}
+.display{font-family:'Fraunces',Georgia,serif;font-weight:300;letter-spacing:-.02em}
+.wrap{max-width:1180px;margin:0 auto;padding:0 28px}
+a{text-decoration:none;color:inherit}
+
+/* selector de tema */
+.switch{position:sticky;top:0;z-index:99;background:#111;color:#fff;padding:10px 0}
+.switch .wrap{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}
+.switch span{font-size:12.5px;color:#9a9a9a;margin-right:6px}
+.switch button{font-family:inherit;font-size:12.5px;padding:7px 16px;border-radius:99px;border:1px solid #444;background:transparent;color:#ddd;cursor:pointer;transition:.15s}
+.switch button:hover{border-color:#888}
+.switch button.on{background:#fff;color:#111;border-color:#fff}
+
+/* barra utilitaria */
+.util{background:var(--accent);color:#3A2A10;font-size:12px;text-align:center;padding:8px}
+body[data-tema="b"] .util,
+body[data-tema="c"] .util{background:var(--text);color:var(--bg)}
+
+/* header */
+header{background:var(--header);border-bottom:1px solid var(--border);position:sticky;top:41px;z-index:50}
+.hrow{display:flex;align-items:center;gap:28px;padding:20px 0}
+.logo{font-family:'Fraunces',serif;font-size:25px;font-weight:400;letter-spacing:-.02em;white-space:nowrap}
+.logo b{font-weight:400;color:var(--accent)}
+.search{flex:1;display:flex;align-items:center;gap:10px;background:var(--bg-alt);border:1px solid var(--border);border-radius:99px;padding:11px 20px}
+.search input{border:0;background:transparent;outline:none;font-family:inherit;font-size:14px;width:100%;color:var(--text)}
+.search input::placeholder{color:var(--text-faint)}
+.icons{display:flex;align-items:center;gap:22px;font-size:13px;color:var(--text-soft);white-space:nowrap}
+.cart{position:relative}
+.cart .dot{position:absolute;top:-7px;right:-11px;background:var(--accent);color:#3A2A10;font-size:10px;font-weight:600;width:17px;height:17px;border-radius:50%;display:grid;place-items:center}
+nav.cats{display:flex;gap:30px;padding:0 0 15px;font-size:13.5px;color:var(--text-soft);overflow-x:auto}
+nav.cats a:first-child{color:var(--text);font-weight:500}
+
+/* hero */
+.hero{background:var(--bg-alt);padding:88px 0 96px;margin-bottom:0}
+.hero h1{font-size:58px;line-height:1.04;max-width:620px;margin-bottom:22px}
+.hero p{font-size:17px;line-height:1.65;color:var(--text-soft);max-width:440px;margin-bottom:34px;font-weight:300}
+.btn{display:inline-block;background:var(--text);color:var(--bg);padding:15px 34px;border-radius:99px;font-size:14px;font-weight:500}
+body[data-tema="a"] .btn{background:var(--accent);color:#2B1E0D}
+.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--text);margin-left:10px}
+
+/* secciones */
+section{padding:76px 0}
+.shead{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:38px;gap:20px}
+.shead h2{font-size:33px;font-weight:300}
+.shead a{font-size:13.5px;color:var(--text-soft);border-bottom:1px solid var(--border);padding-bottom:3px}
+
+/* categorías */
+.cats4{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.cat{border-radius:16px;padding:32px 24px;min-height:188px;display:flex;flex-direction:column;justify-content:flex-end}
+.cat h3{font-size:20px;font-weight:400;margin-bottom:5px}
+.cat span{font-size:12.5px;color:var(--text-soft)}
+
+/* productos */
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px}
+.card{background:var(--surface);border-radius:16px;overflow:hidden;border:1px solid var(--border)}
+.ph{aspect-ratio:1;display:grid;place-items:center;position:relative}
+.ph em{font-style:normal;font-size:11px;color:var(--text-faint);letter-spacing:.09em;text-transform:uppercase}
+.tag{position:absolute;top:13px;left:13px;background:var(--surface);border:1px solid var(--border);font-size:10.5px;padding:4px 11px;border-radius:99px;color:var(--text-soft);letter-spacing:.04em}
+.cbody{padding:17px 18px 20px}
+.cbody .brand{font-size:10.5px;color:var(--accent-ink);letter-spacing:.09em;text-transform:uppercase;margin-bottom:6px}
+body[data-tema="c"] .stars{color:var(--accent-ink)}
+body[data-tema="c"] .cat h3{color:var(--text)}
+body[data-tema="c"] .btn.ghost{border-color:var(--border);color:var(--text-soft)}
+.cbody h4{font-size:14.5px;font-weight:400;line-height:1.4;margin-bottom:4px}
+.cbody .pres{font-size:12px;color:var(--text-faint);margin-bottom:11px}
+.stars{font-size:11px;color:var(--text-soft);margin-bottom:10px}
+.price{display:flex;align-items:baseline;justify-content:space-between}
+.price b{font-size:17px;font-weight:500}
+.price .out{font-size:11px;color:var(--text-faint)}
+
+/* confianza */
+.trust{background:var(--bg-alt);padding:52px 0}
+.trust .wrap{display:grid;grid-template-columns:repeat(4,1fr);gap:34px;text-align:center}
+.trust h5{font-size:14px;font-weight:500;margin-bottom:6px}
+.trust p{font-size:12.5px;color:var(--text-soft);line-height:1.55;font-weight:300}
+
+/* footer */
+footer{background:var(--footer);color:var(--footer-text);padding:64px 0 30px}
+footer .cols{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:36px;margin-bottom:44px}
+footer .logo{color:#fff;margin-bottom:12px}
+footer p{font-size:12.5px;line-height:1.75;font-weight:300}
+footer h6{color:#fff;font-size:12.5px;font-weight:500;margin-bottom:13px;letter-spacing:.03em}
+footer li{list-style:none;font-size:12.5px;line-height:2;font-weight:300}
+footer .base{border-top:1px solid rgba(255,255,255,.14);padding-top:22px;font-size:11.5px;opacity:.72}
+
+.note{background:#FFF8E1;border:1px solid #F0D9A0;color:#6B4E12;font-size:12.5px;padding:11px 18px;border-radius:10px;margin:0 auto 0;max-width:1124px}
+@media(max-width:900px){
+  .cats4,.grid,.trust .wrap,footer .cols{grid-template-columns:repeat(2,1fr)}
+  .hero h1{font-size:40px}.hrow{flex-wrap:wrap;gap:14px}.search{order:3;width:100%;flex:none}
+}
+</style>
+</head>
+<body data-tema="c">
+
+<div class="switch">
+  <div class="wrap">
+    <span>Comparar paleta:</span>
+    <button id="bc" class="on" onclick="setTema('c')">C · El mix ✦</button>
+    <button id="ba" onclick="setTema('a')">A · Navy y dorado con aire</button>
+    <button id="bb" onclick="setTema('b')">B · Neutros cálidos (Wild One)</button>
+  </div>
+</div>
+
+<div style="padding:16px 28px 0">
+<div class="note"><b>Paleta C (el mix)</b> — base cálida de Wild One, tinta navy de tu marca, dorado como único acento. Alterná arriba para comparar contra las otras dos. Productos y reseñas son de ejemplo; los bloques de imagen son intencionales mientras no haya fotos.</div>
+</div>
+
+<div class="util">Envíos en todo Costa Rica · Retiro en tienda sin costo</div>
+
+<header>
+  <div class="wrap">
+    <div class="hrow">
+      <div class="logo">All<b>Pet</b></div>
+      <div class="search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-faint);flex-shrink:0"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input placeholder="Buscar alimento, juguetes, arena…">
+      </div>
+      <div class="icons">
+        <span>Mi cuenta</span>
+        <span class="cart">Carrito<span class="dot">2</span></span>
+      </div>
+    </div>
+    <nav class="cats">
+      <a href="#">Perros</a><a href="#">Gatos</a><a href="#">Alimento</a><a href="#">Snacks</a>
+      <a href="#">Juguetes</a><a href="#">Higiene</a><a href="#">Accesorios</a><a href="#">Marcas</a>
+    </nav>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="wrap">
+    <h1 class="display">Todo para tu mascota,<br>elegido con criterio.</h1>
+    <p>Alimento, accesorios e higiene para perros y gatos. Te decimos qué le sirve realmente, no qué nos conviene vender.</p>
+    <a href="#" class="btn">Ver catálogo</a>
+    <a href="#" class="btn ghost">Hablar con nosotros</a>
+  </div>
+</div>
+
+<section>
+  <div class="wrap">
+    <div class="shead"><h2 class="display">Comprar por categoría</h2><a href="#">Ver todas</a></div>
+    <div class="cats4">
+      <div class="cat" style="background:var(--tile-1)"><h3 class="display">Perros</h3><span>Alimento, snacks, juguetes</span></div>
+      <div class="cat" style="background:var(--tile-2)"><h3 class="display">Gatos</h3><span>Arena, alimento, rascadores</span></div>
+      <div class="cat" style="background:var(--tile-3)"><h3 class="display">Higiene</h3><span>Baño, cepillado, cuidado</span></div>
+      <div class="cat" style="background:var(--tile-4)"><h3 class="display">Accesorios</h3><span>Collares, camas, transporte</span></div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:0">
+  <div class="wrap">
+    <div class="shead"><h2 class="display">Más vendidos</h2><a href="#">Ver todo el catálogo</a></div>
+    <div class="grid">
+      <div class="card">
+        <div class="ph" style="background:var(--tile-1)"><span class="tag">Más vendido</span><em>Foto pendiente</em></div>
+        <div class="cbody">
+          <div class="brand">Alimento seco</div>
+          <h4>Alimento perro adulto razas medianas</h4>
+          <div class="pres">2 kg</div>
+          <div class="stars">★★★★★ <span style="color:var(--text-faint)">(24)</span></div>
+          <div class="price"><b>₡12 500</b></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ph" style="background:var(--tile-2)"><em>Foto pendiente</em></div>
+        <div class="cbody">
+          <div class="brand">Higiene</div>
+          <h4>Arena aglomerante sin perfume</h4>
+          <div class="pres">5 L</div>
+          <div class="stars">★★★★☆ <span style="color:var(--text-faint)">(11)</span></div>
+          <div class="price"><b>₡4 200</b></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ph" style="background:var(--tile-3)"><em>Foto pendiente</em></div>
+        <div class="cbody">
+          <div class="brand">Accesorios</div>
+          <h4>Collar ajustable mediano</h4>
+          <div class="pres">Talla M</div>
+          <div class="stars">★★★★★ <span style="color:var(--text-faint)">(8)</span></div>
+          <div class="price"><b>₡6 800</b><span class="out">Sin existencias</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ph" style="background:var(--tile-4)"><em>Foto pendiente</em></div>
+        <div class="cbody">
+          <div class="brand">Snacks</div>
+          <h4>Premios naturales de pollo</h4>
+          <div class="pres">200 g</div>
+          <div class="stars">★★★★★ <span style="color:var(--text-faint)">(31)</span></div>
+          <div class="price"><b>₡3 400</b></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="trust">
+  <div class="wrap">
+    <div><h5>Tienda física real</h5><p>No somos un catálogo en línea sin dirección. Podés venir y vernos.</p></div>
+    <div><h5>Asesoría honesta</h5><p>Te recomendamos según lo que necesita tu mascota, no según el margen.</p></div>
+    <div><h5>Retiro en tienda</h5><p>Reservás en línea y lo recogés el mismo día, sin costo de envío.</p></div>
+    <div><h5>Precios claros</h5><p>El precio que ves es el que pagás. Sin cargos sorpresa al final.</p></div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <div class="logo">All<b>Pet</b></div>
+        <p>Productos para perros y gatos en Costa Rica.<br>Tienda física, atención honesta.</p>
+      </div>
+      <div><h6>Comprar</h6><ul><li>Perros</li><li>Gatos</li><li>Alimento</li><li>Accesorios</li></ul></div>
+      <div><h6>Ayuda</h6><ul><li>Contacto</li><li>Envíos</li><li>Devoluciones</li><li>Preguntas frecuentes</li></ul></div>
+      <div><h6>Nosotros</h6><ul><li>Sobre AllPet</li><li>Nuestra tienda</li><li>Blog</li></ul></div>
+    </div>
+    <div class="base">© 2026 AllPetcr · Cédula jurídica 3-101-999999 · Régimen de Tributación Simplificada</div>
+  </div>
+</footer>
+
+<script>
+function setTema(t){
+  document.body.dataset.tema=t;
+  document.getElementById('bc').classList.toggle('on',t==='c');
+  document.getElementById('ba').classList.toggle('on',t==='a');
+  document.getElementById('bb').classList.toggle('on',t==='b');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>

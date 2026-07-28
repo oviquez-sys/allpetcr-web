@@ -1,0 +1,31 @@
+FOTOS DE LAS TARJETAS DE CATEGORIA
+==================================
+
+Cuando esten elegidas, guardar aqui los cuatro archivos con estos nombres
+exactos (sin tildes, sin espacios, en minuscula):
+
+    perros.jpg
+    gatos.jpg
+    higiene.jpg
+    accesorios.jpg
+
+Despues, abrir  lib/categorias.ts  y descomentar la linea "imagen" de cada
+categoria. Eso es todo: la tarjeta empieza a usar la foto y el scrim se
+encarga de que el texto siga siendo legible encima.
+
+REQUISITOS MINIMOS
+------------------
+- 2000 px o mas en el lado corto (las tarjetas son grandes; menos que eso
+  se ve blando en pantallas modernas).
+- Luz natural suave. Sin flash directo ni sombras duras.
+- Colores dentro de la paleta: blanco, crema, arena, madera clara, gris.
+- Sin personas reconocibles, sin logos de marcas, sin marcas de agua.
+- Que aguante recorte cuadrado: en movil la tarjeta es casi cuadrada.
+
+LICENCIA
+--------
+Solo usar fotos de Unsplash, Pexels, o stock pagado (Adobe / Shutterstock).
+NUNCA de Pinterest, Behance, Dribbble, ni de los sitios de otras tiendas:
+esas imagenes tienen dueno y su uso comercial es infraccion.
+
+El criterio completo esta en  DIRECCION-DE-ARTE.md  en la raiz del proyecto.

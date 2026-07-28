@@ -1,0 +1,74 @@
+[
+  {
+    "sku": "DEMO-001",
+    "nombre": "Alimento perro adulto razas medianas",
+    "categoria_id": 7,
+    "presentacion": "2 kg",
+    "precio_venta": 12500,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "DEMO-002",
+    "nombre": "Alimento gato adulto pollo",
+    "categoria_id": 9,
+    "presentacion": "1.5 kg",
+    "precio_venta": 9800,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "DEMO-003",
+    "nombre": "Arena aglomerante sin perfume",
+    "categoria_id": 5,
+    "presentacion": "5 L",
+    "precio_venta": 4200,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "DEMO-004",
+    "nombre": "Collar ajustable mediano",
+    "categoria_id": 6,
+    "presentacion": "Talla M",
+    "precio_venta": 6800,
+    "disponible": false,
+    "imagen": ""
+  },
+  {
+    "sku": "DEMO-005",
+    "nombre": "Premios naturales de pollo",
+    "categoria_id": 8,
+    "presentacion": "200 g",
+    "precio_venta": 3400,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "DEMO-006",
+    "nombre": "Shampoo hipoalergénico",
+    "categoria_id": 5,
+    "presentacion": "500 ml",
+    "precio_venta": 5600,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "DEMO-007",
+    "nombre": "Cama acolchada lavable",
+    "categoria_id": 6,
+    "presentacion": "60 × 45 cm",
+    "precio_venta": 18900,
+    "disponible": false,
+    "imagen": ""
+  },
+  {
+    "sku": "DEMO-008",
+    "nombre": "Snack dental para perro",
+    "categoria_id": 8,
+    "presentacion": "7 unidades",
+    "precio_venta": 2900,
+    "disponible": true,
+    "imagen": ""
+  }
+]
