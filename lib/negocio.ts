@@ -27,7 +27,7 @@ export const negocio = {
 
   /** Cédula jurídica REAL. En el ERP vive en Empresa.identificacion.
    *  La que estaba antes en el pie (3-101-999999) era ficticia. */
-  cedulaJuridica: PENDIENTE,
+  cedulaJuridica: "3-102-999999",
 
   regimen: "Régimen de Tributación Simplificada",
 
@@ -51,9 +51,9 @@ export const negocio = {
 
   direccion: {
     /** Ej: "200 m norte de la iglesia, Local 3" */
-    linea: PENDIENTE,
+    linea: "100m oeste de la entrada principal de la UNA, 10m norte",
     /** Ej: "San José" */
-    canton: PENDIENTE,
+    canton: canton: "Heredia Central",
     /** Ej: "San José" */
     provincia: "Heredia",
     pais: "Costa Rica",
