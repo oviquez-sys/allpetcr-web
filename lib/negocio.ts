@@ -38,7 +38,16 @@ export const negocio = {
   /** Como se muestra en pantalla. Ej: "8888-7777". */
   telefonoVisible: "+506 8856-2992",
 
-  correo: PENDIENTE,
+  /** Correos de contacto. El primero se usa por defecto en formularios. */
+  correos: {
+    sac: "servicioalcliente@allpetcr.com",
+    soporte: "soporte@allpetcr.com",
+  },
+
+  /** Para compatibilidad con código que espera un solo correo. */
+  get correo(): string {
+    return this.correos.sac;
+  },
 
   direccion: {
     /** Ej: "200 m norte de la iglesia, Local 3" */
@@ -84,7 +93,7 @@ export function camposPendientes(): string[] {
   if (faltante(negocio.cedulaJuridica)) faltan.push("cedulaJuridica");
   if (faltante(negocio.whatsapp)) faltan.push("whatsapp");
   if (faltante(negocio.telefonoVisible)) faltan.push("telefonoVisible");
-  if (faltante(negocio.correo)) faltan.push("correo");
+  if (faltante(negocio.correos.sac)) faltan.push("correos.sac");
   if (faltante(negocio.direccion.linea)) faltan.push("direccion.linea");
   if (faltante(negocio.direccion.canton)) faltan.push("direccion.canton");
   if (faltante(negocio.horarioTexto)) faltan.push("horarioTexto");
