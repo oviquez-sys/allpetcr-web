@@ -33,10 +33,10 @@ export const negocio = {
 
   /** Solo dígitos, con código de país (506 para Costa Rica).
    *  Ej: "50688887777". Se usa para el enlace de WhatsApp. */
-  whatsapp: PENDIENTE,
+  whatsapp: "50688562992",
 
   /** Como se muestra en pantalla. Ej: "8888-7777". */
-  telefonoVisible: PENDIENTE,
+  telefonoVisible: "+506 8856-2992",
 
   correo: PENDIENTE,
 
@@ -46,7 +46,7 @@ export const negocio = {
     /** Ej: "San José" */
     canton: PENDIENTE,
     /** Ej: "San José" */
-    provincia: PENDIENTE,
+    provincia: "Heredia",
     pais: "Costa Rica",
     /** Coordenadas para Google Maps y datos estructurados.
      *  Se obtienen en Google Maps: clic derecho sobre el local → copiar. */
@@ -56,10 +56,10 @@ export const negocio = {
 
   /** Horario en formato schema.org. Mo,Tu,We,Th,Fr,Sa,Su
    *  Ej: [{ dias: "Mo-Fr", abre: "08:00", cierra: "18:00" }] */
-  horario: [] as { dias: string; abre: string; cierra: string }[],
+  horario: [{ dias: "Mo-Fr", abre: "08:30", cierra: "19:00" }],
 
   /** Texto legible del horario, para mostrar en la página de contacto. */
-  horarioTexto: PENDIENTE,
+  horarioTexto: "Lunes a viernes, 8:30 a.m. – 7:00 p.m.",
 
   /** Dominio final, sin barra al final. Necesario para el sitemap,
    *  las URLs canónicas y las vistas previas al compartir. */
@@ -73,7 +73,6 @@ export const negocio = {
   /** Monto mínimo de pedido en colones. 0 = sin mínimo. */
   pedidoMinimo: 0,
 } as const;
-
 /** true si el dato está sin completar. */
 export function faltante(valor: unknown): boolean {
   return valor === PENDIENTE || valor === "" || valor === null || valor === undefined;
