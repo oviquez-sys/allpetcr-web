@@ -53,7 +53,7 @@ export const negocio = {
     /** Ej: "200 m norte de la iglesia, Local 3" */
     linea: "100m oeste de la entrada principal de la UNA, 10m norte",
     /** Ej: "San José" */
-    canton: canton: "Heredia Central",
+    canton: "Heredia Central",
     /** Ej: "San José" */
     provincia: "Heredia",
     pais: "Costa Rica",
