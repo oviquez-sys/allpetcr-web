@@ -1,82 +1,120 @@
 # AllPet — sitio web
 
-Stack: Next.js 15 (App Router) + TypeScript + Tailwind CSS. Sin carrito ni
-cuentas de usuario. Sin conexión al ERP todavía.
+Next.js 16 (App Router) + TypeScript + Tailwind. Catálogo con carrito y
+pedido por WhatsApp.
 
-## Cómo correr
+## Antes de publicar — 3 pasos obligatorios
+
+El sitio **no compila en producción** hasta completarlos. Es deliberado: antes
+se publicaba una cédula jurídica inventada y ocho productos ficticios.
+
+### 1. Datos del negocio
+
+Abrí `lib/negocio.ts` y reemplazá todo lo que diga `PENDIENTE`:
+
+| Campo | Qué poner |
+|---|---|
+| `cedulaJuridica` | La cédula real (está en el ERP, en Empresa.identificacion) |
+| `whatsapp` | Solo dígitos con código de país: `50688887777` |
+| `telefonoVisible` | Como se muestra: `8888-7777` |
+| `correo` | Correo de contacto |
+| `direccion.linea` | Dirección exacta del local |
+| `direccion.canton` / `provincia` | Para el posicionamiento local |
+| `direccion.lat` / `lng` | Clic derecho en Google Maps sobre el local → copiar coordenadas |
+| `horario` y `horarioTexto` | Horario de atención |
+| `sitioUrl` | El dominio final, sin barra al final |
+
+### 2. Catálogo real
+
+En la carpeta del ERP:
 
 ```
-npm install
-npm run dev
+python manage.py exportar_catalogo_web
 ```
 
-## Decisiones de arquitectura (leer antes de tocar el catálogo)
+Eso reemplaza los productos DEMO por los reales. **Antes de correrlo**, revisá
+que los nombres estén presentables: el README del ERP menciona 152 productos
+pendientes de depuración, y saldrían a internet tal como estén.
 
-**El ERP (`allpetcr-erp`, Django 5.2) hoy NO expone ninguna API.** Se
-verificó directamente en el código: no está instalado Django REST Framework,
-no hay `serializers.py` ni `api.py` en ninguna app. El propio README del ERP
-lista "API / integraciones" como algo pendiente, no existente. Cualquier
-mención de "conectar al ERP" en este proyecto es aspiracional hasta que esa
-API se construya (dueño de esa tarea: aún no decidido).
+### 3. Verificar
 
-**Por eso todo el acceso a datos pasa por `lib/data.ts`.** Ninguna página
-debe importar los JSON de `data/` directamente — todas llaman a
-`getProductos()` / `getCategorias()` en `lib/data.ts`. El día que exista una
-API real, ese archivo es el único que cambia (JSON → `fetch`). Los tipos en
-`lib/types.ts` son un espejo 1:1 de `catalogo/models.py` del ERP
-(`Producto`, `Categoria`) para que ese cambio no implique remodelar
-componentes.
+```
+npm run verificar    # avisa qué falta
+npm run revisar      # lint + tipos + pruebas
+npm run build        # falla si quedan datos de relleno
+```
 
-**Los datos en `data/productos.json` son un placeholder de un solo item**,
-marcado explícitamente como tal. No se inventaron productos, precios ni
-nombres reales — eso habría generado datos falsos indistinguibles de datos
-reales. Reemplazar con una exportación real del inventario del ERP (o con
-las llamadas a la futura API) antes de publicar.
+## Comandos
 
-**Copy de Inicio, Sobre nosotros y Contacto es borrador**, escrito a partir
-del contexto de marca (honesto, sin humo, tienda física en CR), no de texto
-real de AllPetcr. Está marcado con comentarios `NOTA:` en cada archivo.
-Reemplazar antes de publicar.
+```
+npm run dev        # desarrollo en localhost:3000
+npm run build      # compilar para producción (verifica datos antes)
+npm run start      # servir lo compilado
+npm run test       # pruebas
+npm run revisar    # lint + tipos + pruebas, todo junto
+```
+
+## Cómo funciona la compra
+
+No hay pasarela de pago, y es una decisión, no una omisión. Cobrar en línea
+exige cuenta de comercio, resolver la facturación electrónica (el régimen
+simplificado no la emite) y manejar datos de tarjeta. Nada de eso está
+resuelto, y simularlo sería peor que no ofrecerlo.
+
+El recorrido actual: el cliente arma el carrito → `/checkout` pide nombre,
+teléfono y modo de entrega → se abre WhatsApp con el pedido ya escrito. El
+comercio confirma existencias y total antes de comprometerse. Es además el
+canal donde el cliente costarricense ya está.
+
+**El carrito nunca cobra por productos agotados** y **siempre usa el precio
+vigente del catálogo**, no el que estaba cuando el cliente lo agregó. Si algo
+cambió, se le avisa de forma explícita en vez de ajustarlo en silencio.
 
 ## Estructura
 
 ```
 app/
-  page.tsx              → Inicio
-  catalogo/page.tsx      → Catálogo (lee de lib/data.ts)
-  sobre-nosotros/page.tsx
-  contacto/page.tsx
+  page.tsx                 → Inicio
+  catalogo/page.tsx        → Catálogo con filtros
+  producto/[sku]/page.tsx  → Ficha (estática por producto, con JSON-LD)
+  carrito/page.tsx         → Carrito
+  checkout/page.tsx        → Confirmar pedido
+  contacto/, sobre-nosotros/
+  sitemap.ts, robots.ts    → SEO, generados desde el catálogo
+  not-found.tsx            → 404 propia
 components/
-  NavBar.tsx
-  Footer.tsx
+  NavBar, Footer, TarjetaProducto, TarjetaCategoria,
+  CatalogoCliente, CarritoCliente, CheckoutCliente,
+  BotonAgregar, AvisoConfiguracion
 lib/
-  types.ts              → tipos espejo del modelo Django real
-  data.ts                → única puerta de acceso a datos del catálogo
-data/
-  productos.json         → placeholder, 1 item
-  categorias.json         → categorías de ejemplo
+  negocio.ts    → ⚠ DATOS DEL NEGOCIO — editar antes de publicar
+  carrito.tsx   → estado del carrito (persistente, entre pestañas)
+  data.ts       → única puerta a los datos del catálogo
+  types.ts, formato.ts, categorias.ts
+scripts/
+  verificar-datos.mjs  → impide publicar con datos de relleno
 ```
 
-## Marca
+## Decisiones de arquitectura
 
-- Dorado `#CD963A`, Navy `#0B3161` — configurados en `tailwind.config.ts`
-  como escalas `dorado-*` / `navy-*`, no como valores sueltos. Usar las
-  clases (`text-dorado-500`, `bg-navy-500`, etc.), no hex hardcodeado.
-- Tipografía: pila de system fonts (sin Google Fonts), configurada en
-  `tailwind.config.ts` (`fontFamily.sans`). Decisión deliberada por
-  velocidad: cero requests externas en cada visita. Si se quiere una
-  tipografía de marca específica más adelante, usar `next/font/local`
-  con el archivo `.woff2` autohospedado en `public/fonts/` — no
-  `next/font/google`, que además de la llamada en runtime también
-  requiere acceso de red al hacer `npm run build`.
+**El acceso a datos pasa solo por `lib/data.ts`.** Ninguna página importa los
+JSON de `data/` directamente. El día que el ERP exponga una API, ese archivo
+es el único que cambia.
 
-## Pendiente (decisiones tuyas, no técnicas)
+**El ERP no tiene API todavía.** Verificado: no está instalado Django REST
+Framework, no hay `serializers.py` ni `api.py`. El puente actual es el comando
+`exportar_catalogo_web`, que hay que correr a mano cuando cambien precios.
 
-1. Blog — quedó fuera de este scaffold inicial (era opcional en el brief).
-   Se agrega como `app/blog/` cuando se decida.
-2. Quién construye la API del ERP y cuándo — no bloquea este sitio hoy,
-   pero sí bloquea reemplazar `data/*.json` por datos reales.
-3. Datos de contacto reales (teléfono, correo, dirección, horario) —
-   hoy están como "(por definir)" en `app/contacto/page.tsx` y en el footer.
-4. Repo en GitHub — este proyecto está listo para `git init` + push; aún no
-   se ha hecho.
+**Costos y márgenes nunca salen al sitio.** El exportador los omite a
+propósito, y `stock_actual` se reduce a un booleano `disponible`: publicar
+"quedan 3" le revela a la competencia el volumen que se maneja.
+
+## Pendientes conocidos
+
+- Fotos de producto: la exportación las tiene desactivadas (`INCLUIR_IMAGENES`
+  en el comando del ERP). Antes de activarlas, migrar a `next/image`.
+- Copy de Inicio y Sobre nosotros: sigue siendo borrador.
+- Analítica: sin instalar. Recomendado Plausible o Umami (no requieren banner
+  de cookies).
+- Ficha de Google Business: sin crear. Es la acción de mayor impacto comercial
+  y la verificación tarda una o dos semanas.

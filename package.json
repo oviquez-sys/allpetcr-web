@@ -4,9 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/verificar-datos.mjs --estricto",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "verificar": "node scripts/verificar-datos.mjs",
+    "revisar": "npm run lint && npx tsc --noEmit && npm run test"
   },
   "dependencies": {
     "next": "^16.2.12",
@@ -24,10 +29,11 @@
     "tailwindcss": "^3.4.17",
     "eslint": "^9",
     "eslint-config-next": "^16.2.12",
-    "autoprefixer": "^10.4.20"
+    "autoprefixer": "^10.4.20",
+    "vitest": "^2.1.8"
   },
   "overrides": {
-    "postcss": "$postcss",
+    "postcss": "^8.5.23",
     "sharp": "^0.35.3"
   }
 }

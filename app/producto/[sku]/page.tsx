@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import TarjetaProducto from "@/components/TarjetaProducto";
+import BotonAgregar from "@/components/BotonAgregar";
 import { getCategorias, getProductoPorSku, getProductos } from "@/lib/data";
 import { formatoColones, tinteDeSku } from "@/lib/formato";
+import { negocio, urlWhatsApp, faltante } from "@/lib/negocio";
 
 // Genera una página estática por producto al compilar: son instantáneas al
 // abrirse y las indexa Google.
@@ -18,10 +20,22 @@ export async function generateMetadata({
 }) {
   const { sku } = await params;
   const producto = await getProductoPorSku(decodeURIComponent(sku));
-  if (!producto) return { title: "Producto no encontrado | AllPet" };
+  if (!producto) return { title: "Producto no encontrado" };
+  const descripcion =
+    `${producto.nombre}${producto.presentacion ? ` · ${producto.presentacion}` : ""} — ` +
+    `${formatoColones(producto.precio_venta)}. Disponible en AllPet Costa Rica, ` +
+    "con retiro en tienda sin costo.";
+  const ruta = `/producto/${encodeURIComponent(producto.sku)}`;
   return {
-    title: `${producto.nombre} | AllPet`,
-    description: `${producto.nombre}${producto.presentacion ? ` · ${producto.presentacion}` : ""} — disponible en AllPet Costa Rica.`,
+    title: producto.nombre,
+    description: descripcion,
+    alternates: { canonical: ruta },
+    openGraph: {
+      type: "website",
+      title: `${producto.nombre} | AllPet`,
+      description: descripcion,
+      url: ruta,
+    },
   };
 }
 
@@ -46,19 +60,68 @@ export default async function ProductoPage({
     .filter((p) => p.sku !== producto.sku && p.categoria_id === producto.categoria_id)
     .slice(0, 4);
 
+  const url = `${negocio.sitioUrl}/producto/${encodeURIComponent(producto.sku)}`;
+
+  // Product: permite que Google muestre precio y disponibilidad en los
+  // resultados. Es lo que diferencia un resultado con datos de uno de texto.
+  const ldProducto = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: producto.nombre,
+    sku: producto.sku,
+    ...(producto.presentacion ? { size: producto.presentacion } : {}),
+    ...(categoria ? { category: categoria.nombre } : {}),
+    offers: {
+      "@type": "Offer",
+      url,
+      price: producto.precio_venta,
+      priceCurrency: "CRC",
+      availability: producto.disponible
+        ? "https://schema.org/InStock"
+        : "https://schema.org/OutOfStock",
+      seller: { "@type": "Organization", name: negocio.nombre },
+    },
+  };
+
+  const ldMigas = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Inicio", item: negocio.sitioUrl },
+      { "@type": "ListItem", position: 2, name: "Catálogo", item: `${negocio.sitioUrl}/catalogo` },
+      ...(categoria
+        ? [{
+            "@type": "ListItem", position: 3, name: categoria.nombre,
+            item: `${negocio.sitioUrl}/catalogo?c=${encodeURIComponent(categoria.nombre)}`,
+          }]
+        : []),
+      { "@type": "ListItem", position: categoria ? 4 : 3, name: producto.nombre, item: url },
+    ],
+  };
+
+  const consultaWa = urlWhatsApp(
+    `Hola, quiero consultar por: ${producto.nombre}` +
+      (producto.presentacion ? ` (${producto.presentacion})` : ""),
+  );
+
   return (
     <>
+      <script type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(ldProducto) }} />
+      <script type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(ldMigas) }} />
+
       <div className="mx-auto max-w-contenido px-6 pt-6">
         <nav aria-label="Ruta" className="text-xs text-navy-300">
-          <Link href="/" className="hover:text-navy-500">Inicio</Link>
-          <span className="px-2">/</span>
-          <Link href="/catalogo" className="hover:text-navy-500">Catálogo</Link>
+          <Link href="/" className="rounded hover:text-navy-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500">Inicio</Link>
+          <span className="px-2" aria-hidden="true">/</span>
+          <Link href="/catalogo" className="rounded hover:text-navy-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500">Catálogo</Link>
           {categoria && (
             <>
-              <span className="px-2">/</span>
+              <span className="px-2" aria-hidden="true">/</span>
               <Link
                 href={`/catalogo?c=${encodeURIComponent(categoria.nombre)}`}
-                className="hover:text-navy-500"
+                className="rounded hover:text-navy-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500"
               >
                 {categoria.nombre}
               </Link>
@@ -69,7 +132,7 @@ export default async function ProductoPage({
 
       <article className="mx-auto grid max-w-contenido gap-12 px-6 py-10 lg:grid-cols-2">
         <div
-          className={`grid aspect-square place-items-center rounded-card ${tinteDeSku(producto.sku)}`}
+          className={`grid aspect-square place-items-center overflow-hidden rounded-card ${tinteDeSku(producto.sku)}`}
         >
           {producto.imagen ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -79,7 +142,7 @@ export default async function ProductoPage({
               className="h-full w-full rounded-card object-cover"
             />
           ) : (
-            <span className="text-[11px] uppercase tracking-[0.09em] text-navy-200">
+            <span className="text-[11px] uppercase tracking-[0.09em] text-navy-300">
               Foto pendiente
             </span>
           )}
@@ -105,7 +168,7 @@ export default async function ProductoPage({
           <p className="mt-3 text-sm">
             {producto.disponible ? (
               <span className="text-navy-400">
-                <span className="mr-2 inline-block h-2 w-2 rounded-full bg-dorado-500 align-middle" />
+                <span className="mr-2 inline-block h-2 w-2 rounded-full bg-dorado-500 align-middle" aria-hidden="true" />
                 Disponible en tienda
               </span>
             ) : (
@@ -114,27 +177,23 @@ export default async function ProductoPage({
           </p>
 
           <div className="mt-8 flex flex-wrap gap-3">
-            <button
-              type="button"
-              disabled={!producto.disponible}
-              className="rounded-full bg-navy-500 px-8 py-3.5 text-sm font-medium text-crema-100 transition-colors hover:bg-navy-600 disabled:cursor-not-allowed disabled:bg-navy-200"
-            >
-              Agregar al carrito
-            </button>
-            <Link
-              href="/contacto"
-              className="rounded-full border border-crema-500 px-8 py-3.5 text-sm font-medium text-navy-400 transition-colors hover:border-navy-300 hover:text-navy-500"
-            >
-              Consultar por este producto
-            </Link>
+            <BotonAgregar producto={producto} />
+            {!faltante(negocio.whatsapp) && consultaWa && (
+              <a
+                href={consultaWa}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-full border border-crema-500 px-8 py-3.5 text-sm font-medium text-navy-400 transition-colors hover:border-navy-300 hover:text-navy-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:ring-offset-2"
+              >
+                Consultar por WhatsApp
+              </a>
+            )}
           </div>
 
-          {/* El botón de carrito todavía no tiene lógica: la interfaz existe,
-              falta conectar el estado del carrito y la pasarela de pago
-              (pendiente de la definición fiscal). */}
-          <p className="mt-4 text-xs text-navy-300">
-            El carrito está en construcción. Por ahora, consultanos y te
-            reservamos el producto.
+          <p className="mt-4 text-xs font-light leading-relaxed text-navy-300">
+            Agregá al carrito y confirmá el pedido por WhatsApp. No se cobra
+            nada en línea: te confirmamos existencias y total antes de preparar
+            todo.
           </p>
 
           <dl className="mt-10 divide-y divide-crema-400 border-t border-crema-400 text-sm">

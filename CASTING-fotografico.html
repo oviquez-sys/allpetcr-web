@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AllPet — Hoja de contactos · Casting fotográfico</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#12151A; --panel:#1A1F26; --line:#2A313B;
+  --ink:#F2EFE9; --soft:#98A2B0; --gold:#CD963A;
+  /* GRADING DE CAMPAÑA
+     Desatura levemente (quita el look "stock sobresaturado"),
+     sube contraste, y aporta calidez. El mismo valor para las cuatro
+     fotos: eso es lo que las hace parecer de una sola produccion. */
+  --grade: saturate(.86) contrast(1.07) sepia(.09) brightness(1.02);
+}
+body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,-apple-system,sans-serif;
+  -webkit-font-smoothing:antialiased;line-height:1.55;padding:0 0 90px}
+.wrap{max-width:1240px;margin:0 auto;padding:0 32px}
+
+header{border-bottom:1px solid var(--line);padding:36px 0 28px;margin-bottom:44px}
+h1{font-family:Georgia,serif;font-weight:400;font-size:30px;letter-spacing:-.015em}
+.sub{color:var(--soft);font-size:14px;margin-top:8px;max-width:640px}
+
+.ctrl{display:flex;align-items:center;gap:14px;margin-top:26px;flex-wrap:wrap}
+button{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:99px;
+  padding:10px 22px;font-family:inherit;font-size:13px;cursor:pointer;transition:.2s}
+button:hover{border-color:var(--gold)}
+button.on{background:var(--gold);color:#20170A;border-color:var(--gold);font-weight:600}
+.hint{font-size:12.5px;color:var(--soft)}
+
+h2{font-family:Georgia,serif;font-weight:400;font-size:21px;margin:52px 0 6px;letter-spacing:-.01em}
+h2 .n{color:var(--gold);font-size:13px;font-family:'Inter',sans-serif;margin-left:10px;letter-spacing:.04em}
+.brief{color:var(--soft);font-size:13.5px;margin-bottom:24px;max-width:720px;border-left:2px solid var(--line);padding-left:14px}
+
+.sheet{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:22px}
+.shot{background:var(--panel);border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.shot .im{aspect-ratio:3/2;position:relative;background:#0C0F13;overflow:hidden}
+.shot img{width:100%;height:100%;object-fit:cover;display:block;transition:filter .35s}
+body.graded .shot img{filter:var(--grade)}
+.meta{padding:13px 15px 15px;display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;color:var(--gold);letter-spacing:.04em}
+.who{font-size:11.5px;color:var(--soft);text-align:right;line-height:1.45}
+.note{font-size:12px;color:var(--soft);padding:0 15px 14px;margin-top:-6px}
+
+.split{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--line);border:1px solid var(--line);border-radius:4px;overflow:hidden;margin:8px 0 0}
+.split .half{position:relative;aspect-ratio:3/2;overflow:hidden;background:#0C0F13}
+.split img{width:100%;height:100%;object-fit:cover;display:block}
+.split .half.g img{filter:var(--grade)}
+.split .lb{position:absolute;bottom:0;left:0;background:rgba(8,10,14,.86);color:var(--ink);
+  font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;padding:6px 12px}
+
+.box{background:var(--panel);border:1px solid var(--line);border-left:2px solid var(--gold);
+  border-radius:4px;padding:20px 24px;margin:44px 0 0}
+.box h3{font-size:14px;font-weight:600;margin-bottom:10px}
+.box p{font-size:13.5px;color:var(--soft);margin-bottom:9px}
+.box p:last-child{margin-bottom:0}
+.box b{color:var(--ink);font-weight:500}
+
+@media(max-width:760px){.split{grid-template-columns:1fr}.wrap{padding:0 20px}}
+</style>
+</head>
+<body class="graded">
+
+<div class="wrap">
+
+<header>
+  <h1>Hoja de contactos — casting fotográfico</h1>
+  <p class="sub">
+    Candidatas reales de Unsplash, licencia comercial libre. Todas las opciones
+    de Unsplash+ (suscripción pagada) fueron <b>descartadas por licencia</b>, no por calidad.
+  </p>
+  <div class="ctrl">
+    <button id="tg" class="on">Grading de campaña: ACTIVO</button>
+    <span class="hint">Tocá el botón para ver las fotos crudas, como vienen de Unsplash.</span>
+  </div>
+</header>
+
+<div class="box">
+  <h3>Por qué esto importa más que el layout</h3>
+  <p>
+    El problema del stock nunca es la calidad de cada foto por separado. Es que cuatro fotos
+    de cuatro fotógrafos distintos traen temperaturas de color, contrastes y saturaciones
+    diferentes. Puestas juntas, el ojo detecta la incoherencia y lee <b>"imágenes de internet"</b>.
+  </p>
+  <p>
+    Una campaña real se ve como campaña porque todo pasó por el mismo revelado. Ese es el
+    único paso que convierte material ajeno en material propio — y es gratis.
+  </p>
+</div>
+
+<h2>Perros <span class="n">— 4 candidatas</span></h2>
+<p class="brief">
+  Tu brief: perro viviendo una aventura, no posando. Mar, arena, atardecer, movimiento real.
+  Prioricé escenas con acción y luz baja por encima del retrato bonito.
+</p>
+<div class="sheet">
+
+  <div class="shot">
+    <div class="im"><img src="https://images.unsplash.com/photo-1567644495368-82cb64d087f4?w=1200&q=80&auto=format&fit=crop" alt=""></div>
+    <div class="meta"><span class="code">P-01</span><span class="who">Lenin Estrada<br>perro con pelota, orilla</span></div>
+    <p class="note">La más cercana a tu descripción literal: pelota en boca, agua, movimiento.</p>
+  </div>
+
+  <div class="shot">
+    <div class="im"><img src="https://images.unsplash.com/photo-1725807793044-6b137d32b898?w=1200&q=80&auto=format&fit=crop" alt=""></div>
+    <div class="meta"><span class="code">P-02</span><span class="who">Branislav Rodman<br>corriendo junto al mar</span></div>
+    <p class="note">Acción pura. Buena si querés que el hero transmita energía.</p>
+  </div>
+
+  <div class="shot">
+    <div class="im"><img src="https://images.unsplash.com/photo-1616961368535-1da6bfb14828?w=1200&q=80&auto=format&fit=crop" alt=""></div>
+    <div class="meta"><span class="code">P-03</span><span class="who">Oveth Martinez<br>playa, atardecer</span></div>
+    <p class="note">Luz cálida de hora dorada. Más contemplativa que P-01 y P-02.</p>
+  </div>
+
+  <div class="shot">
+    <div class="im"><img src="https://images.unsplash.com/photo-1616961259009-7a3bbf2050e9?w=1200&q=80&auto=format&fit=crop" alt=""></div>
+    <div class="meta"><span class="code">P-04</span><span class="who">Oveth Martinez<br>golden retriever, atardecer</span></div>
+    <p class="note">Del mismo autor que P-03: si elegís ambas, ya vienen coherentes de origen.</p>
+  </div>
+
+</div>
+
+<h2>Gatos <span class="n">— 6 candidatas</span></h2>
+<p class="brief">
+  Tu brief: un gato extremadamente querido, no un gato saltando. Sofá, luz de ventana,
+  pelaje bien iluminado, ternura inmediata. Busqué luz lateral natural, que es la que
+  revela textura de pelaje.
+</p>
+<div class="sheet">
+
+  <div class="shot">
+    <div class="im"><img src="https://images.unsplash.com/photo-1780406820366-098e4abd7ea4?w=1200&q=80&auto=format&fit=crop" alt=""></div>
+    <div class="meta"><span class="code">G-01</span><span class="who">Sarah Adatte<br>sol sobre gato en sofá</span></div>
+    <p class="note">La descripción coincide punto por punto con tu brief.</p>
+  </div>
+
+  <div class="shot">
+    <div class="im"><img src="https://images.unsplash.com/photo-1759997724538-e75a36097585?w=1200&q=80&auto=format&fit=crop" alt=""></div>
+    <div class="meta"><span class="code">G-02</span><span class="who">Alexandros Giannakakis<br>siesta, sofá de cuero</span></div>
+    <p class="note">Luz de sol directa. El cuero aporta materialidad cara.</p>
+  </div>
+
+  <div class="shot">
+    <div class="im"><img src="https://images.unsplash.com/photo-1768198566500-9ec0160d88ec?w=1200&q=80&auto=format&fit=crop" alt=""></div>
+    <div class="meta"><span class="code">G-03</span><span class="who">Brooke Balentine<br>gato mullido junto a ventana</span></div>
+    <p class="note">Pelaje largo: el que mejor lee "textura" en pantalla grande.</p>
+  </div>
+
+  <div class="shot">
+    <div class="im"><img src="https://images.unsplash.com/photo-1501895822752-d0ed2e6a5086?w=1200&q=80&auto=format&fit=crop" alt=""></div>
+    <div class="meta"><span class="code">G-04</span><span class="who">Caleb Woods<br>atigrado junto a ventana</span></div>
+    <p class="note">Un clásico de Unsplash. Riesgo: muy vista, la vas a reconocer en otros sitios.</p>
+  </div>
+
+  <div class="shot">
+    <div class="im"><img src="https://images.unsplash.com/photo-1768670449344-e2d9ce1d7635?w=1200&q=80&auto=format&fit=crop" alt=""></div>
+    <div class="meta"><span class="code">G-05</span><span class="who">Bruno Guerrero<br>sol de ventana</span></div>
+    <p class="note">Contraluz. Elegante, pero deja el rostro más oscuro.</p>
+  </div>
+
+  <div class="shot">
+    <div class="im"><img src="https://images.unsplash.com/photo-1585435618194-4dffd09bd384?w=1200&q=80&auto=format&fit=crop" alt=""></div>
+    <div class="meta"><span class="code">G-06</span><span class="who">Keenan Barber<br>recostado sobre textil</span></div>
+    <p class="note">Composición sobria, paleta gris. La más cercana al gusto Aesop.</p>
+  </div>
+
+</div>
+
+<h2>Comparación directa <span class="n">— el argumento del grading</span></h2>
+<p class="brief">
+  La misma foto, sin tratar y tratada. La diferencia parece menor en una sola imagen;
+  es decisiva cuando hay cuatro juntas en la misma pantalla.
+</p>
+<div class="split">
+  <div class="half">
+    <img src="https://images.unsplash.com/photo-1567644495368-82cb64d087f4?w=1200&q=80&auto=format&fit=crop" alt="">
+    <span class="lb">Sin tratar</span>
+  </div>
+  <div class="half g">
+    <img src="https://images.unsplash.com/photo-1567644495368-82cb64d087f4?w=1200&q=80&auto=format&fit=crop" alt="">
+    <span class="lb">Con grading AllPet</span>
+  </div>
+</div>
+
+<div class="box">
+  <h3>Lo que falta y por qué te lo pregunto</h3>
+  <p>
+    Faltan <b>Accesorios</b> e <b>Higiene</b>. No las busqué todavía a propósito: si el criterio
+    de estas dos primeras no es el que tenés en la cabeza, prefiero corregir el rumbo antes
+    de seguir, no después.
+  </p>
+  <p>
+    También hay una limitación real que debés saber: <b>no puedo ver estas fotos.</b> El entorno
+    donde trabajo bloquea la descarga de imágenes, así que las seleccioné leyendo la descripción,
+    el autor y la escena — no mirándolas. Vos sí las estás viendo ahora mismo. Por eso esta hoja
+    existe: la decisión final de imagen tiene que ser tuya, con los ojos puestos encima.
+  </p>
+</div>
+
+</div>
+
+<script>
+  var b = document.getElementById('tg');
+  b.addEventListener('click', function () {
+    var on = document.body.classList.toggle('graded');
+    b.classList.toggle('on', on);
+    b.textContent = 'Grading de campaña: ' + (on ? 'ACTIVO' : 'APAGADO');
+  });
+</script>
+
+</body>
+</html>
