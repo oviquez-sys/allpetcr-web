@@ -8,10 +8,17 @@ import type { NextConfig } from "next";
  * hidratar, y por eso frame-ancestors va en 'none'. El iframe del mapa se
  * habilita de forma explícita en frame-src: es la única excepción y conviene
  * que se vea, en vez de abrir la política entera.
+ *
+ * 'unsafe-eval' va SOLO en desarrollo: el recargado en caliente de Turbopack
+ * lo necesita. En producción no hace falta —el código no usa eval ni
+ * new Function, y las únicas dependencias en runtime son React, Next y las
+ * fuentes— y dejarlo abriría una vía de XSS sin ninguna ventaja.
  */
+const esDesarrollo = process.env.NODE_ENV !== "production";
+
 const csp = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline'",
+  `script-src 'self' 'unsafe-inline'${esDesarrollo ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://*.googleapis.com https://*.gstatic.com",
   "font-src 'self' data:",
