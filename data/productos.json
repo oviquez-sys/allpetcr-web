@@ -1,73 +1,1657 @@
 [
   {
-    "sku": "DEMO-001",
-    "nombre": "Alimento perro adulto razas medianas",
-    "categoria_id": 7,
-    "presentacion": "2 kg",
-    "precio_venta": 12500,
+    "sku": "83472",
+    "nombre": "Alimentador",
+    "categoria_id": 8,
+    "presentacion": "Paquete: 12 / Caja: 144",
+    "precio_venta": 1260.0,
     "disponible": true,
     "imagen": ""
   },
   {
-    "sku": "DEMO-002",
-    "nombre": "Alimento gato adulto pollo",
+    "sku": "79441",
+    "nombre": "Arenero para Gato Cuadrado Grande Semicerrado con Pala 55.5x36x18.5cm",
+    "categoria_id": 2,
+    "presentacion": "Paquete: 3 / Caja: 20",
+    "precio_venta": 6840.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "75582",
+    "nombre": "Arnés",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 144",
+    "precio_venta": 1980.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "83088",
+    "nombre": "Arnés",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 6 / Caja: 120",
+    "precio_venta": 4500.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "83086",
+    "nombre": "Arnés",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 6 / Caja: 120",
+    "precio_venta": 3780.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "83094",
+    "nombre": "Arnés",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 6 / Caja: 120",
+    "precio_venta": 4860.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "75677",
+    "nombre": "Arnés",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 60",
+    "precio_venta": 3600.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "75678",
+    "nombre": "Arnés",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 84",
+    "precio_venta": 4140.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "75679",
+    "nombre": "Arnés",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 72",
+    "precio_venta": 4680.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "75680",
+    "nombre": "Arnés",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 72",
+    "precio_venta": 5220.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "79661",
+    "nombre": "Arnés",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 120",
+    "precio_venta": 3600.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "75581",
+    "nombre": "Arnés",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 180",
+    "precio_venta": 1800.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "75580",
+    "nombre": "Arnés",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 108",
+    "precio_venta": 1620.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "75545",
+    "nombre": "Arnés",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 96",
+    "precio_venta": 3420.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "75546",
+    "nombre": "Arnés",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 84",
+    "precio_venta": 4140.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "75547",
+    "nombre": "Arnés",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 60",
+    "precio_venta": 4500.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "75587",
+    "nombre": "Arnés",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 216",
+    "precio_venta": 1440.0,
+    "disponible": false,
+    "imagen": ""
+  },
+  {
+    "sku": "79724",
+    "nombre": "Arnés",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 240",
+    "precio_venta": 1080.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "79725",
+    "nombre": "Arnés",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 240",
+    "precio_venta": 1440.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "81261",
+    "nombre": "Arnés",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 240",
+    "precio_venta": 1080.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "82883",
+    "nombre": "Arnés",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 6 / Caja: 120",
+    "precio_venta": 5220.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "83087",
+    "nombre": "Arnés",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 6 / Caja: 120",
+    "precio_venta": 4140.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "81282",
+    "nombre": "Arnés con Correa",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 120",
+    "precio_venta": 2430.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "79676",
+    "nombre": "Arnés con Correa",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 120",
+    "precio_venta": 3510.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "79682",
+    "nombre": "Arnés con Correa",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 120",
+    "precio_venta": 2700.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "81303",
+    "nombre": "Arnés con Correa Bordado Conejo Talla S (4 diseños) - Correa 1.0x120cm",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 240",
+    "precio_venta": 1260.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "81296",
+    "nombre": "Arnés con Correa Cuadros Vichy con Moño Talla M (4 colores) - Correa 1.5x120cm",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 240",
+    "precio_venta": 1710.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "79721",
+    "nombre": "Arnés con Correa Encaje con Moño Talla M (4 colores) - Correa 1.5x120cm",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 240",
+    "precio_venta": 1800.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "75374",
+    "nombre": "Arnés y Correa",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 180",
+    "precio_venta": 2340.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "75375",
+    "nombre": "Arnés y Correa",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 120",
+    "precio_venta": 2520.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "75376",
+    "nombre": "Arnés y Correa",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 132",
+    "precio_venta": 2700.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "00065",
+    "nombre": "Artículo de Entrenamiento",
+    "categoria_id": 1,
+    "presentacion": "Paquete: 3 / Caja: 240",
+    "precio_venta": 3060.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "75635",
+    "nombre": "Artículo de Higiene Animal",
+    "categoria_id": 6,
+    "presentacion": "Paquete: 6 / Caja: 72",
+    "precio_venta": 2160.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "71090",
+    "nombre": "Artículo de Higiene Animal",
+    "categoria_id": 6,
+    "presentacion": "Paquete: 6 / Caja: 50",
+    "precio_venta": 2250.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "71091",
+    "nombre": "Artículo de Higiene Animal",
+    "categoria_id": 6,
+    "presentacion": "Paquete: 6 / Caja: 50",
+    "precio_venta": 2430.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "71092",
+    "nombre": "Artículo de Higiene Animal",
+    "categoria_id": 6,
+    "presentacion": "Paquete: 6 / Caja: 50",
+    "precio_venta": 2430.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "71093",
+    "nombre": "Artículo de Higiene Animal",
+    "categoria_id": 6,
+    "presentacion": "Paquete: 6 / Caja: 50",
+    "precio_venta": 2250.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "75636",
+    "nombre": "Artículo de Higiene Animal",
+    "categoria_id": 6,
+    "presentacion": "Paquete: 6 / Caja: 60",
+    "precio_venta": 2340.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "83484",
+    "nombre": "Artículo de Higiene Animal",
+    "categoria_id": 6,
+    "presentacion": "Paquete: 6 / Caja: 60",
+    "precio_venta": 2880.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "75384",
+    "nombre": "Bozal para Perros",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 300",
+    "precio_venta": 2340.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "00059",
+    "nombre": "Cama / Manta para Mascota",
+    "categoria_id": 5,
+    "presentacion": "Paquete: 12 / Caja: 240",
+    "precio_venta": 1440.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "83214",
+    "nombre": "Cama / Manta para Mascota",
+    "categoria_id": 5,
+    "presentacion": "Paquete: 3 / Caja: 40",
+    "precio_venta": 11700.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "79205",
+    "nombre": "Cama de Hielo",
+    "categoria_id": 5,
+    "presentacion": "Paquete: 3 / Caja: 6",
+    "precio_venta": 5760.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "77149",
+    "nombre": "Cama para Mascotas",
+    "categoria_id": 5,
+    "presentacion": "Paquete: 3 / Caja: 30",
+    "precio_venta": 8964.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "82480",
+    "nombre": "Cepillo",
+    "categoria_id": 6,
+    "presentacion": "Paquete: 12 / Caja: 144",
+    "precio_venta": 900.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "88034",
+    "nombre": "Cepillo",
+    "categoria_id": 6,
+    "presentacion": "Paquete: 12 / Caja: 144",
+    "precio_venta": 1980.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "88006",
+    "nombre": "Cepillo",
+    "categoria_id": 6,
+    "presentacion": "Paquete: 12 / Caja: 144",
+    "precio_venta": 1260.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "88005",
+    "nombre": "Cepillo",
+    "categoria_id": 6,
+    "presentacion": "Paquete: 12 / Caja: 72",
+    "precio_venta": 1440.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "82524",
+    "nombre": "Cepillo",
+    "categoria_id": 6,
+    "presentacion": "Paquete: 12 / Caja: 500",
+    "precio_venta": 630.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "82471",
+    "nombre": "Cepillo",
+    "categoria_id": 6,
+    "presentacion": "Paquete: 12 / Caja: 408",
+    "precio_venta": 1440.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "82479",
+    "nombre": "Cepillo",
+    "categoria_id": 6,
+    "presentacion": "Paquete: 12 / Caja: 144",
+    "precio_venta": 1080.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "60088",
+    "nombre": "Cepillo",
+    "categoria_id": 6,
+    "presentacion": "Paquete: 12 / Caja: 144",
+    "precio_venta": 1080.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "87189",
+    "nombre": "CEPILLO",
+    "categoria_id": 6,
+    "presentacion": "",
+    "precio_venta": 1260.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "87190",
+    "nombre": "CEPILLO",
+    "categoria_id": 6,
+    "presentacion": "",
+    "precio_venta": 1620.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "87203",
+    "nombre": "CEPILLO",
+    "categoria_id": 6,
+    "presentacion": "",
+    "precio_venta": 2700.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "87081",
+    "nombre": "Collar",
+    "categoria_id": 6,
+    "presentacion": "Paquete: 10 / Caja: 1000",
+    "precio_venta": 360.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "81919",
+    "nombre": "Collar",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 600",
+    "precio_venta": 1170.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "87076",
+    "nombre": "Collar",
+    "categoria_id": 6,
+    "presentacion": "Paquete: 10 / Caja: 300",
+    "precio_venta": 1260.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "87075",
+    "nombre": "Collar",
+    "categoria_id": 6,
+    "presentacion": "Paquete: 10 / Caja: 300",
+    "precio_venta": 1440.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "00098",
+    "nombre": "Collar",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 300",
+    "precio_venta": 990.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "87077",
+    "nombre": "Collar",
+    "categoria_id": 6,
+    "presentacion": "Paquete: 10 / Caja: 500",
+    "precio_venta": 1080.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "87079",
+    "nombre": "Collar",
+    "categoria_id": 6,
+    "presentacion": "Paquete: 10 / Caja: 800",
+    "precio_venta": 630.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "87080",
+    "nombre": "Collar",
+    "categoria_id": 6,
+    "presentacion": "Paquete: 10 / Caja: 800",
+    "precio_venta": 540.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "85220",
+    "nombre": "Collar",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 600",
+    "precio_venta": 1170.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "82859",
+    "nombre": "Collar con Corbatín",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 240",
+    "precio_venta": 1800.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "82869",
+    "nombre": "Collar con Corbatín",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 240",
+    "precio_venta": 3060.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "82858",
+    "nombre": "Collar con Corbatín",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 240",
+    "precio_venta": 1620.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "87030",
+    "nombre": "Collar con Luz",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 144",
+    "precio_venta": 4500.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "87153",
+    "nombre": "COMEDERO AUTOMATICO PARA MASCOTAS",
+    "categoria_id": 8,
+    "presentacion": "",
+    "precio_venta": 28440.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "82682",
+    "nombre": "Comedero Doble de Acero Inoxidable",
+    "categoria_id": 8,
+    "presentacion": "Paquete: 12 / Caja: 48",
+    "precio_venta": 2880.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "79729",
+    "nombre": "Corbatín",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 600",
+    "precio_venta": 990.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "79642",
+    "nombre": "Correa",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 240",
+    "precio_venta": 2430.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "75293",
+    "nombre": "Correa",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 72",
+    "precio_venta": 2160.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "75292",
+    "nombre": "Correa",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 120",
+    "precio_venta": 1620.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "75291",
+    "nombre": "Correa",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 144",
+    "precio_venta": 1260.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "75387",
+    "nombre": "Correa",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 120",
+    "precio_venta": 3420.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "81180",
+    "nombre": "Correa",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 240",
+    "precio_venta": 1170.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "81207",
+    "nombre": "Correa",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 240",
+    "precio_venta": 1530.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "81936",
+    "nombre": "Correa",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 120",
+    "precio_venta": 2880.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "75462",
+    "nombre": "Correa",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 12 / Caja: 48",
+    "precio_venta": 3240.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "75593",
+    "nombre": "Correa de Auto",
+    "categoria_id": 4,
+    "presentacion": "Paquete: 12 / Caja: 168",
+    "precio_venta": 1260.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "79484",
+    "nombre": "Correa para Mascota",
+    "categoria_id": 3,
+    "presentacion": "Paquete: 3 / Caja: 20",
+    "precio_venta": 6840.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "82420",
+    "nombre": "DISFRAZ DE MASCOTA",
     "categoria_id": 9,
-    "presentacion": "1.5 kg",
-    "precio_venta": 9800,
+    "presentacion": "",
+    "precio_venta": 4770.0,
     "disponible": true,
     "imagen": ""
   },
   {
-    "sku": "DEMO-003",
-    "nombre": "Arena aglomerante sin perfume",
-    "categoria_id": 5,
-    "presentacion": "5 L",
-    "precio_venta": 4200,
+    "sku": "82416",
+    "nombre": "DISFRAZ DE MASCOTA",
+    "categoria_id": 9,
+    "presentacion": "",
+    "precio_venta": 1710.0,
     "disponible": true,
     "imagen": ""
   },
   {
-    "sku": "DEMO-004",
-    "nombre": "Collar ajustable mediano",
+    "sku": "82429",
+    "nombre": "DISFRAZ DE MASCOTA",
+    "categoria_id": 9,
+    "presentacion": "",
+    "precio_venta": 4464.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "88063",
+    "nombre": "DISPENSADOR Y BOLSAS PARA DESECHOS",
     "categoria_id": 6,
-    "presentacion": "Talla M",
-    "precio_venta": 6800,
-    "disponible": false,
-    "imagen": ""
-  },
-  {
-    "sku": "DEMO-005",
-    "nombre": "Premios naturales de pollo",
-    "categoria_id": 8,
-    "presentacion": "200 g",
-    "precio_venta": 3400,
+    "presentacion": "",
+    "precio_venta": 864.0,
     "disponible": true,
     "imagen": ""
   },
   {
-    "sku": "DEMO-006",
-    "nombre": "Shampoo hipoalergénico",
+    "sku": "81503",
+    "nombre": "FUNDA PROTECTOR DE ASIENTO PARA AUTO",
+    "categoria_id": 4,
+    "presentacion": "",
+    "precio_venta": 17640.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "81504",
+    "nombre": "Funda Protectora de Asiento para Auto - Modelo Sencillo",
+    "categoria_id": 4,
+    "presentacion": "Paquete: 3 / Caja: 30",
+    "precio_venta": 5760.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "81500",
+    "nombre": "Funda Protectora de Asiento para Auto - Negra (137x147cm)",
+    "categoria_id": 4,
+    "presentacion": "Paquete: 3 / Caja: 10",
+    "precio_venta": 12960.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "82490",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 72",
+    "precio_venta": 1980.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "82602",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 144",
+    "precio_venta": 2160.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "79314",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 48",
+    "precio_venta": 1800.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "85222",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 240",
+    "precio_venta": 990.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "87123",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 144",
+    "precio_venta": 1260.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "00097",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 288",
+    "precio_venta": 1440.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "00099",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 200",
+    "precio_venta": 1980.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "00107",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 200",
+    "precio_venta": 2700.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "00118",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 200",
+    "precio_venta": 1710.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "79814",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 240",
+    "precio_venta": 810.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "00110",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 480",
+    "precio_venta": 1080.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "82795",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 240",
+    "precio_venta": 630.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "82844",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 240",
+    "precio_venta": 630.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "147123",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 480",
+    "precio_venta": 504.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "147359",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 480",
+    "precio_venta": 810.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "66108",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 240",
+    "precio_venta": 684.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "81136",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 240",
+    "precio_venta": 1080.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "81162",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 240",
+    "precio_venta": 900.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "81119",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 240",
+    "precio_venta": 900.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "79845",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 240",
+    "precio_venta": 1080.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "81166",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 240",
+    "precio_venta": 630.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "82781",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 240",
+    "precio_venta": 684.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "66438",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 6 / Caja: 60",
+    "precio_venta": 2700.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "00067",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 480",
+    "precio_venta": 720.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "88043",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 6 / Caja: 100",
+    "precio_venta": 4500.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "00109",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 60",
+    "precio_venta": 3240.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "87116",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 240",
+    "precio_venta": 1080.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "87117",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 240",
+    "precio_venta": 1080.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "87118",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 240",
+    "precio_venta": 1080.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "74546",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 60",
+    "precio_venta": 2700.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "74835",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 120",
+    "precio_venta": 1260.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "79944",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 120",
+    "precio_venta": 2700.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "82199",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 3 / Caja: 24",
+    "precio_venta": 5760.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "82494",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 144",
+    "precio_venta": 1620.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "82493",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 96",
+    "precio_venta": 1980.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "147368",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 360",
+    "precio_venta": 1260.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "82350",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 300",
+    "precio_venta": 900.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "82284",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 300",
+    "precio_venta": 1260.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "82283",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 120",
+    "precio_venta": 3420.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "82300",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 120",
+    "precio_venta": 2700.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "82307",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 300",
+    "precio_venta": 1620.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "82367",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 120",
+    "precio_venta": 2160.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "82323",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 120",
+    "precio_venta": 2520.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "82327",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 120",
+    "precio_venta": 3420.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "82370",
+    "nombre": "Juguete",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 6 / Caja: 60",
+    "precio_venta": 3240.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "66475",
+    "nombre": "Juguete",
+    "categoria_id": 2,
+    "presentacion": "Paquete: 1 / Caja: 10",
+    "precio_venta": 11700.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "85330",
+    "nombre": "JUGUETE",
+    "categoria_id": 7,
+    "presentacion": "",
+    "precio_venta": 2340.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "89065",
+    "nombre": "JUGUETE",
+    "categoria_id": 7,
+    "presentacion": "",
+    "precio_venta": 4500.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "87204",
+    "nombre": "JUGUETE",
+    "categoria_id": 7,
+    "presentacion": "",
+    "precio_venta": 2340.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "88079",
+    "nombre": "JUGUETE",
+    "categoria_id": 7,
+    "presentacion": "",
+    "precio_venta": 1980.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "88081",
+    "nombre": "JUGUETE",
+    "categoria_id": 7,
+    "presentacion": "",
+    "precio_venta": 7560.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "88083",
+    "nombre": "JUGUETE",
+    "categoria_id": 7,
+    "presentacion": "",
+    "precio_venta": 5220.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "88086",
+    "nombre": "JUGUETE",
+    "categoria_id": 7,
+    "presentacion": "",
+    "precio_venta": 1440.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "88088",
+    "nombre": "JUGUETE",
+    "categoria_id": 7,
+    "presentacion": "",
+    "precio_venta": 2340.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "88090",
+    "nombre": "JUGUETE",
+    "categoria_id": 7,
+    "presentacion": "",
+    "precio_venta": 2340.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "88092",
+    "nombre": "JUGUETE",
+    "categoria_id": 7,
+    "presentacion": "",
+    "precio_venta": 3060.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "88093",
+    "nombre": "JUGUETE",
+    "categoria_id": 7,
+    "presentacion": "",
+    "precio_venta": 3780.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "88094",
+    "nombre": "JUGUETE",
+    "categoria_id": 7,
+    "presentacion": "",
+    "precio_venta": 3060.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "88106",
+    "nombre": "JUGUETE",
+    "categoria_id": 7,
+    "presentacion": "",
+    "precio_venta": 3060.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "88109",
+    "nombre": "JUGUETE",
+    "categoria_id": 7,
+    "presentacion": "",
+    "precio_venta": 1800.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "88111",
+    "nombre": "JUGUETE",
+    "categoria_id": 7,
+    "presentacion": "",
+    "precio_venta": 1980.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "88116",
+    "nombre": "JUGUETE",
+    "categoria_id": 7,
+    "presentacion": "",
+    "precio_venta": 3780.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "88117",
+    "nombre": "JUGUETE",
+    "categoria_id": 7,
+    "presentacion": "",
+    "precio_venta": 3780.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "88120",
+    "nombre": "JUGUETE",
+    "categoria_id": 7,
+    "presentacion": "",
+    "precio_venta": 2160.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "89025",
+    "nombre": "JUGUETE",
+    "categoria_id": 7,
+    "presentacion": "",
+    "precio_venta": 1080.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "89026",
+    "nombre": "JUGUETE",
+    "categoria_id": 7,
+    "presentacion": "",
+    "precio_venta": 900.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "89027",
+    "nombre": "JUGUETE",
+    "categoria_id": 7,
+    "presentacion": "",
+    "precio_venta": 1080.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "89028",
+    "nombre": "JUGUETE",
+    "categoria_id": 7,
+    "presentacion": "",
+    "precio_venta": 900.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "89079",
+    "nombre": "JUGUETE",
+    "categoria_id": 7,
+    "presentacion": "",
+    "precio_venta": 4500.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "147295",
+    "nombre": "JUGUETE",
+    "categoria_id": 7,
+    "presentacion": "",
+    "precio_venta": 684.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "89049",
+    "nombre": "JUGUETE",
+    "categoria_id": 7,
+    "presentacion": "",
+    "precio_venta": 3780.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "85334",
+    "nombre": "JUGUETE",
+    "categoria_id": 7,
+    "presentacion": "",
+    "precio_venta": 1440.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "85340",
+    "nombre": "JUGUETE",
+    "categoria_id": 7,
+    "presentacion": "",
+    "precio_venta": 1440.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "87198",
+    "nombre": "JUGUETE",
+    "categoria_id": 7,
+    "presentacion": "",
+    "precio_venta": 2340.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "87199",
+    "nombre": "JUGUETE",
+    "categoria_id": 7,
+    "presentacion": "",
+    "precio_venta": 2700.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "82929",
+    "nombre": "Juguete con Sonido",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 96",
+    "precio_venta": 1440.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "79961",
+    "nombre": "Juguete Plástico",
+    "categoria_id": 7,
+    "presentacion": "Paquete: 12 / Caja: 60",
+    "precio_venta": 2880.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "79197",
+    "nombre": "Manta Refrescante",
     "categoria_id": 5,
-    "presentacion": "500 ml",
-    "precio_venta": 5600,
+    "presentacion": "Paquete: 4 / Caja: 4",
+    "precio_venta": 7740.0,
     "disponible": true,
     "imagen": ""
   },
   {
-    "sku": "DEMO-007",
-    "nombre": "Cama acolchada lavable",
-    "categoria_id": 6,
-    "presentacion": "60 × 45 cm",
-    "precio_venta": 18900,
-    "disponible": false,
+    "sku": "74273",
+    "nombre": "Manta Refrescante",
+    "categoria_id": 5,
+    "presentacion": "Paquete: 8 / Caja: 16",
+    "precio_venta": 2160.0,
+    "disponible": true,
     "imagen": ""
   },
   {
-    "sku": "DEMO-008",
-    "nombre": "Snack dental para perro",
+    "sku": "83195",
+    "nombre": "Mochila para Mascota",
+    "categoria_id": 4,
+    "presentacion": "Paquete: 3 / Caja: 50",
+    "precio_venta": 14040.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "83206",
+    "nombre": "Mochila para Mascota",
+    "categoria_id": 4,
+    "presentacion": "Paquete: 3 / Caja: 40",
+    "precio_venta": 10440.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "75564",
+    "nombre": "Mochila/Riñonera para Bolsas Higiénicas (6 colores)",
+    "categoria_id": 1,
+    "presentacion": "Paquete: 12 / Caja: 144",
+    "precio_venta": 1260.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "82740",
+    "nombre": "Pala de Arena Tipo Cuchara con Mango (3 colores) - Pequeña",
+    "categoria_id": 2,
+    "presentacion": "Paquete: 6 / Caja: 60",
+    "precio_venta": 4500.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "88048",
+    "nombre": "Prensa para Mascota - Set 3pc Caramelo Cuadros 12.5x5.5cm",
+    "categoria_id": 1,
+    "presentacion": "Paquete: 12 / Caja: 360",
+    "precio_venta": 1440.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "83370",
+    "nombre": "Prensa para Mascota - Set Fresa y Flores 9pc",
+    "categoria_id": 1,
+    "presentacion": "Paquete: 12 / Caja: 1200",
+    "precio_venta": 540.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "83368",
+    "nombre": "Prensa para Mascota - Set Girasol/Lazo Cuadros 9pc",
+    "categoria_id": 1,
+    "presentacion": "Paquete: 12 / Caja: 1200",
+    "precio_venta": 540.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "87174",
+    "nombre": "RASCADOR PARA GATO",
+    "categoria_id": 2,
+    "presentacion": "",
+    "precio_venta": 2700.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "87179",
+    "nombre": "RASCADOR PARA GATO",
+    "categoria_id": 2,
+    "presentacion": "",
+    "precio_venta": 3960.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "87177",
+    "nombre": "RASCADOR PARA GATO",
+    "categoria_id": 2,
+    "presentacion": "",
+    "precio_venta": 3060.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "88016",
+    "nombre": "Rodillo Quita Pelusas",
+    "categoria_id": 6,
+    "presentacion": "Paquete: 12 / Caja: 144",
+    "precio_venta": 1350.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "85321",
+    "nombre": "ROPA PARA MASCOTAS",
+    "categoria_id": 9,
+    "presentacion": "",
+    "precio_venta": 1710.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "87202",
+    "nombre": "SET DECORATIVO DE CUMPLEANOS PARA MASCOTAS",
+    "categoria_id": 1,
+    "presentacion": "",
+    "precio_venta": 3420.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "79344",
+    "nombre": "Sombrero Gorra para Mascota (9 diseños)",
+    "categoria_id": 1,
+    "presentacion": "Paquete: 12 / Caja: 600",
+    "precio_venta": 3240.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "83483",
+    "nombre": "Taza Lavapatas para Perro",
+    "categoria_id": 6,
+    "presentacion": "Paquete: 6 / Caja: 80",
+    "precio_venta": 2700.0,
+    "disponible": true,
+    "imagen": ""
+  },
+  {
+    "sku": "79400",
+    "nombre": "Taza para Mascota",
     "categoria_id": 8,
-    "presentacion": "7 unidades",
-    "precio_venta": 2900,
+    "presentacion": "Paquete: 12 / Caja: 216",
+    "precio_venta": 1440.0,
     "disponible": true,
     "imagen": ""
   }

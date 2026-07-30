@@ -1,10 +1,47 @@
 [
-  { "id": 1, "nombre": "Perros", "padre_id": null },
-  { "id": 2, "nombre": "Gatos", "padre_id": null },
-  { "id": 5, "nombre": "Higiene", "padre_id": null },
-  { "id": 6, "nombre": "Accesorios", "padre_id": null },
-  { "id": 7, "nombre": "Alimento para perros", "padre_id": 1 },
-  { "id": 8, "nombre": "Snacks para perros", "padre_id": 1 },
-  { "id": 9, "nombre": "Alimento para gatos", "padre_id": 2 },
-  { "id": 10, "nombre": "Snacks para gatos", "padre_id": 2 }
+  {
+    "id": 1,
+    "nombre": "Accesorios",
+    "padre_id": null
+  },
+  {
+    "id": 5,
+    "nombre": "Camas y descanso",
+    "padre_id": null
+  },
+  {
+    "id": 3,
+    "nombre": "Collares, correas y arneses",
+    "padre_id": null
+  },
+  {
+    "id": 8,
+    "nombre": "Comederos y bebederos",
+    "padre_id": null
+  },
+  {
+    "id": 2,
+    "nombre": "Gatos: areneros y rascadores",
+    "padre_id": null
+  },
+  {
+    "id": 7,
+    "nombre": "Juguetes y peluches",
+    "padre_id": null
+  },
+  {
+    "id": 9,
+    "nombre": "Ropa",
+    "padre_id": null
+  },
+  {
+    "id": 6,
+    "nombre": "Salud e higiene",
+    "padre_id": null
+  },
+  {
+    "id": 4,
+    "nombre": "Transporte y paseo",
+    "padre_id": null
+  }
 ]
