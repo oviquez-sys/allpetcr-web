@@ -1,3 +1,4 @@
+import { memo } from "react";
 import Link from "next/link";
 import type { Producto } from "@/lib/types";
 import { formatoColones, tinteDeSku } from "@/lib/formato";
@@ -8,9 +9,22 @@ interface Props {
   categoria?: string;
 }
 
-export default function TarjetaProducto({ producto, categoria }: Props) {
+/**
+ * Rendimiento: la grilla del catálogo monta 184 tarjetas a la vez, y cada una
+ * arrastra un componente cliente (BotonAgregar). Sin memoizar, cada tecla en
+ * el buscador re-renderizaba las 184 — es la causa principal de que la página
+ * se sintiera pegada. `memo` corta eso: solo se re-renderiza la tarjeta cuyos
+ * datos cambiaron. Requiere que `categoria` llegue como string estable, no
+ * recalculada por render (ver el mapa memoizado en CatalogoCliente).
+ *
+ * `content-visibility: auto` (clase `tarjeta-diferida`) hace que el navegador
+ * se salte el pintado de las tarjetas fuera de pantalla. Es nativo, sin JS y
+ * sin librería de virtualización, y mantiene las 184 en el DOM: Ctrl+F sigue
+ * encontrándolas y no se pierde nada de SEO.
+ */
+function TarjetaProducto({ producto, categoria }: Props) {
   return (
-    <article className="group flex flex-col overflow-hidden rounded-card border border-crema-400 bg-white transition-all duration-200 hover:-translate-y-0.5 hover:border-crema-500 hover:shadow-[0_6px_24px_rgba(11,49,97,0.09)]">
+    <article className="tarjeta-diferida group flex flex-col overflow-hidden rounded-card border border-crema-400 bg-white transition-[transform,box-shadow,border-color] duration-200 ease-out hover:-translate-y-0.5 hover:border-crema-500 hover:shadow-[0_6px_24px_rgba(11,49,97,0.09)] motion-reduce:transition-none motion-reduce:hover:translate-y-0">
       <Link
         href={`/producto/${encodeURIComponent(producto.sku)}`}
         className="flex flex-1 flex-col rounded-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:ring-offset-2"
@@ -27,7 +41,8 @@ export default function TarjetaProducto({ producto, categoria }: Props) {
               src={producto.imagen}
               alt={producto.nombre}
               loading="lazy"
-              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+              decoding="async"
+              className="h-full w-full object-cover transition-transform duration-300 ease-out group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
             />
           ) : (
             <span className="text-[11px] uppercase tracking-[0.09em] text-navy-300">
@@ -65,3 +80,17 @@ export default function TarjetaProducto({ producto, categoria }: Props) {
     </article>
   );
 }
+
+// Comparación explícita: el SKU identifica al producto de forma única, así que
+// si no cambió el sku, el precio, la disponibilidad ni la categoría mostrada,
+// la tarjeta no necesita volver a renderizarse. Filtrar y ordenar la lista
+// reordena los elementos, pero no los muta.
+export default memo(TarjetaProducto, (anterior, nuevo) => {
+  return (
+    anterior.producto.sku === nuevo.producto.sku &&
+    anterior.producto.precio_venta === nuevo.producto.precio_venta &&
+    anterior.producto.disponible === nuevo.producto.disponible &&
+    anterior.producto.imagen === nuevo.producto.imagen &&
+    anterior.categoria === nuevo.categoria
+  );
+});

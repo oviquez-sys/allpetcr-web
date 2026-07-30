@@ -12,6 +12,26 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Accesibilidad y rendimiento: quien pidió menos movimiento en su sistema
+   operativo no debería recibir desplazamiento animado ni transiciones. No es
+   solo una cortesía —para personas con trastornos vestibulares el movimiento
+   involuntario provoca mareo real— y además elimina trabajo de composición en
+   equipos lentos. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 body {
   @apply bg-crema-100 font-sans text-navy-500 antialiased;
 }
@@ -20,4 +40,17 @@ body {
    Sin esto, los títulos grandes se ven pesados. */
 .font-display {
   font-variation-settings: "opsz" 120, "SOFT" 0, "WONK" 0;
+}
+
+/* Rendimiento de la grilla del catálogo.
+   `content-visibility: auto` le permite al navegador saltarse por completo el
+   diseño y el pintado de las tarjetas que están fuera de la pantalla. Con 184
+   tarjetas es la diferencia entre pintar todo de golpe y pintar solo lo
+   visible, y no hace falta ninguna librería de virtualización.
+   `contain-intrinsic-size` le da al navegador una altura estimada para las
+   que aún no pintó: sin eso la barra de desplazamiento salta mientras uno
+   recorre la página. El valor es la altura aproximada de una tarjeta. */
+.tarjeta-diferida {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 420px;
 }

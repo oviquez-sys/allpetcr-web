@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useDeferredValue, useMemo, useState } from "react";
 import TarjetaProducto from "@/components/TarjetaProducto";
 import type { Categoria, Producto } from "@/lib/types";
 
@@ -30,8 +30,23 @@ export default function CatalogoCliente({
   const [soloDisponibles, setSoloDisponibles] = useState(false);
   const [orden, setOrden] = useState<Orden>("relevancia");
 
-  const nombreCategoria = (id: number | null) =>
-    categorias.find((c) => c.id === id)?.nombre ?? undefined;
+  // La búsqueda se difiere: el input se actualiza de inmediato (se siente
+  // instantáneo al escribir) y el filtrado de 184 productos corre en una
+  // prioridad más baja, sin bloquear la tecla siguiente. Antes, cada
+  // pulsación re-filtraba y re-renderizaba la grilla completa de forma
+  // síncrona, y eso es lo que producía el tirón.
+  const busquedaDiferida = useDeferredValue(busqueda);
+  const filtrando = busqueda !== busquedaDiferida;
+
+  // Un Map en vez de `categorias.find()` por producto. Con .find() dentro del
+  // map de la grilla eran 184 búsquedas lineales en cada render, y además
+  // devolvía una función nueva por render, lo que rompía la memoización de
+  // las tarjetas.
+  const nombrePorCategoria = useMemo(() => {
+    const m = new Map<number, string>();
+    for (const c of categorias) m.set(c.id, c.nombre);
+    return m;
+  }, [categorias]);
 
   // Jerarquía de 2 niveles: Alimento y Snacks son hijas de Perros/Gatos
   // (padre_id). Elegir una categoría raíz en el filtro debe incluir también
@@ -64,7 +79,7 @@ export default function CatalogoCliente({
   }, [productos, categorias, idsConHijos]);
 
   const filtrados = useMemo(() => {
-    const term = busqueda.trim().toLowerCase();
+    const term = busquedaDiferida.trim().toLowerCase();
     // Expandir cada categoría raíz elegida a [ella misma, ...sus hijas].
     const idsElegidos = catsElegidas.flatMap((id) => idsConHijos(id));
     let lista = productos.filter((p) => {
@@ -91,7 +106,7 @@ export default function CatalogoCliente({
       lista.sort((a, b) => Number(b.disponible) - Number(a.disponible));
     }
     return lista;
-  }, [productos, busqueda, catsElegidas, soloDisponibles, orden, idsConHijos]);
+  }, [productos, busquedaDiferida, catsElegidas, soloDisponibles, orden, idsConHijos]);
 
   const alternarCategoria = (id: number) =>
     setCatsElegidas((prev) =>
@@ -199,12 +214,23 @@ export default function CatalogoCliente({
               </button>
             </div>
           ) : (
-            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            <div
+              // Mientras el filtrado va en camino, la grilla se atenúa un
+              // poco en vez de congelarse. Es una señal honesta de "estoy
+              // trabajando" y evita la sensación de que la página se trabó.
+              className={`grid gap-5 transition-opacity duration-150 sm:grid-cols-2 xl:grid-cols-3 motion-reduce:transition-none ${
+                filtrando ? "opacity-60" : "opacity-100"
+              }`}
+            >
               {filtrados.map((p) => (
                 <TarjetaProducto
                   key={p.sku}
                   producto={p}
-                  categoria={nombreCategoria(p.categoria_id)}
+                  categoria={
+                    p.categoria_id === null
+                      ? undefined
+                      : nombrePorCategoria.get(p.categoria_id)
+                  }
                 />
               ))}
             </div>

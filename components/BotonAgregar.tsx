@@ -48,7 +48,11 @@ export default function BotonAgregar({ producto, tamano = "grande", className = 
           onClick={alPulsar}
           disabled={agotado}
           aria-describedby={agotado ? idAyuda : undefined}
-          className={`h-11 w-full rounded-full text-[13px] font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:ring-offset-2 ${
+          // `transition-colors`, no `transition-all`: lo único que cambia acá
+          // es el color de fondo y el texto. `transition-all` obliga al
+          // navegador a vigilar todas las propiedades animables —incluidas las
+          // de diseño— y en la grilla del catálogo eso son 184 botones.
+          className={`h-11 w-full rounded-full text-[13px] font-medium transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:ring-offset-2 motion-reduce:transition-none ${
             agotado
               ? "cursor-not-allowed bg-crema-300 text-navy-300"
               : confirmado
@@ -77,7 +81,7 @@ export default function BotonAgregar({ producto, tamano = "grande", className = 
         onClick={alPulsar}
         disabled={agotado}
         aria-describedby={agotado ? idAyuda : undefined}
-        className={`rounded-full px-8 py-3.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:ring-offset-2 ${
+        className={`rounded-full px-8 py-3.5 text-sm font-medium transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:ring-offset-2 motion-reduce:transition-none ${
           agotado
             ? "cursor-not-allowed bg-crema-300 text-navy-300"
             : confirmado
