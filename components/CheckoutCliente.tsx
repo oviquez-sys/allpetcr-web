@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useCarrito, resolverCarrito } from "@/lib/carrito";
 import { formatoColones } from "@/lib/formato";
 import { negocio, urlWhatsApp, faltante } from "@/lib/negocio";
@@ -43,17 +43,24 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
   const [nota, setNota] = useState("");
   const [errores, setErrores] = useState<Errores>({});
   const [enviado, setEnviado] = useState(false);
+  const refNombre = useRef<HTMLInputElement>(null);
+  const refTelefono = useRef<HTMLInputElement>(null);
 
   const sinWhatsApp = faltante(negocio.whatsapp);
 
-  function validar(): boolean {
+  // Devuelve los errores directamente en vez de solo actualizar el estado:
+  // `enviar` necesita saber YA, en el mismo tick, cuál campo falló para
+  // moverle el foco. Leer el DOM (`querySelector('[aria-invalid=true]')`)
+  // justo después de `setErrores` no servía — React aplica el estado antes
+  // de repintar, no antes de que termine esta función, así que el atributo
+  // todavía no existía en el DOM cuando se lo buscaba.
+  function validar(): Errores {
     const e: Errores = {};
     if (nombre.trim().length < 3) e.nombre = "Escribí tu nombre completo.";
     // Costa Rica: 8 dígitos. Se aceptan espacios y guiones al escribir.
     const soloDigitos = telefono.replace(/\D/g, "");
     if (soloDigitos.length < 8) e.telefono = "El teléfono debe tener 8 dígitos.";
-    setErrores(e);
-    return Object.keys(e).length === 0;
+    return e;
   }
 
   function textoPedido(): string {
@@ -70,12 +77,16 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
     return l.join("\n");
   }
 
-  function enviar(e: React.FormEvent) {
-    e.preventDefault();
-    if (!validar()) {
-      // Llevar el foco al primer campo con error (WCAG 3.3.1).
-      const primero = document.querySelector<HTMLElement>('[aria-invalid="true"]');
-      primero?.focus();
+  function enviar(ev: React.FormEvent) {
+    ev.preventDefault();
+    const e = validar();
+    setErrores(e);
+    if (Object.keys(e).length > 0) {
+      // Llevar el foco al primer campo con error (WCAG 3.3.1), por ref y no
+      // por consulta al DOM: la ref apunta al input real sin depender de que
+      // React ya haya repintado aria-invalid.
+      if (e.nombre) refNombre.current?.focus();
+      else if (e.telefono) refTelefono.current?.focus();
       return;
     }
     const url = urlWhatsApp(textoPedido());
@@ -103,14 +114,14 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
               <path d="m20 6-11 11-5-5" />
             </svg>
           </div>
-          <h1 className="mt-7 font-display text-[32px] font-light text-navy-500">
+          <h1 className="mt-7 font-display text-headline text-navy-500">
             Pedido enviado
           </h1>
           <p className="mt-3 text-[15px] font-light leading-relaxed text-navy-400">
             Se abrió WhatsApp con tu pedido. Si no se abrió, escribinos
             directamente y te lo confirmamos.
           </p>
-          <p className="mt-2 text-sm font-light text-navy-300">
+          <p className="mt-2 text-sm font-light text-navy-400">
             Te confirmamos existencias y el total antes de preparar todo.
           </p>
           <Link
@@ -127,7 +138,7 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
   if (comprables.length === 0) {
     return (
       <div className="mx-auto max-w-contenido px-6 py-24 text-center">
-        <h1 className="font-display text-[32px] font-light text-navy-500">
+        <h1 className="font-display text-headline text-navy-500">
           No hay nada que pedir
         </h1>
         <p className="mt-3 text-[15px] font-light text-navy-400">
@@ -148,7 +159,7 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
 
   return (
     <div className="mx-auto max-w-contenido px-6 py-12">
-      <nav aria-label="Ruta" className="text-xs text-navy-300">
+      <nav aria-label="Ruta" className="text-xs text-navy-400">
         <Link href="/carrito" className="rounded hover:text-navy-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500">
           Carrito
         </Link>
@@ -156,7 +167,7 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
         <span className="text-navy-400">Confirmar pedido</span>
       </nav>
 
-      <h1 className="mt-4 font-display text-[38px] font-light text-navy-500">
+      <h1 className="mt-4 font-display text-headline text-navy-500">
         Confirmar pedido
       </h1>
 
@@ -182,6 +193,7 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
               </label>
               <input
                 id="nombre"
+                ref={refNombre}
                 type="text"
                 autoComplete="name"
                 value={nombre}
@@ -204,6 +216,7 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
               </label>
               <input
                 id="telefono"
+                ref={refTelefono}
                 type="tel"
                 inputMode="tel"
                 autoComplete="tel"
@@ -220,7 +233,7 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
                   {errores.telefono}
                 </p>
               ) : (
-                <p id="ayuda-telefono" className="mt-1.5 text-[12.5px] text-navy-300">
+                <p id="ayuda-telefono" className="mt-1.5 text-[12.5px] text-navy-400">
                   Para confirmarte el pedido.
                 </p>
               )}
@@ -252,7 +265,7 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
                   />
                   <span>
                     <span className="block text-[15px] text-navy-500">{titulo}</span>
-                    <span className="mt-0.5 block text-[13px] font-light text-navy-300">
+                    <span className="mt-0.5 block text-[13px] font-light text-navy-400">
                       {detalle}
                     </span>
                   </span>
@@ -263,7 +276,7 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
 
           <div className="mt-9">
             <label htmlFor="nota" className="block text-sm text-navy-500">
-              Nota para el pedido <span className="text-navy-300">(opcional)</span>
+              Nota para el pedido <span className="text-navy-400">(opcional)</span>
             </label>
             <textarea
               id="nota"
@@ -283,7 +296,7 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
           >
             Enviar pedido por WhatsApp
           </button>
-          <p className="mt-3 text-[12.5px] font-light text-navy-300">
+          <p className="mt-3 text-[12.5px] font-light text-navy-400">
             No se cobra nada en línea. Confirmamos existencias y total antes de
             preparar el pedido.
           </p>
@@ -298,7 +311,7 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
               {comprables.map((i) => (
                 <li key={i.sku} className="flex justify-between gap-3 text-sm">
                   <span className="text-navy-400">
-                    <span className="text-navy-300">{i.cantidad} ×</span> {i.producto!.nombre}
+                    <span className="text-navy-400">{i.cantidad} ×</span> {i.producto!.nombre}
                   </span>
                   <span className="shrink-0 text-navy-500">{formatoColones(i.subtotal)}</span>
                 </li>
@@ -312,7 +325,7 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
             </div>
             <Link
               href="/carrito"
-              className="mt-5 block rounded text-center text-xs text-navy-300 underline underline-offset-2 hover:text-navy-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500"
+              className="mt-5 block rounded text-center text-xs text-navy-400 underline underline-offset-2 hover:text-navy-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500"
             >
               Modificar el carrito
             </Link>

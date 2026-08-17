@@ -28,4 +28,4 @@ Solo usar fotos de Unsplash, Pexels, o stock pagado (Adobe / Shutterstock).
 NUNCA de Pinterest, Behance, Dribbble, ni de los sitios de otras tiendas:
 esas imagenes tienen dueno y su uso comercial es infraccion.
 
-El criterio completo esta en  DIRECCION-DE-ARTE.md  en la raiz del proyecto.
+El criterio completo esta en  docs/DIRECCION-DE-ARTE.md

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useMemo } from "react";
 import { useCarrito, resolverCarrito } from "@/lib/carrito";
 import { formatoColones, tinteDeSku } from "@/lib/formato";
@@ -76,7 +77,7 @@ export default function CarritoCliente({ productos }: { productos: Producto[] })
               <path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" />
             </svg>
           </div>
-          <h1 className="mt-7 font-display text-[32px] font-light text-navy-500">
+          <h1 className="mt-7 font-display text-headline text-navy-500">
             Tu carrito está vacío
           </h1>
           <p className="mt-3 text-[15px] font-light leading-relaxed text-navy-400">
@@ -98,7 +99,7 @@ export default function CarritoCliente({ productos }: { productos: Producto[] })
 
   return (
     <div className="mx-auto max-w-contenido px-6 py-12">
-      <h1 className="font-display text-[38px] font-light text-navy-500">Tu carrito</h1>
+      <h1 className="font-display text-headline text-navy-500">Tu carrito</h1>
       <p className="mt-2 text-sm text-navy-400">
         {items.length} {items.length === 1 ? "producto" : "productos"}
       </p>
@@ -131,12 +132,24 @@ export default function CarritoCliente({ productos }: { productos: Producto[] })
               >
                 <div className="flex gap-4 sm:gap-5">
                   <div
-                    className={`grid h-20 w-20 shrink-0 place-items-center rounded-lg sm:h-24 sm:w-24 ${tinteDeSku(item.sku)}`}
+                    className={`relative grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-lg sm:h-24 sm:w-24 ${
+                      p?.imagen ? "bg-white" : tinteDeSku(item.sku)
+                    }`}
                     aria-hidden="true"
                   >
-                    <span className="px-1 text-center text-[9px] uppercase tracking-wider text-navy-300">
-                      Foto pendiente
-                    </span>
+                    {p?.imagen ? (
+                      <Image
+                        src={p.imagen}
+                        alt=""
+                        fill
+                        sizes="96px"
+                        className="object-contain p-1.5"
+                      />
+                    ) : (
+                      <span className="px-1 text-center text-[9px] uppercase tracking-wider text-navy-400">
+                        Foto pendiente
+                      </span>
+                    )}
                   </div>
 
                   <div className="min-w-0 flex-1">
@@ -151,7 +164,7 @@ export default function CarritoCliente({ productos }: { productos: Producto[] })
                       <span className="text-[15px] font-medium text-navy-400">{nombre}</span>
                     )}
                     {p?.presentacion && (
-                      <p className="mt-0.5 text-xs text-navy-300">{p.presentacion}</p>
+                      <p className="mt-0.5 text-xs text-navy-400">{p.presentacion}</p>
                     )}
 
                     {item.descatalogado && (
@@ -173,7 +186,7 @@ export default function CarritoCliente({ productos }: { productos: Producto[] })
 
                     <div className="mt-3.5 flex flex-wrap items-center justify-between gap-3">
                       {item.descatalogado ? (
-                        <span className="text-sm text-navy-300">—</span>
+                        <span className="text-sm text-navy-400">—</span>
                       ) : (
                         <Cantidad
                           valor={item.cantidad}
@@ -188,7 +201,7 @@ export default function CarritoCliente({ productos }: { productos: Producto[] })
                               {formatoColones(item.subtotal)}
                             </p>
                             {item.cantidad > 1 && (
-                              <p className="text-[11px] text-navy-300">
+                              <p className="text-[11px] text-navy-400">
                                 {formatoColones(p.precio_venta)} c/u
                               </p>
                             )}
@@ -200,7 +213,7 @@ export default function CarritoCliente({ productos }: { productos: Producto[] })
                     <button
                       type="button"
                       onClick={() => quitar(item.sku)}
-                      className="mt-3 rounded text-xs text-navy-300 underline underline-offset-2 transition-colors hover:text-navy-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500"
+                      className="mt-3 rounded text-xs text-navy-400 underline underline-offset-2 transition-colors hover:text-navy-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500"
                     >
                       Quitar
                     </button>
@@ -233,7 +246,7 @@ export default function CarritoCliente({ productos }: { productos: Producto[] })
               </span>
             </div>
 
-            <p className="mt-4 text-[11.5px] font-light leading-relaxed text-navy-300">
+            <p className="mt-4 text-[11.5px] font-light leading-relaxed text-navy-400">
               Los precios incluyen impuestos. El pedido se confirma por
               WhatsApp: no se cobra nada en línea.
             </p>
@@ -246,7 +259,7 @@ export default function CarritoCliente({ productos }: { productos: Producto[] })
                 Continuar con el pedido
               </Link>
             ) : (
-              <p className="mt-5 rounded-full bg-crema-300 py-3.5 text-center text-sm text-navy-300">
+              <p className="mt-5 rounded-full bg-crema-300 py-3.5 text-center text-sm text-navy-400">
                 No hay productos disponibles
               </p>
             )}
@@ -260,8 +273,16 @@ export default function CarritoCliente({ productos }: { productos: Producto[] })
 
             <button
               type="button"
-              onClick={vaciar}
-              className="mt-4 w-full rounded text-xs text-navy-300 underline underline-offset-2 transition-colors hover:text-navy-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500"
+              onClick={() => {
+                // Acción destructiva de un clic: antes borraba el pedido
+                // armado sin red de seguridad. confirm() nativo es
+                // suficiente acá — no amerita un diálogo custom para una
+                // sola acción de baja frecuencia.
+                if (window.confirm("¿Vaciar el carrito? Se quitan todos los productos agregados.")) {
+                  vaciar();
+                }
+              }}
+              className="mt-4 w-full rounded text-xs text-navy-400 underline underline-offset-2 transition-colors hover:text-navy-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500"
             >
               Vaciar carrito
             </button>

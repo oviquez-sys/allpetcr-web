@@ -10,7 +10,7 @@
  * Solo bloquea en producción (`npm run build`). En desarrollo avisa y sigue,
  * para no estorbar mientras se trabaja.
  */
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
@@ -49,6 +49,23 @@ if (sinPrecio.length > 0) {
   problemas.push(
     `${sinPrecio.length} producto(s) con precio 0 o inválido: ` +
       sinPrecio.slice(0, 5).map((p) => p.sku).join(", "),
+  );
+}
+
+// 4. Fotos que la base dice tener pero que no están en public/.
+//    Desde el 02/08/2026 el sitio publica fotos reales: el exportador del ERP
+//    las copia a public/productos/. Si el JSON se actualiza pero la copia no
+//    llega —un despliegue a medias, un archivo que no entró al commit— cada
+//    tarjeta muestra un ícono roto y nadie se entera hasta que lo ve un
+//    cliente. Se verifica acá porque es barato y el fallo es silencioso.
+const rotas = productos
+  .filter((p) => p.imagen)
+  .filter((p) => !existsSync(join(raiz, "public", p.imagen.replace(/^\//, ""))));
+if (rotas.length > 0) {
+  problemas.push(
+    `${rotas.length} producto(s) apuntan a una foto que no está en public/: ` +
+      rotas.slice(0, 5).map((p) => `${p.sku} → ${p.imagen}`).join(", ") +
+      ". Corré: python manage.py exportar_catalogo_web  en el ERP.",
   );
 }
 

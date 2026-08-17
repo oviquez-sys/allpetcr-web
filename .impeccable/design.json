@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-16T00:00:00.000Z",
+  "title": "Design System: AllPetcr.com",
+  "extensions": {
+    "colorMeta": {
+      "facade-navy": {
+        "role": "primary",
+        "displayName": "Facade Navy",
+        "canonical": "#092E5E",
+        "tonalRamp": ["#020913", "#041326", "#061D3A", "#07264D", "#092E5E", "#556479", "#7B8A9D", "#9DA8B6", "#CBD7E6", "#E8ECF1"]
+      },
+      "storefront-gold": {
+        "role": "secondary",
+        "displayName": "Storefront Gold",
+        "canonical": "#CC9539",
+        "tonalRamp": ["#2A1D0C", "#543C19", "#7F5B25", "#96692A", "#A87830", "#CC9539", "#D8AB5D", "#E1BF84", "#ECD8B3", "#F5EBD9", "#FBF6EC"]
+      },
+      "warm-cream": {
+        "role": "neutral",
+        "displayName": "Warm Cream",
+        "canonical": "#FAF8F4",
+        "tonalRamp": ["#D8CDBC", "#E6DFD4", "#F0EBE1", "#F5F0E8", "#FAF8F4", "#FDFCFA"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "The single H1 per page, and section headlines. Never the brand name." },
+      "label": { "displayName": "Eyebrow / Label", "purpose": "Uppercase tracked eyebrows, category tags, badges." }
+    },
+    "shadows": [
+      { "name": "card-hover", "value": "0 6px 24px rgba(11,49,97,0.09)", "purpose": "Product/category card lift on hover or focus, paired with a 2px upward translate." },
+      { "name": "floating-panel", "value": "0 16px 48px rgba(9,46,94,0.13)", "purpose": "Mega-menu dropdown and any panel overlaying page content." }
+    ],
+    "motion": [
+      { "name": "color-transition", "value": "color/background-color 150ms ease-out", "purpose": "Default button and link state change. Scoped to color, never transition-all, since the catalog grid repeats this on up to 184 elements." },
+      { "name": "lift-transition", "value": "transform, box-shadow, border-color 200ms ease-out", "purpose": "Card hover lift." },
+      { "name": "photo-zoom", "value": "transform 300-500ms ease-out", "purpose": "Subtle scale on product/category photography on hover." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Default call-to-action pill on light (cream) surfaces.",
+      "html": "<button class=\"ds-btn-primary\">Ver catálogo</button>",
+      "css": ".ds-btn-primary { background: #092E5E; color: #FAF8F4; border-radius: 9999px; padding: 14px 32px; font-size: 14px; font-weight: 500; font-family: 'Inter Variable', system-ui, sans-serif; border: none; cursor: pointer; transition: background-color 150ms ease-out; } .ds-btn-primary:hover { background: #07264D; } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 2px #092E5E, 0 0 0 4px #FAF8F4; }"
+    },
+    {
+      "name": "Inverse Button",
+      "kind": "button",
+      "refersTo": "button-inverse",
+      "description": "Primary CTA when placed on a dark navy (facade) surface, e.g. the hero.",
+      "html": "<button class=\"ds-btn-inverse\">Ver catálogo</button>",
+      "css": ".ds-btn-inverse { background: #FAF8F4; color: #092E5E; border-radius: 9999px; padding: 14px 32px; font-size: 14px; font-weight: 500; font-family: 'Inter Variable', system-ui, sans-serif; border: none; cursor: pointer; transition: background-color 150ms ease-out; } .ds-btn-inverse:hover { background: #FFFFFF; } .ds-btn-inverse:focus-visible { outline: none; box-shadow: 0 0 0 2px #CC9539, 0 0 0 4px #092E5E; }"
+    },
+    {
+      "name": "Product Card",
+      "kind": "card",
+      "refersTo": "card-product",
+      "description": "Catalog grid card: white surface, warm border, navy-tinted hover lift.",
+      "html": "<article class=\"ds-card-product\"><div class=\"ds-card-product-media\"></div><div class=\"ds-card-product-body\"><p class=\"ds-card-product-eyebrow\">Juguetes</p><h3 class=\"ds-card-product-title\">Pelota de goma</h3><p class=\"ds-card-product-price\">₡3,500</p></div></article>",
+      "css": ".ds-card-product { display: flex; flex-direction: column; overflow: hidden; border-radius: 16px; border: 1px solid #E6DFD4; background: #FFFFFF; transition: transform 200ms ease-out, box-shadow 200ms ease-out, border-color 200ms ease-out; } .ds-card-product:hover { transform: translateY(-2px); border-color: #D8CDBC; box-shadow: 0 6px 24px rgba(11,49,97,0.09); } .ds-card-product-media { aspect-ratio: 1 / 1; background: #F5F0E8; } .ds-card-product-body { padding: 16px 20px 20px; font-family: 'Inter Variable', system-ui, sans-serif; } .ds-card-product-eyebrow { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.09em; color: #7F5B25; margin: 0 0 6px; } .ds-card-product-title { font-size: 14.5px; font-weight: 400; color: #092E5E; margin: 0; } .ds-card-product-price { font-size: 17px; font-weight: 500; color: #092E5E; margin: 12px 0 0; }"
+    },
+    {
+      "name": "Category Card",
+      "kind": "custom",
+      "refersTo": "card-category",
+      "description": "Photo or tint background with a two-layer navy scrim, gold-ringed icon, and an inverting pill tag.",
+      "html": "<a class=\"ds-card-category\" href=\"#\"><div class=\"ds-card-category-tint\"></div><div class=\"ds-card-category-scrim\"></div><div class=\"ds-card-category-content\"><span class=\"ds-card-category-icon\">🐾</span><h3 class=\"ds-card-category-title\">Juguetes</h3><p class=\"ds-card-category-detail\">76 productos</p><span class=\"ds-card-category-tag\">Ver productos</span></div></a>",
+      "css": ".ds-card-category { position: relative; display: flex; min-height: 260px; flex-direction: column; justify-content: flex-end; overflow: hidden; border-radius: 16px; text-decoration: none; } .ds-card-category-tint { position: absolute; inset: 0; background: #F0EBE1; } .ds-card-category-scrim { position: absolute; inset: 0; background: linear-gradient(to top, rgba(2,9,19,0.8), rgba(2,9,19,0.25) 60%, transparent); } .ds-card-category-content { position: relative; padding: 28px; font-family: 'Inter Variable', system-ui, sans-serif; } .ds-card-category-icon { display: grid; place-items: center; width: 44px; height: 44px; margin-bottom: 20px; border-radius: 9999px; border: 1px solid rgba(255,255,255,0.45); background: rgba(255,255,255,0.1); color: #fff; } .ds-card-category-title { font-family: 'Fraunces Variable', Georgia, serif; font-size: 20px; font-weight: 400; color: #fff; margin: 0; } .ds-card-category-detail { font-size: 12px; color: rgba(255,255,255,0.85); margin: 4px 0 0; } .ds-card-category-tag { display: inline-block; margin-top: 16px; padding: 8px 20px; border-radius: 9999px; background: rgba(255,255,255,0.95); color: #092E5E; font-size: 12px; font-weight: 500; }"
+    },
+    {
+      "name": "Input Field",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Text input used in checkout and contact forms.",
+      "html": "<input class=\"ds-input\" type=\"text\" placeholder=\"Nombre completo\" />",
+      "css": ".ds-input { width: 100%; border-radius: 8px; border: 1px solid #E6DFD4; background: #FAF8F4; padding: 12px 16px; font-size: 15px; font-family: 'Inter Variable', system-ui, sans-serif; color: #092E5E; outline: none; transition: border-color 150ms ease-out; } .ds-input:focus { border-color: #556479; } .ds-input:focus-visible { box-shadow: 0 0 0 2px #092E5E; }"
+    },
+    {
+      "name": "Nav Link (mega-menu item)",
+      "kind": "nav",
+      "refersTo": "nav-link",
+      "description": "Desktop top-nav item and mega-menu row.",
+      "html": "<a class=\"ds-nav-link\" href=\"#\">Juguetes y peluches</a>",
+      "css": ".ds-nav-link { display: inline-flex; align-items: center; gap: 6px; border-radius: 8px; padding: 10px 14px; font-size: 14px; color: #556479; text-decoration: none; transition: background-color 150ms ease-out, color 150ms ease-out; } .ds-nav-link:hover { background: #F5F0E8; color: #092E5E; } .ds-nav-link:focus-visible { outline: none; box-shadow: 0 0 0 2px #092E5E; }"
+    },
+    {
+      "name": "Cart Count Badge",
+      "kind": "chip",
+      "refersTo": "badge-cart-count",
+      "description": "Small gold-filled circle on the cart icon — one of the two places gold is allowed to fill a surface.",
+      "html": "<span class=\"ds-badge-cart\">3</span>",
+      "css": ".ds-badge-cart { display: grid; place-items: center; min-width: 19px; height: 19px; padding: 0 4px; border-radius: 9999px; background: #CC9539; color: #061D3A; font-size: 10.5px; font-weight: 600; font-family: 'Inter Variable', system-ui, sans-serif; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Lit Facade",
+    "overview": "The system is a screen translation of one physical thing: the Heredia store's own storefront, seen at dusk. Two navy bands bracket the page — the hero and the closing trust section — each carrying the same three-layer light treatment as the shop's actual facade: two warm halos at the upper corners (the side lanterns), a wider, fainter glow at center-top (the eave spotlights), and a thin gold line at the base of the dark band (the sign trim). Between those two dark bands, the page turns to warm cream — the interior, where the actual browsing and buying happens. Long reading (product grids, cards, forms) never sits on the dark surface; that would trade real conversion for atmosphere, and the physical store doesn't ask customers to shop in the dark doorway either.\n\nGold is the building's metal trim, not a paint color: it appears as a 3px hairline, small icon rings, and price-adjacent accents — never as a fill for anything large. Navy is the mass. Cream is the air. This is a deliberately two-and-a-half-color system, and the moment a third hue or a pure-white background enters the page body, the facade metaphor collapses into generic e-commerce.\n\nThe tone matching this world is honest and unhurried: a sober fixed hero instead of a carousel, one primary CTA instead of two competing ones, plain non-inflated pricing, and calm, explicit confirmations (a button that says \"Added ✓\" for two seconds, not a toast that vanishes before it's read). Nothing here performs urgency it doesn't have — there's no countdown timer, no \"only 2 left,\" no fake scarcity — because the product's actual differentiator is that it never claims stock or savings it can't back up.",
+    "keyCharacteristics": [
+      "Two dark \"facade\" bands (hero, closing trust strip) bracket a light \"interior\" (everything transactional).",
+      "Gold only ever appears as trim: hairlines, icon rings, small text accents — never a fill.",
+      "Warm radial-gradient light replaces photography as the primary atmosphere device; it is pure CSS, adds no requests, and costs nothing on slow connections.",
+      "Buttons are full pills everywhere; corners get harder (8px) only on cards and functional chrome.",
+      "Motion is restrained and instant-feeling: 150-300ms color/transform transitions, never transition-all, always disabled under prefers-reduced-motion."
+    ],
+    "rules": [
+      { "name": "The One Accent Rule", "body": "Gold covers a hairline, an icon ring, a badge, or text — never a surface. The instant gold fills a card or a button background at scale, it stops reading as metal and starts reading as yellow.", "section": "colors" },
+      { "name": "The Text-Contrast Fork", "body": "The 500-step brand gold (#CC9539) is for decoration only — 2.50:1 on cream fails WCAG AA. Any gold text on cream uses Storefront Gold Text (#7F5B25, 5.78:1) or, at minimum, #96692A (4.55:1). Gold reads correctly as text only when placed on the dark navy band instead (5.07:1).", "section": "colors" },
+      { "name": "The One H1 Rule", "body": "Exactly one display-weight headline per page, and it is always the value proposition, never the repeated brand name.", "section": "typography" },
+      { "name": "The Flat-at-Rest Rule", "body": "Surfaces are flat and bordered by default. Shadow is earned only by hover, focus, or genuinely floating above other content — it's never decorative at rest.", "section": "elevation" },
+      { "name": "The Pill-vs-Card Rule", "body": "If it's something you press, it's a full pill. If it's something that holds other content, it's the 16px card radius. Mixing the two reads as an inconsistency, not a variation.", "section": "shapes" }
+    ],
+    "dos": [
+      "Do keep gold to hairlines, rings, badges, and text on dark surfaces only.",
+      "Do use the full-pill radius for anything pressable and the 16px card radius for anything that contains content.",
+      "Do tint shadows with navy (rgba(9,46,94,...) / rgba(11,49,97,...)), never neutral black.",
+      "Do keep the dark-band / light-interior / dark-band rhythm when adding new top-level page sections.",
+      "Do use dorado-700 or darker for any gold text on cream; reserve dorado-500 for non-text surfaces."
+    ],
+    "donts": [
+      "Don't fill a background, card, or button at rest with Storefront Gold — that's reserved for the two momentary/small exceptions (add-to-cart confirmation, cart-count badge).",
+      "Don't use dorado-500 for text on a cream background — it fails WCAG AA (2.50:1).",
+      "Don't introduce a third hue or a pure-white page background; the system is built on exactly cream + navy + gold-as-accent.",
+      "Don't use transition-all on repeated elements (product cards, buttons) — the catalog renders up to 184 at once, and only color/transform should be watched.",
+      "Don't add a carousel, autoplay, or urgency-manufacturing UI (countdowns, fake low-stock flags) — it contradicts the \"honest and unhurried\" tone and the product's actual stock-accuracy commitment."
+    ]
+  }
+}

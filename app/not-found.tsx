@@ -10,7 +10,7 @@ export default function NoEncontrada() {
     <div className="mx-auto max-w-contenido px-6 py-24">
       <div className="mx-auto max-w-md text-center">
         <p className="font-display text-[64px] font-light leading-none text-crema-500">404</p>
-        <h1 className="mt-4 font-display text-[32px] font-light text-navy-500">
+        <h1 className="mt-4 font-display text-headline text-navy-500">
           No encontramos esta página
         </h1>
         <p className="mt-3 text-[15px] font-light leading-relaxed text-navy-400">

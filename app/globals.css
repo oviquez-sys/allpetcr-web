@@ -54,3 +54,123 @@ body {
   content-visibility: auto;
   contain-intrinsic-size: auto 420px;
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   AMBIENTE — traducción a pantalla de la fachada del local
+   ══════════════════════════════════════════════════════════════════════════
+
+   La tienda física resuelve tres cosas que la web plana no tenía, y que son
+   lo que hace que se vea cara:
+
+     1. LUZ CÁLIDA.  Faroles laterales y focos empotrados en el alero. El
+        local se ve *encendido*, no simplemente iluminado. Una página con
+        color plano de fondo nunca transmite eso.
+     2. NAVY COMO MASA.  La fachada entera es azul profundo; el dorado
+        aparece en cantidades mínimas. Por eso el dorado se lee como metal y
+        no como amarillo — es cuestión de proporción, no de tono.
+     3. PROFUNDIDAD.  Alero, vitrina hundida, pasillo que se pierde al fondo.
+        Capas, no una superficie.
+
+   Todo lo de abajo es CSS puro: cero JavaScript, cero imágenes, cero peticiones.
+   Un degradado no cuesta nada en red y lo compone la GPU.
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* LA FRANJA DORADA
+   La línea fina que corre bajo el rótulo de la fachada y remata el alero.
+   Es el detalle más reconocible del local y el más barato de trasladar: 3 px
+   de alto. Va degradada en los extremos —no cortada en seco— porque en la
+   fachada la franja se pierde en las esquinas en vez de terminar de golpe. */
+.franja-dorada {
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    theme("colors.dorado.600") 12%,
+    theme("colors.dorado.400") 50%,
+    theme("colors.dorado.600") 88%,
+    transparent 100%
+  );
+}
+
+/* SUPERFICIE NAVY CON LUZ
+   El fondo de las secciones ancla. Tres capas superpuestas:
+     · dos halos cálidos arriba, a izquierda y derecha → los dos faroles
+     · un resplandor central más amplio y tenue        → los focos del alero
+     · la base navy                                    → la fachada
+   Los halos van al 8-10% de opacidad. Más que eso y deja de parecer luz para
+   parecer una mancha de color: el error clásico al imitar iluminación. */
+.superficie-navy {
+  background-color: theme("colors.navy.600");
+  background-image:
+    radial-gradient(
+      42rem 26rem at 12% 0%,
+      rgb(204 149 57 / 0.1),
+      transparent 62%
+    ),
+    radial-gradient(
+      42rem 26rem at 88% 0%,
+      rgb(204 149 57 / 0.09),
+      transparent 62%
+    ),
+    radial-gradient(
+      70rem 40rem at 50% -18%,
+      rgb(216 171 93 / 0.07),
+      transparent 70%
+    );
+}
+
+/* Variante para bandas de menor altura (confianza, pie): un solo resplandor
+   central. Repetir los tres halos en una franja baja los amontona y se ve
+   sucio. */
+.superficie-navy-plana {
+  background-color: theme("colors.navy.600");
+  background-image: radial-gradient(
+    60rem 22rem at 50% 0%,
+    rgb(204 149 57 / 0.08),
+    transparent 68%
+  );
+}
+
+/* EL RESPLANDOR DEL INTERIOR
+   En la foto, la luz del interior se derrama por la vitrina hacia la acera.
+   Este halo hace lo mismo detrás de un elemento —el isotipo del hero— para
+   que no flote sobre un fondo muerto. Decorativo: siempre con aria-hidden. */
+.halo-calido {
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgb(224 182 110 / 0.26),
+    rgb(204 149 57 / 0.1) 42%,
+    transparent 68%
+  );
+}
+
+/* MARCO DORADO — dirección "Evolución Premium" (aprobada), única superficie
+   del sitio donde el dorado ENMARCA una foto en vez de aparecer en dosis
+   mínimas (hairline, ícono, badge). Reservado EXCLUSIVAMENTE a la sección
+   "Pieza del mes" del home: un producto a la vez, nunca una grilla — es lo
+   que mantiene el marco leyéndose como metal y no como relleno. No usar en
+   ningún otro componente sin revisar antes esa regla en DESIGN.md. */
+.marco-dorado {
+  position: relative;
+  padding: 22px;
+}
+.marco-dorado::before,
+.marco-dorado::after {
+  content: "";
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border: 1.5px solid theme("colors.dorado.500");
+}
+.marco-dorado::before {
+  top: 0;
+  left: 0;
+  border-right: none;
+  border-bottom: none;
+}
+.marco-dorado::after {
+  bottom: 0;
+  right: 0;
+  border-left: none;
+  border-top: none;
+}

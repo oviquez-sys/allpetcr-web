@@ -29,7 +29,7 @@ export default function ContactoPage() {
 
   return (
     <section className="mx-auto max-w-2xl px-6 py-20">
-      <h1 className="font-display text-[38px] font-light leading-tight text-navy-500">
+      <h1 className="font-display text-headline leading-tight text-navy-500">
         Contacto
       </h1>
       <p className="mt-3 text-[16.5px] font-light text-navy-400">
@@ -54,12 +54,12 @@ export default function ContactoPage() {
       <dl className="mt-12 divide-y divide-crema-400 border-y border-crema-400">
         {filas.map((f) => (
           <div key={f.rotulo} className="py-5">
-            <dt className="text-[10.5px] uppercase tracking-[0.09em] text-dorado-700">
+            <dt className="text-label uppercase text-dorado-700">
               {f.rotulo}
             </dt>
             <dd className="mt-1.5 text-lg font-light text-navy-500">
               {faltante(f.valor) ? (
-                <span className="text-navy-300">Por confirmar</span>
+                <span className="text-navy-400">Por confirmar</span>
               ) : f.href ? (
                 <a
                   href={f.href}

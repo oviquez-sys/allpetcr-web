@@ -20,9 +20,20 @@ export interface Categoria {
 export interface Producto {
   sku: string;
   nombre: string;
+  /** Id de la subcategoría (hoja del árbol). Su padre es la categoría web. */
   categoria_id: number | null;
   presentacion: string;
-  imagen: string; // hoy siempre vacía: las fotos se publicarán más adelante
+  /** Texto de venta. Vive en el ERP: corregirlo no exige un despliegue. */
+  descripcion: string;
+  /** "Perro" | "Gato" | "Perro y gato" | "Peces" | "Tortugas" | "Otros".
+   *  Vacío si el ERP todavía no lo tiene cargado. */
+  mascota: string;
+  imagen: string; // ruta pública, ej. "/productos/75564.jpeg". "" si no hay foto.
   precio_venta: number;
+  /** Desde el 02/08/2026 el exportador solo publica lo que hay en existencia
+   *  (`SOLO_EN_EXISTENCIA`), así que en la práctica siempre llega `true`.
+   *  El campo se conserva porque el JSON es una foto del momento: entre dos
+   *  exportaciones el stock cambia, y el sitio tiene que poder marcar un
+   *  agotado —en el carrito, sobre todo— sin esperar a la siguiente. */
   disponible: boolean;
 }

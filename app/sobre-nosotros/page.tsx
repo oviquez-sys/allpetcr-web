@@ -1,5 +1,6 @@
 export const metadata = {
-  title: "Sobre nosotros | AllPet",
+  // Sin sufijo manual: app/layout.tsx ya agrega " | AllPet" vía su template.
+  title: "Sobre nosotros",
 };
 
 // NOTA: borrador de copy. Reemplazar con la historia real de AllPetcr
@@ -8,7 +9,7 @@ export const metadata = {
 export default function SobreNosotrosPage() {
   return (
     <section className="mx-auto max-w-2xl px-6 py-20">
-      <h1 className="font-display text-[38px] font-light leading-tight text-navy-500">
+      <h1 className="font-display text-headline leading-tight text-navy-500">
         Sobre nosotros
       </h1>
       <div className="mt-8 space-y-5 text-[16.5px] font-light leading-relaxed text-navy-400">

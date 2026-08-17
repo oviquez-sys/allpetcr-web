@@ -4,8 +4,14 @@ import type { Producto } from "./types";
 
 const catalogo: Producto[] = [
   { sku: "A1", nombre: "Alimento perro", categoria_id: 1, presentacion: "2 kg",
+    descripcion: "Alimento seco para perro adulto.", mascota: "Perro",
     imagen: "", precio_venta: 10000, disponible: true },
+  // A2 sigue con `disponible: false` a propósito: aunque el exportador del ERP
+  // ya solo publica lo que hay en existencia, el carrito vive en el navegador
+  // y guarda SKU entre visitas. Un producto que se agotó entre dos
+  // exportaciones es justo el caso que estas pruebas cubren.
   { sku: "A2", nombre: "Arena gato", categoria_id: 2, presentacion: "5 L",
+    descripcion: "Arena aglomerante para gato.", mascota: "Gato",
     imagen: "", precio_venta: 4000, disponible: false },
 ];
 

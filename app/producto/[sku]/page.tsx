@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import TarjetaProducto from "@/components/TarjetaProducto";
 import BotonAgregar from "@/components/BotonAgregar";
@@ -21,10 +22,16 @@ export async function generateMetadata({
   const { sku } = await params;
   const producto = await getProductoPorSku(decodeURIComponent(sku));
   if (!producto) return { title: "Producto no encontrado" };
-  const descripcion =
-    `${producto.nombre}${producto.presentacion ? ` · ${producto.presentacion}` : ""} — ` +
-    `${formatoColones(producto.precio_venta)}. Disponible en AllPet Costa Rica, ` +
-    "con retiro en tienda sin costo.";
+  // Se prefiere la descripción real del ERP: es texto propio del producto y
+  // no una plantilla repetida en 184 páginas, que es lo que Google trata como
+  // contenido duplicado. La plantilla queda como respaldo para los productos
+  // a los que todavía no se les escribió descripción.
+  const descripcion = producto.descripcion
+    ? `${producto.descripcion} ${formatoColones(producto.precio_venta)}. ` +
+      "Retiro en tienda sin costo en Heredia."
+    : `${producto.nombre}${producto.presentacion ? ` · ${producto.presentacion}` : ""} — ` +
+      `${formatoColones(producto.precio_venta)}. Disponible en AllPet Costa Rica, ` +
+      "con retiro en tienda sin costo.";
   const ruta = `/producto/${encodeURIComponent(producto.sku)}`;
   return {
     title: producto.nombre,
@@ -35,6 +42,7 @@ export async function generateMetadata({
       title: `${producto.nombre} | AllPet`,
       description: descripcion,
       url: ruta,
+      ...(producto.imagen ? { images: [{ url: producto.imagen }] } : {}),
     },
   };
 }
@@ -56,9 +64,19 @@ export default async function ProductoPage({
   if (!producto) notFound();
 
   const categoria = categorias.find((c) => c.id === producto.categoria_id);
-  const relacionados = productos
-    .filter((p) => p.sku !== producto.sku && p.categoria_id === producto.categoria_id)
-    .slice(0, 4);
+
+  // Cross-selling: misma categoría, y SOLO lo que se puede comprar hoy.
+  // Recomendar un producto agotado gasta el clic de alguien que ya estaba
+  // dispuesto a comprar — es el peor momento para hacerle perder el tiempo.
+  // Si no alcanzan cuatro disponibles se completa con el resto de la
+  // categoría antes que dejar la fila coja.
+  const mismaCategoria = productos.filter(
+    (p) => p.sku !== producto.sku && p.categoria_id === producto.categoria_id,
+  );
+  const relacionados = [
+    ...mismaCategoria.filter((p) => p.disponible),
+    ...mismaCategoria.filter((p) => !p.disponible),
+  ].slice(0, 4);
 
   const url = `${negocio.sitioUrl}/producto/${encodeURIComponent(producto.sku)}`;
 
@@ -69,8 +87,16 @@ export default async function ProductoPage({
     "@type": "Product",
     name: producto.nombre,
     sku: producto.sku,
+    ...(producto.descripcion ? { description: producto.descripcion } : {}),
+    // Absoluta: Google necesita resolver la imagen sin depender de la página
+    // desde la que se lee el marcado.
+    ...(producto.imagen ? { image: `${negocio.sitioUrl}${producto.imagen}` } : {}),
     ...(producto.presentacion ? { size: producto.presentacion } : {}),
     ...(categoria ? { category: categoria.nombre } : {}),
+    // `mascota` NO se marca: schema.org no tiene una propiedad para la especie
+    // destino de un producto, y forzarla dentro de `audience` (que es para
+    // públicos humanos) sería marcado incorrecto. Mejor omitirlo que emitir un
+    // dato que Google va a descartar o, peor, interpretar mal.
     offers: {
       "@type": "Offer",
       url,
@@ -92,7 +118,10 @@ export default async function ProductoPage({
       ...(categoria
         ? [{
             "@type": "ListItem", position: 3, name: categoria.nombre,
-            item: `${negocio.sitioUrl}/catalogo?c=${encodeURIComponent(categoria.nombre)}`,
+            // Por id, no por nombre: el filtro por nombre depende de que dos
+            // archivos escriban igual, y esa fragilidad ya rompió la
+            // navegación una vez (ver lib/navegacion.ts).
+            item: `${negocio.sitioUrl}/catalogo?cats=${categoria.id}`,
           }]
         : []),
       { "@type": "ListItem", position: categoria ? 4 : 3, name: producto.nombre, item: url },
@@ -112,7 +141,7 @@ export default async function ProductoPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(ldMigas) }} />
 
       <div className="mx-auto max-w-contenido px-6 pt-6">
-        <nav aria-label="Ruta" className="text-xs text-navy-300">
+        <nav aria-label="Ruta" className="text-xs text-navy-400">
           <Link href="/" className="rounded hover:text-navy-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500">Inicio</Link>
           <span className="px-2" aria-hidden="true">/</span>
           <Link href="/catalogo" className="rounded hover:text-navy-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500">Catálogo</Link>
@@ -120,7 +149,7 @@ export default async function ProductoPage({
             <>
               <span className="px-2" aria-hidden="true">/</span>
               <Link
-                href={`/catalogo?c=${encodeURIComponent(categoria.nombre)}`}
+                href={`/catalogo?cats=${categoria.id}`}
                 className="rounded hover:text-navy-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500"
               >
                 {categoria.nombre}
@@ -131,18 +160,27 @@ export default async function ProductoPage({
       </div>
 
       <article className="mx-auto grid max-w-contenido gap-12 px-6 py-10 lg:grid-cols-2">
+        {/* object-contain y fondo blanco: la foto del catálogo es apaisada
+            (300x231) y este marco es cuadrado. Con object-cover el navegador
+            la ampliaba hasta llenar y le cortaba los costados, que en la
+            ficha del producto es justo donde suele estar la medida o la
+            variante de color. Mejor verla completa con aire a los lados. */}
         <div
-          className={`grid aspect-square place-items-center overflow-hidden rounded-card ${tinteDeSku(producto.sku)}`}
+          className={`grid aspect-square place-items-center overflow-hidden rounded-card ${
+            producto.imagen ? "bg-white" : tinteDeSku(producto.sku)
+          }`}
         >
           {producto.imagen ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={producto.imagen}
               alt={producto.nombre}
-              className="h-full w-full rounded-card object-cover"
+              fill
+              priority
+              sizes="(max-width: 1024px) 90vw, 45vw"
+              className="rounded-card object-contain p-6"
             />
           ) : (
-            <span className="text-[11px] uppercase tracking-[0.09em] text-navy-300">
+            <span className="text-label uppercase text-navy-400">
               Foto pendiente
             </span>
           )}
@@ -150,29 +188,53 @@ export default async function ProductoPage({
 
         <div className="lg:py-4">
           {categoria && (
-            <p className="text-[10.5px] uppercase tracking-[0.09em] text-dorado-700">
+            <p className="text-label uppercase text-dorado-700">
               {categoria.nombre}
             </p>
           )}
-          <h1 className="mt-2 font-display text-[34px] font-light leading-tight text-navy-500">
+          <h1 className="mt-2 font-display text-headline leading-tight text-navy-500">
             {producto.nombre}
           </h1>
           {producto.presentacion && (
             <p className="mt-2 text-sm text-navy-400">{producto.presentacion}</p>
           )}
 
+          {/* La descripción va ARRIBA del precio, no enterrada al final: es
+              lo que responde "¿es esto lo que busco?", y esa pregunta viene
+              antes que "¿cuánto cuesta?". El texto sale del ERP
+              (Producto.descripcion), así que corregirlo no exige desplegar
+              el sitio. */}
+          {producto.descripcion && (
+            <p className="mt-5 max-w-prose text-[15px] font-light leading-relaxed text-navy-400">
+              {producto.descripcion}
+            </p>
+          )}
+
           <p className="mt-7 text-[30px] font-medium text-navy-500">
             {formatoColones(producto.precio_venta)}
           </p>
 
-          <p className="mt-3 text-sm">
+          {/* El estado no se comunica SOLO por color (WCAG 1.4.1): el punto
+              acompaña al texto, no lo sustituye. Y no usa el dorado de marca:
+              mezclar el color de identidad con el de estado hace que ninguno
+              de los dos signifique nada. */}
+          <p className="mt-3 flex items-center gap-2 text-sm">
             {producto.disponible ? (
-              <span className="text-navy-400">
-                <span className="mr-2 inline-block h-2 w-2 rounded-full bg-dorado-500 align-middle" aria-hidden="true" />
-                Disponible en tienda
-              </span>
+              <>
+                <span
+                  className="inline-block h-2 w-2 shrink-0 rounded-full bg-emerald-600"
+                  aria-hidden="true"
+                />
+                <span className="text-navy-400">Disponible en tienda</span>
+              </>
             ) : (
-              <span className="text-navy-300">Sin existencias por el momento</span>
+              <>
+                <span
+                  className="inline-block h-2 w-2 shrink-0 rounded-full bg-navy-200"
+                  aria-hidden="true"
+                />
+                <span className="text-navy-400">Sin existencias por el momento</span>
+              </>
             )}
           </p>
 
@@ -190,7 +252,7 @@ export default async function ProductoPage({
             )}
           </div>
 
-          <p className="mt-4 text-xs font-light leading-relaxed text-navy-300">
+          <p className="mt-4 text-xs font-light leading-relaxed text-navy-400">
             Agregá al carrito y confirmá el pedido por WhatsApp. No se cobra
             nada en línea: te confirmamos existencias y total antes de preparar
             todo.
@@ -198,17 +260,17 @@ export default async function ProductoPage({
 
           <dl className="mt-10 divide-y divide-crema-400 border-t border-crema-400 text-sm">
             <div className="flex justify-between py-3">
-              <dt className="text-navy-300">Código</dt>
+              <dt className="text-navy-400">Código</dt>
               <dd className="text-navy-400">{producto.sku}</dd>
             </div>
             {producto.presentacion && (
               <div className="flex justify-between py-3">
-                <dt className="text-navy-300">Presentación</dt>
+                <dt className="text-navy-400">Presentación</dt>
                 <dd className="text-navy-400">{producto.presentacion}</dd>
               </div>
             )}
             <div className="flex justify-between py-3">
-              <dt className="text-navy-300">Retiro en tienda</dt>
+              <dt className="text-navy-400">Retiro en tienda</dt>
               <dd className="text-navy-400">Sin costo</dd>
             </div>
           </dl>
@@ -217,7 +279,7 @@ export default async function ProductoPage({
 
       {relacionados.length > 0 && (
         <section className="mx-auto max-w-contenido px-6 pb-20">
-          <h2 className="mb-8 font-display text-[28px] font-light text-navy-500">
+          <h2 className="mb-8 font-display text-headline text-navy-500">
             También te puede servir
           </h2>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">

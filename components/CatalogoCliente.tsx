@@ -2,6 +2,7 @@
 
 import { useDeferredValue, useMemo, useState } from "react";
 import TarjetaProducto from "@/components/TarjetaProducto";
+import { ESPECIES, esParaEspecie, type ClaveEspecie } from "@/lib/navegacion";
 import type { Categoria, Producto } from "@/lib/types";
 
 interface Props {
@@ -9,6 +10,10 @@ interface Props {
   categorias: Categoria[];
   busquedaInicial?: string;
   categoriaInicial?: string;
+  /** Ids de categoría ya validados en el servidor (parámetro ?cats=). */
+  idsIniciales?: number[];
+  /** Especie preseleccionada (parámetro ?para=perro|gato). */
+  especieInicial?: ClaveEspecie | null;
 }
 
 type Orden = "relevancia" | "precio-asc" | "precio-desc" | "nombre";
@@ -18,17 +23,35 @@ export default function CatalogoCliente({
   categorias,
   busquedaInicial = "",
   categoriaInicial = "",
+  idsIniciales = [],
+  especieInicial = null,
 }: Props) {
   const [busqueda, setBusqueda] = useState(busquedaInicial);
   const [catsElegidas, setCatsElegidas] = useState<number[]>(() => {
+    // `cats` (ids) tiene prioridad: es lo que generan los enlaces del sitio.
+    // `c` (nombre) queda como respaldo para enlaces viejos ya compartidos.
+    if (idsIniciales.length > 0) return idsIniciales;
     if (!categoriaInicial) return [];
     const encontrada = categorias.find(
       (c) => c.nombre.toLowerCase() === categoriaInicial.toLowerCase()
     );
     return encontrada ? [encontrada.id] : [];
   });
+  const [especie, setEspecie] = useState<ClaveEspecie | null>(especieInicial);
   const [soloDisponibles, setSoloDisponibles] = useState(false);
   const [orden, setOrden] = useState<Orden>("relevancia");
+
+  // El ERP publica solo lo que hay en existencia (regla del 02/08/2026), así
+  // que normalmente TODO lo que llega está disponible y la casilla "solo con
+  // existencias" no filtraría nada. Una casilla que no filtra nada es
+  // exactamente el defecto que se corrigió en la navegación: parece que hace
+  // algo y no hace nada. Se muestra solo si hay algo que filtrar — que es el
+  // caso cuando el exportador corre con --incluir-agotados.
+  const hayAgotados = useMemo(() => productos.some((p) => !p.disponible), [productos]);
+
+  // Solo se ofrece el filtro por especie si los datos lo soportan. Si el ERP
+  // todavía no exportó `mascota`, el filtro daría cero resultados siempre.
+  const hayMascota = useMemo(() => productos.some((p) => p.mascota), [productos]);
 
   // La búsqueda se difiere: el input se actualiza de inmediato (se siente
   // instantáneo al escribir) y el filtrado de 184 productos corre en una
@@ -84,6 +107,7 @@ export default function CatalogoCliente({
     const idsElegidos = catsElegidas.flatMap((id) => idsConHijos(id));
     let lista = productos.filter((p) => {
       if (soloDisponibles && !p.disponible) return false;
+      if (especie && !esParaEspecie(p.mascota, especie)) return false;
       if (catsElegidas.length > 0) {
         if (p.categoria_id === null || !idsElegidos.includes(p.categoria_id)) return false;
       }
@@ -91,7 +115,11 @@ export default function CatalogoCliente({
         const enNombre = p.nombre.toLowerCase().includes(term);
         const enSku = p.sku.toLowerCase().includes(term);
         const enPres = p.presentacion.toLowerCase().includes(term);
-        if (!enNombre && !enSku && !enPres) return false;
+        // La descripción también entra en la búsqueda: es donde están el
+        // material, la talla y el uso ("arnés acolchado", "para cachorro"),
+        // que es como la gente busca de verdad.
+        const enDesc = p.descripcion.toLowerCase().includes(term);
+        if (!enNombre && !enSku && !enPres && !enDesc) return false;
       }
       return true;
     });
@@ -106,27 +134,53 @@ export default function CatalogoCliente({
       lista.sort((a, b) => Number(b.disponible) - Number(a.disponible));
     }
     return lista;
-  }, [productos, busquedaDiferida, catsElegidas, soloDisponibles, orden, idsConHijos]);
+  }, [productos, busquedaDiferida, catsElegidas, especie, soloDisponibles, orden, idsConHijos]);
+
+  // Catálogo por bloques de 24, no los 184 de una sola pasada — hallazgo de
+  // la auditoría: sin corte, recorrer el catálogo completo (~28.000px) no
+  // tiene ningún punto de referencia de cuánto falta, sobre todo en mobile.
+  const [visibles, setVisibles] = useState(24);
+
+  // Se reinicia a 24 cuando cambia algún filtro real, para no arrastrar "ya
+  // cargué 96" a una categoría distinta que el visitante recién eligió.
+  // Ajustado durante el render, no en un efecto — mismo patrón que NavBar.tsx
+  // usa para cerrar el menú al navegar: comparar contra el valor anterior en
+  // el cuerpo del componente evita el fotograma de conteo viejo que un
+  // useEffect dejaría ver antes de correr.
+  const filtroClave = `${catsElegidas.join(",")}|${especie ?? ""}|${soloDisponibles}|${busquedaDiferida}|${orden}`;
+  const [filtroClavePrevia, setFiltroClavePrevia] = useState(filtroClave);
+  if (filtroClave !== filtroClavePrevia) {
+    setFiltroClavePrevia(filtroClave);
+    setVisibles(24);
+  }
+
+  const paraMostrar = filtrados.slice(0, visibles);
 
   const alternarCategoria = (id: number) =>
     setCatsElegidas((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
 
-  const hayFiltros = catsElegidas.length > 0 || soloDisponibles || busqueda.trim() !== "";
+  const hayFiltros =
+    catsElegidas.length > 0 || especie !== null || soloDisponibles || busqueda.trim() !== "";
 
   const limpiar = () => {
     setCatsElegidas([]);
+    setEspecie(null);
     setSoloDisponibles(false);
     setBusqueda("");
   };
 
   return (
     <div className="mx-auto max-w-contenido px-6 py-12">
-      <h1 className="font-display text-[38px] font-light text-navy-500">Catálogo</h1>
+      <h1 className="font-display text-headline text-navy-500">Catálogo</h1>
 
-      <div className="mt-8 grid gap-10 lg:grid-cols-[230px_1fr]">
-        <aside className="lg:sticky lg:top-40 lg:self-start">
+      {/* md, no lg: a ~900px (tablet) el panel de filtros a ancho completo
+          enterraba la grilla de 184 productos bajo el fold. Con dos columnas
+          desde md (768px) el filtro ocupa una franja angosta y el catálogo es
+          visible de inmediato en todo el rango donde ya hay espacio real. */}
+      <div className="mt-8 grid gap-8 md:grid-cols-[200px_1fr] md:gap-6 lg:grid-cols-[230px_1fr] lg:gap-10">
+        <aside className="md:sticky md:top-40 md:self-start">
           <div className="rounded-card border border-crema-400 bg-white p-5">
             <label className="block text-xs font-medium uppercase tracking-wider text-navy-400">
               Buscar
@@ -138,6 +192,37 @@ export default function CatalogoCliente({
                 className="mt-2 w-full rounded-lg border border-crema-400 bg-crema-200 px-3 py-2 text-sm font-normal normal-case tracking-normal text-navy-500 outline-none focus:border-navy-300"
               />
             </label>
+
+            {hayMascota && (
+              <fieldset className="mt-6">
+                <legend className="text-xs font-medium uppercase tracking-wider text-navy-400">
+                  Para
+                </legend>
+                {/* Filtro cruzado, no una segunda navegación: se combina con
+                    la categoría. Un producto "Perro y gato" aparece en los
+                    dos — ver ESPECIES en lib/navegacion.ts. */}
+                <div className="mt-2 flex gap-2">
+                  {ESPECIES.map((e) => {
+                    const activo = especie === e.clave;
+                    return (
+                      <button
+                        key={e.clave}
+                        type="button"
+                        aria-pressed={activo}
+                        onClick={() => setEspecie(activo ? null : e.clave)}
+                        className={`flex-1 rounded-full border px-3 py-1.5 text-xs transition-colors ${
+                          activo
+                            ? "border-navy-500 bg-navy-500 text-crema-100"
+                            : "border-crema-400 text-navy-400 hover:border-navy-300 hover:text-navy-500"
+                        }`}
+                      >
+                        {e.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </fieldset>
+            )}
 
             {categoriasConProductos.length > 0 && (
               <fieldset className="mt-6">
@@ -161,15 +246,19 @@ export default function CatalogoCliente({
               </fieldset>
             )}
 
-            <label className="mt-6 flex items-center gap-2.5 text-sm text-navy-400">
-              <input
-                type="checkbox"
-                checked={soloDisponibles}
-                onChange={(e) => setSoloDisponibles(e.target.checked)}
-                className="h-3.5 w-3.5 accent-navy-500"
-              />
-              Solo con existencias
-            </label>
+            {/* Solo aparece si de verdad hay algo agotado que filtrar.
+                Ver `hayAgotados` arriba. */}
+            {hayAgotados && (
+              <label className="mt-6 flex items-center gap-2.5 text-sm text-navy-400">
+                <input
+                  type="checkbox"
+                  checked={soloDisponibles}
+                  onChange={(e) => setSoloDisponibles(e.target.checked)}
+                  className="h-3.5 w-3.5 accent-navy-500"
+                />
+                Solo con existencias
+              </label>
+            )}
 
             {hayFiltros && (
               <button
@@ -183,6 +272,10 @@ export default function CatalogoCliente({
         </aside>
 
         <div>
+          {/* sr-only: sin esto el H1 "Catálogo" saltaba directo a los H3 de
+              cada tarjeta de producto (×184), rompiendo la navegación por
+              encabezados de lectores de pantalla. No cambia nada visible. */}
+          <h2 className="sr-only">Resultados</h2>
           <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-crema-400 pb-4">
             <p className="text-sm text-navy-400">
               {filtrados.length}{" "}
@@ -222,7 +315,7 @@ export default function CatalogoCliente({
                 filtrando ? "opacity-60" : "opacity-100"
               }`}
             >
-              {filtrados.map((p) => (
+              {paraMostrar.map((p) => (
                 <TarjetaProducto
                   key={p.sku}
                   producto={p}
@@ -233,6 +326,21 @@ export default function CatalogoCliente({
                   }
                 />
               ))}
+            </div>
+          )}
+
+          {filtrados.length > visibles && (
+            <div className="mt-10 border-t border-crema-400 pt-8 text-center">
+              <p className="text-sm text-navy-400">
+                Mostrando <span className="font-medium text-navy-500">{paraMostrar.length}</span> de{" "}
+                <span className="font-medium text-navy-500">{filtrados.length}</span>
+              </p>
+              <button
+                onClick={() => setVisibles((v) => v + 24)}
+                className="mt-4 rounded-full border border-crema-400 px-8 py-3 text-sm font-medium text-navy-500 transition-colors hover:border-navy-300 hover:bg-crema-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500"
+              >
+                Cargar más
+              </button>
             </div>
           )}
         </div>

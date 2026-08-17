@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import IconoCategoria from "./IconoCategoria";
 
 interface Props {
   nombre: string;
@@ -11,6 +12,8 @@ interface Props {
   posicion?: string;
   /** Color de respaldo mientras no haya foto. */
   tinte?: string;
+  /** Clave de IconoCategoria. Ver la nota de señalética más abajo. */
+  icono?: string;
   prioridad?: boolean;
 }
 
@@ -36,6 +39,7 @@ export default function TarjetaCategoria({
   imagen,
   posicion = "center",
   tinte = "bg-crema-300",
+  icono,
   prioridad = false,
 }: Props) {
   return (
@@ -68,6 +72,22 @@ export default function TarjetaCategoria({
 
       {/* Zona segura del texto: padding generoso para que nunca toque el borde. */}
       <div className="relative p-7">
+        {/* El icono en un círculo de trazo dorado, como el rótulo vertical de
+            iconos que el local tiene junto a la puerta. Sobre foto va en
+            blanco translúcido para no competir con la imagen; sobre tinte, en
+            navy con el aro dorado a la vista. */}
+        {icono && (
+          <span
+            className={`mb-5 grid h-11 w-11 place-items-center rounded-full border transition-colors ${
+              imagen
+                ? "border-white/45 bg-white/10 text-white backdrop-blur-sm"
+                : "border-dorado-500/40 text-navy-500 group-hover:border-dorado-500/70"
+            }`}
+            aria-hidden="true"
+          >
+            <IconoCategoria nombre={icono} className="h-[22px] w-[22px]" />
+          </span>
+        )}
         <h3
           className={`font-display text-xl font-normal ${
             imagen ? "text-white" : "text-navy-500"

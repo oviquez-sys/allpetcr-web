@@ -1,16 +1,25 @@
 /**
- * Las cuatro categorías destacadas del inicio.
+ * ⚠ ARCHIVO OBSOLETO — no usar. Reemplazado por `lib/navegacion.ts`.
  *
- * CÓMO AGREGAR LAS FOTOS (cuando estén elegidas):
- * 1. Guardar el archivo en `public/categorias/` con el nombre indicado abajo.
- * 2. Descomentar la línea `imagen` de esa categoría.
- * 3. Si el sujeto no está centrado, ajustar `posicion` (ej. "70% 40%") para
- *    que el recorte en móvil no lo decapite.
+ * Aquí vivían las cuatro categorías destacadas del inicio, con enlaces a
+ * /catalogo?c=Perros, ?c=Gatos, ?c=Higiene y ?c=Accesorios. Ninguna de esas
+ * cuatro categorías existe en data/categorias.json: el filtro no encontraba
+ * nada y mostraba el catálogo completo sin avisar. Las tarjetas de la portada
+ * parecían filtrar y no filtraban.
  *
- * Mientras no haya foto, la tarjeta usa su tinte de la paleta. No se ve rota:
- * se ve intencional. Esa es la diferencia entre un sitio sin fotos todavía y
- * un sitio incompleto.
+ * La sustitución (lib/navegacion.ts) hace tres cosas que esto no hacía:
+ *   · filtra por id de categoría, no por nombre — no se rompe si alguien
+ *     corrige una tilde en el ERP;
+ *   · deriva los enlaces de las categorías que existen de verdad, así que un
+ *     enlace roto es imposible de escribir sin que falle una prueba;
+ *   · comparte la misma fuente con el encabezado y el pie, en vez de repetir
+ *     la lista en tres archivos que se desincronizan.
+ *
+ * Este archivo se deja vacío en vez de borrarse para que quede el rastro de
+ * por qué desapareció. Se puede eliminar sin consecuencias: no lo importa
+ * nadie (verificado). El tipo se conserva por si algún import quedó suelto.
  */
+
 export interface CategoriaDestacada {
   nombre: string;
   detalle: string;
@@ -20,37 +29,5 @@ export interface CategoriaDestacada {
   posicion?: string;
 }
 
-export const categoriasDestacadas: CategoriaDestacada[] = [
-  {
-    nombre: "Perros",
-    detalle: "Alimento, snacks, juguetes",
-    href: "/catalogo?c=Perros",
-    tinte: "bg-crema-300",
-    // imagen: "/categorias/perros.jpg",
-    posicion: "center 40%",
-  },
-  {
-    nombre: "Gatos",
-    detalle: "Arena, alimento, rascadores",
-    href: "/catalogo?c=Gatos",
-    tinte: "bg-dorado-100",
-    // imagen: "/categorias/gatos.jpg",
-    posicion: "center 40%",
-  },
-  {
-    nombre: "Higiene",
-    detalle: "Baño, cepillado, cuidado",
-    href: "/catalogo?c=Higiene",
-    tinte: "bg-navy-50",
-    // imagen: "/categorias/higiene.jpg",
-    posicion: "center",
-  },
-  {
-    nombre: "Accesorios",
-    detalle: "Collares, camas, transporte",
-    href: "/catalogo?c=Accesorios",
-    tinte: "bg-crema-400",
-    // imagen: "/categorias/accesorios.jpg",
-    posicion: "center",
-  },
-];
+/** @deprecated Usar `destacadas` de `lib/navegacion.ts`. */
+export const categoriasDestacadas: CategoriaDestacada[] = [];

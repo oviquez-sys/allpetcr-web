@@ -1,7 +1,42 @@
-# AllPet — sitio web
+# AllPetcr.com — sitio web
 
 Next.js 16 (App Router) + TypeScript + Tailwind. Catálogo con carrito y
 pedido por WhatsApp.
+
+## Documentación
+
+Las decisiones de diseño y sus motivos están en **[`docs/`](docs/README.md)**.
+Antes de tocar un componente conviene leer
+[`docs/ANALISIS-Y-DECISIONES.md`](docs/ANALISIS-Y-DECISIONES.md): explica por
+qué cada cosa está como está, incluido lo que se decidió **no** hacer.
+
+Tres reglas que se rompen con facilidad si no se conocen:
+
+- **Los enlaces de catálogo van por id** (`?cats=7`), nunca por nombre. Toda
+  la navegación sale de `lib/navegacion.ts`. Enlazar por nombre hace fallar
+  `lib/enlaces.test.ts`, y con razón: así estuvo rota la navegación.
+- **El dorado 500 no sirve para texto** (2.50:1 sobre crema, WCAG AA pide
+  4.5). Para texto va `dorado-700`. Detalle en `tailwind.config.ts`.
+- **`data/` y `public/productos/` no se editan a mano.** Los dos JSON y las
+  fotos los escribe `exportar_catalogo_web` desde el ERP. Editar el JSON acá
+  hace que el siguiente export lo pise sin avisar y que el sitio muestre
+  precios que el mostrador no cobra.
+
+## El catálogo, desde el 02/08/2026
+
+- El árbol de categorías tiene **dos niveles**: categoría web ("Juguetes") y
+  subcategoría ("Pelotas"). Los productos cuelgan siempre de la subcategoría;
+  una raíz tiene cero productos propios y muchos por sus hijas. Al filtrar
+  hay que expandir (`idsConHijos` en `CatalogoCliente`).
+- Cada producto trae `descripcion`, `mascota` ("Perro" / "Gato" / "Perro y
+  gato" / …) y `imagen` real.
+- **El ERP solo exporta lo que hay en existencia.** Un producto agotado
+  desaparece del sitio y su página `/producto/<sku>` deja de existir. Es una
+  decisión de negocio, con un costo de posicionamiento; está explicada —y se
+  revierte con una constante— en `exportar_catalogo_web.py` del ERP.
+  Consecuencia práctica: el catálogo cambia de tamaño solo, así que las
+  pruebas de `lib/enlaces.test.ts` son la red que avisa si una sección del
+  menú se quedó sin un solo producto.
 
 ## Antes de publicar — 3 pasos obligatorios
 
