@@ -44,11 +44,13 @@ interface Props {
  * que cubre—.
  *
  * ── SOBRE LA FOTOGRAFÍA
- * Hoy hay una sola foto de gato en `public/categorias/` y es un gato siendo
- * bañado: transmite estrés, no ganas de comprar. Antes que poner una foto que
- * juega en contra, la puerta de gato va con tinte. Cuando exista una foto
- * buena, se agrega `imagen` en `PUERTAS` (lib/navegacion.ts) y ya. Criterios
- * de selección y licencias: `docs/DIRECCION-DE-ARTE.md`.
+ * Las dos puertas van con foto. El criterio para elegirlas: el animal se ve
+ * relajado o jugando, nunca sometido a un procedimiento —la primera foto de
+ * gato que hubo acá era un gato siendo bañado y transmitía estrés justo donde
+ * hay que dar ganas de entrar—. El componente igual soporta `tinte` sin foto,
+ * pero úsese en las dos a la vez: una puerta con foto al lado de una con
+ * tinte se lee como error, no como decisión (probado en pantalla).
+ * Criterios de selección y licencias: `docs/DIRECCION-DE-ARTE.md`.
  *
  * ── EL MARCO
  * El filete dorado por dentro del borde es el mismo recurso que el marco de

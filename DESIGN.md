@@ -256,12 +256,26 @@ nota de los 58 compartidos debajo.
   seis entradas compitiendo. Las categorías bajan a una línea de texto con su
   conteo. `TarjetaCategoria` sigue existiendo y sirve para otras páginas.
 
-### Pendiente conocido
+### La foto de la puerta de gato — resuelto el 17/08/2026
 
-La foto de la puerta de gato es provisional: es la única de gato que hay en
-`public/categorias/` y es un gato siendo bañado. Se dejó porque una puerta con
-tinte al lado de una con foto se ve rota, no intencional. Reemplazar por una
-foto de gato en reposo — ver `docs/DIRECCION-DE-ARTE.md`.
+Estuvo un rato con `higiene.jpg`, un gato siendo bañado, marcada como
+provisional. Oscar aportó la foto definitiva (`gato.jpg`): un gato jugando con
+pelota, ratón y rascador de fondo. Además de no transmitir estrés, muestra
+producto de la tienda en uso sin parecer un catálogo.
+
+**El criterio que deja sentado, y que aplica a cualquier foto futura de estas
+puertas:** el animal se ve relajado o jugando, nunca sometido a un
+procedimiento. Una puerta es una invitación; un gato mojado y encogido invita
+a lo contrario.
+
+Queda una diferencia de temperatura entre las dos puertas —la de perro es una
+calle al atardecer, cálida; la de gato es interior de día, fría— que se ve al
+compararlas lado a lado. Se dejó así a propósito: forzar la foto de gato a
+tono cálido es exactamente el error que se descartó en el hero (variante 3).
+
+Pendiente menor: `gato.jpg` es de 1108x736, contra 2400x1600 de las otras
+fotos de categoría. Alcanza de sobra al tamaño al que se muestra, pero en
+pantallas grandes de alta densidad se verá algo menos nítida.
 
 ## Hero: fotografía real — 17/08/2026
 

@@ -289,9 +289,10 @@ export function hrefEspecie(especie: ClaveEspecie): string {
  * se desactualice cuando cambie el inventario. Es el mismo principio que rige
  * `secciones()`: la navegación refleja el catálogo que existe.
  *
- * `imagen` está deliberadamente ausente en gato — ver la nota de fotografía
- * en `components/PuertaEspecie.tsx`. Para agregarla: guardar el archivo en
- * `public/categorias/` y sumar `imagen` y, si hace falta, `posicion`.
+ * Las dos puertas ya tienen foto propia. Para cambiar una: guardar el archivo
+ * en `public/categorias/` y ajustar `imagen` y, si hace falta, `posicion`
+ * (el encuadre se verifica en pantalla, no se supone — el texto de la puerta
+ * vive abajo a la izquierda y no debe tapar al animal).
  */
 export interface PuertaNav {
   clave: ClaveEspecie;
@@ -316,13 +317,18 @@ export const PUERTAS: PuertaNav[] = [
     nombre: "Para gato",
     icono: "gatos",
     tinte: "bg-navy-50",
-    // PROVISIONAL. Es la única foto de gato que hay en public/categorias/, y
-    // es un gato siendo bañado: no es la imagen con la que uno quiere abrir
-    // una tienda. Se usa igual porque la alternativa —dejar la puerta con
-    // tinte al lado de una con foto— se ve rota, no intencional (probado en
-    // pantalla el 17/08/2026). Reemplazar en cuanto haya una foto de gato en
-    // reposo; criterios y licencias en docs/DIRECCION-DE-ARTE.md.
-    imagen: "/categorias/higiene.jpg",
-    posicion: "center 35%",
+    // Foto definitiva desde el 17/08/2026: gato jugando, aportada por Oscar.
+    // Reemplaza a higiene.jpg (un gato siendo bañado), que era provisional y
+    // transmitía estrés justo donde hay que dar ganas de entrar. Esta muestra
+    // producto real de la tienda en uso —pelota, ratón, rascador— sin que
+    // parezca un catálogo.
+    //
+    // Nota de resolución: 1108x736, más chica que las otras fotos de
+    // categoría (2400x1600). Alcanza para el tamaño al que se muestra la
+    // puerta (~575px), pero en pantallas muy grandes y de alta densidad se
+    // verá algo menos nítida que las demás. Si aparece el original en mayor
+    // resolución, vale la pena reemplazarla.
+    imagen: "/categorias/gato.jpg",
+    posicion: "center 45%",
   },
 ];
