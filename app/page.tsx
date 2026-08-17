@@ -159,7 +159,18 @@ export default async function HomePage() {
 
           `next/image` con `priority`: esta foto es la candidata a LCP de la
           página (lo primero grande que pinta el navegador), así que se
-          precarga en vez de esperar a que el navegador la descubra sola. */}
+          precarga en vez de esperar a que el navegador la descubra sola.
+
+          AJUSTE 17/08/2026 (mismo día, después de que Oscar viera el hero en
+          su pantalla real): en escritorios anchos `object-cover` recortaba
+          mucho más de lo que se veía en las capturas de comparación de
+          1440px —la lámpara quedaba cortada arriba, la alfombra abajo—.
+          Se resuelve con `object-contain` desde `lg:` para arriba: la foto
+          se ve completa, sin recorte, con el navy de `.superficie-navy`
+          rellenando a los costados si sobra espacio (rellena en vez de
+          recortar). En mobile se mantiene `object-cover` con el encuadre
+          original: ahí el contenedor es más angosto que alto y `contain`
+          dejaba una costura visible partiendo el texto a la mitad. */}
       <section className="superficie-navy relative overflow-hidden">
         <Image
           src="/categorias/hogar.jpg"
@@ -167,8 +178,7 @@ export default async function HomePage() {
           fill
           priority
           sizes="100vw"
-          style={{ objectPosition: "center 30%" }}
-          className="object-cover"
+          className="object-cover object-[center_30%] lg:object-contain lg:object-center"
         />
         {/* Scrim de dos capas, el mismo patrón que TarjetaCategoria: una base
             uniforme leve que evita que un punto claro de la foto borre una
