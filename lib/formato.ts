@@ -24,3 +24,40 @@ export function tinteDeSku(sku: string): string {
   for (let i = 0; i < sku.length; i++) suma += sku.charCodeAt(i);
   return TINTES[suma % TINTES.length];
 }
+
+/**
+ * PRESENTACIÓN VISIBLE PARA EL CLIENTE
+ *
+ * ── EL PROBLEMA
+ * `Producto.presentacion` está pensado para lo que un comprador necesita
+ * saber del envase: "2 kg", "500 ml", "talla M". Lo que el ERP exporta hoy es
+ * otra cosa: "Paquete: 12 / Caja: 216" — cuántas unidades trae el paquete del
+ * proveedor y cuántas la caja máster. Es dato de bodega y de compra a
+ * mayoreo, y en el sitio lo veía el cliente minorista.
+ *
+ * De los 184 productos publicados (17/08/2026): 141 traen ese formato, 43
+ * vienen vacíos y NINGUNO trae una presentación de venta real. O sea que hoy
+ * el campo nunca aporta nada al cliente, y sí confunde: "Paquete: 12" al lado
+ * del precio de una unidad sugiere que se está comprando una docena. En el
+ * mensaje de pedido por WhatsApp era peor —"1 × Alimentador (Paquete: 12 /
+ * Caja: 216)"— porque ahí la confusión se convierte en un pedido mal hecho.
+ *
+ * ── POR QUÉ UN FILTRO Y NO BORRAR LOS USOS
+ * Borrar cada `{producto.presentacion && ...}` resuelve hoy y hay que
+ * deshacerlo entero el día que el ERP exporte "2 kg". Este filtro deja pasar
+ * cualquier presentación de venta legítima y bloquea solo el formato de
+ * empaque: cuando el ERP se corrija, el dato aparece solo, sin tocar código.
+ *
+ * ── DÓNDE ESTÁ LA CORRECCIÓN DE VERDAD
+ * Acá se tapa un síntoma. El arreglo de fondo es que el exportador del ERP
+ * mande la presentación de venta en este campo, o que mande el empaque en uno
+ * aparte que el sitio no lea.
+ */
+const EMPAQUE_DE_BODEGA = /^\s*paquete\s*:/i;
+
+export function presentacionVisible(presentacion: string | undefined): string {
+  if (!presentacion) return "";
+  const limpia = presentacion.trim();
+  if (!limpia || EMPAQUE_DE_BODEGA.test(limpia)) return "";
+  return limpia;
+}

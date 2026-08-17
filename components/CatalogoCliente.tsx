@@ -3,6 +3,7 @@
 import { useDeferredValue, useMemo, useState } from "react";
 import TarjetaProducto from "@/components/TarjetaProducto";
 import { ESPECIES, esParaEspecie, type ClaveEspecie } from "@/lib/navegacion";
+import { presentacionVisible } from "@/lib/formato";
 import type { Categoria, Producto } from "@/lib/types";
 
 interface Props {
@@ -114,7 +115,9 @@ export default function CatalogoCliente({
       if (term) {
         const enNombre = p.nombre.toLowerCase().includes(term);
         const enSku = p.sku.toLowerCase().includes(term);
-        const enPres = p.presentacion.toLowerCase().includes(term);
+        // Solo la presentación que el cliente puede ver: buscar "paquete"
+        // devolvía 141 de 184 productos por un dato que no está en pantalla.
+        const enPres = presentacionVisible(p.presentacion).toLowerCase().includes(term);
         // La descripción también entra en la búsqueda: es donde están el
         // material, la talla y el uso ("arnés acolchado", "para cachorro"),
         // que es como la gente busca de verdad.

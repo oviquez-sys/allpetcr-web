@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useMemo } from "react";
 import { useCarrito, resolverCarrito } from "@/lib/carrito";
-import { formatoColones, tinteDeSku } from "@/lib/formato";
+import { formatoColones, presentacionVisible, tinteDeSku } from "@/lib/formato";
 import type { Producto } from "@/lib/types";
 
 function Cantidad({
@@ -163,8 +163,10 @@ export default function CarritoCliente({ productos }: { productos: Producto[] })
                     ) : (
                       <span className="text-[15px] font-medium text-navy-400">{nombre}</span>
                     )}
-                    {p?.presentacion && (
-                      <p className="mt-0.5 text-xs text-navy-400">{p.presentacion}</p>
+                    {presentacionVisible(p?.presentacion) && (
+                      <p className="mt-0.5 text-xs text-navy-400">
+                        {presentacionVisible(p?.presentacion)}
+                      </p>
                     )}
 
                     {item.descatalogado && (

@@ -1,59 +1,50 @@
 import Link from "next/link";
 import Image from "next/image";
 import TarjetaProducto from "@/components/TarjetaProducto";
-import TarjetaCategoria from "@/components/TarjetaCategoria";
-import Marca from "@/components/Marca";
-import { destacadas } from "@/lib/navegacion";
+import PuertaEspecie from "@/components/PuertaEspecie";
+import { PUERTAS, ESPECIES, esParaEspecie, hrefEspecie, hrefCategoria } from "@/lib/navegacion";
 import { getCategorias, getProductos } from "@/lib/data";
 import { negocio, faltante } from "@/lib/negocio";
-import { formatoColones, tinteDeSku } from "@/lib/formato";
 
 /**
  * INICIO
  *
- * ── EL ORDEN DE LAS SECCIONES NO ES DECORATIVO
- * Sigue la secuencia de decisión de quien entra por primera vez:
- *   1. ¿Qué es esto y por qué debería quedarme?   → hero
- *   2. ¿Qué venden?                                → categorías
- *   3. Enseñame producto de verdad                 → destacados
- *   4. ¿Puedo confiar?                             → señales de confianza
- *   5. ¿Cómo compro?                               → cómo funciona
+ * ── EL ORDEN (rediseño del 17/08/2026)
+ *   1. Hero               ¿qué es esto y por qué me quedo?
+ *   2. Dos puertas        ¿para quién comprás? — perro / gato
+ *   3. La vitrina         enseñame producto de verdad
+ *   4. Cómo comprar       no veo botón de pagar, ¿entonces cómo compro?
+ *   5. La tienda física   ¿puedo confiar?
  *
- * Es el mismo orden que usa Chewy y casi todo el comercio serio, y no por
- * moda: poner las señales de confianza arriba, antes de que la persona sepa
- * qué vendés, es responder una pregunta que todavía no se hizo.
+ * ── QUÉ CAMBIÓ Y POR QUÉ
+ * El orden anterior (hero → categorías → destacados → cómo funciona →
+ * confianza) es el de casi cualquier tienda en línea. Funciona, y por eso
+ * mismo no distingue a nadie: la portada se leía como una plantilla. Lo que
+ * AllPet tiene y la plantilla no es (a) 184 productos con existencia
+ * confirmada y (b) un mostrador donde alguien pregunta para quién comprás.
+ * Las dos cosas ahora están arriba.
  *
- * ── POR QUÉ EL HERO ES SOBRIO Y NO UN CARRUSEL
- * Los carruseles de portada tienen tasas de clic muy bajas fuera del primer
- * cuadro, empujan el contenido útil hacia abajo y cargan JavaScript y varias
- * imágenes grandes en la ruta crítica —justo donde se decide el LCP, la
- * métrica de Core Web Vitals que más pesa. Un hero fijo con una sola promesa
- * carga más rápido y comunica mejor.
+ * ── SE FUE "PIEZA DEL MES"
+ * Ponía una segunda banda navy pegada al hero. El propio DESIGN.md declara el
+ * ritmo oscuro → claro → oscuro como estructural ("la fachada oscura, el
+ * interior iluminado"): dos bandas oscuras seguidas lo rompían, y quien
+ * entraba chocaba con una segunda pared antes de ver un solo producto.
+ * El destaque de un producto suelto cabe mejor dentro de la vitrina, sobre
+ * crema, si algún día el ERP tiene un campo "destacado" de verdad —hoy no lo
+ * tiene, y elegirlo por "el primero con foto" era inventar un criterio—.
  *
- * ── POR QUÉ HAY UN SOLO BOTÓN PRINCIPAL
- * Dos botones del mismo peso visual obligan a elegir antes de saber qué se
- * está eligiendo. "Ver catálogo" es primario; hablar por WhatsApp es una
- * salida secundaria, y se ve como tal.
+ * ── SE FUERON LAS CUATRO CAJAS "FOTO PENDIENTE"
+ * Cuatro recuadros punteados con la palabra PENDIENTE cerraban la página. La
+ * intención era honesta —no inventar contenido— pero el efecto era el
+ * contrario: lee como sitio a medio hacer justo donde había que dar
+ * confianza. Los datos reales de la tienda (dirección, horario, teléfono)
+ * dicen lo mismo y son verificables.
+ *
+ * ── POR QUÉ EL HERO TIENE BUSCADOR Y NO SOLO UN BOTÓN
+ * 184 productos con nombres cortos y repetidos ("Arnés chaleco" aparece nueve
+ * veces): buscar llega antes que navegar. Es un <form> con GET a /catalogo,
+ * sin JavaScript: funciona aunque el bundle no haya cargado.
  */
-
-const confianza = [
-  {
-    titulo: "Tienda física en Heredia",
-    texto: "No somos un catálogo sin dirección. Podés venir, ver el producto y preguntar.",
-  },
-  {
-    titulo: "Asesoría honesta",
-    texto: "Recomendamos según lo que necesita tu mascota, no según lo que deja más margen.",
-  },
-  {
-    titulo: "Retiro sin costo",
-    texto: "Reservás en línea y lo recogés en tienda. Sin cargo de envío.",
-  },
-  {
-    titulo: "Precios claros",
-    texto: "El precio que ves es el que pagás. Sin cargos que aparecen al final.",
-  },
-];
 
 const pasos = [
   {
@@ -76,216 +67,247 @@ const pasos = [
 export default async function HomePage() {
   const [productos, categorias] = await Promise.all([getProductos(), getCategorias()]);
 
-  // Solo productos disponibles en la portada. Mostrar agotados en el
-  // escaparate principal es la forma más rápida de gastar la primera
-  // impresión: el visitante hace clic, no puede comprar, y aprende que el
-  // sitio le hace perder el tiempo.
-  //
-  // 3, no 4: la dirección "Evolución Premium" reduce densidad por fila a
-  // cambio de más presencia por producto (tarjetas más grandes, más aire).
-  const destacadosProd = productos.filter((p) => p.disponible).slice(0, 3);
-
+  const disponibles = productos.filter((p) => p.disponible);
   const nombrePorId = new Map(categorias.map((c) => [c.id, c.nombre]));
 
-  // PIEZA DEL MES — un producto real, elegido de forma determinista (el
-  // primero disponible que ya tiene foto, para que la franja se vea bien
-  // incluso antes de reprocesar el resto del catálogo; si ninguno tiene foto
-  // todavía, cae al primero disponible). No existe un campo "destacado" en
-  // el ERP: el día que exista, este filtro se reemplaza por ese campo en vez
-  // de inventar uno.
-  const piezaDelMes =
-    productos.find((p) => p.disponible && p.imagen) ??
-    productos.find((p) => p.disponible) ??
-    null;
+  // Conteo por especie calculado, nunca escrito a mano: el día que cambie el
+  // inventario la puerta dice la verdad sola. Un producto "Perro y gato"
+  // cuenta en las dos —de ahí la nota bajo las puertas—.
+  const conteoEspecie = new Map(
+    ESPECIES.map((e) => [
+      e.clave,
+      disponibles.filter((p) => esParaEspecie(p.mascota, e.clave)).length,
+    ]),
+  );
+  const ambas = disponibles.filter(
+    (p) => esParaEspecie(p.mascota, "perro") && esParaEspecie(p.mascota, "gato"),
+  ).length;
+
+  // Categorías raíz con su conteo real, ordenadas por surtido. La línea de
+  // texto reemplaza a las cuatro tarjetas grandes: con dos puertas arriba,
+  // cuatro tarjetas más eran seis puertas de entrada compitiendo entre sí.
+  const categoriasConConteo = categorias
+    .filter((c) => c.padre_id === null)
+    .map((c) => ({
+      nombre: c.nombre,
+      total: disponibles.filter((p) => p.categoria_id === c.id).length,
+    }))
+    .filter((c) => c.total > 0)
+    .sort((a, b) => b.total - a.total);
+
+  // LA VITRINA — 12 productos repartidos por categoría en vez de los 12
+  // primeros del JSON, que salían todos de "Juguetes" y hacían ver la tienda
+  // más chica de lo que es. Determinista: mismo catálogo, misma vitrina.
+  const porCategoria = new Map<number | null, typeof disponibles>();
+  for (const p of disponibles) {
+    const lista = porCategoria.get(p.categoria_id) ?? [];
+    lista.push(p);
+    porCategoria.set(p.categoria_id, lista);
+  }
+  //
+  // Además, ningún nombre se repite en la vitrina. El ERP tiene 112 nombres
+  // para 184 productos —"Arnés chaleco" aparece nueve veces— y dos tarjetas
+  // idénticas con precios distintos y sin nada que las diferencie no le
+  // sirven a nadie: el visitante no puede elegir, solo dudar. En el catálogo
+  // completo conviven porque ahí se comparan lado a lado con su descripción;
+  // en un escaparate de doce, no. El arreglo de fondo es escribir nombres
+  // distintos en el ERP, no esconderlos acá.
+  const vitrina: typeof disponibles = [];
+  const nombresUsados = new Set<string>();
+  const orden = [...porCategoria.keys()].sort(
+    (a, b) => (porCategoria.get(b)?.length ?? 0) - (porCategoria.get(a)?.length ?? 0),
+  );
+  const conFoto = new Map(
+    [...porCategoria.entries()].map(([cat, lista]) => [cat, lista.filter((p) => p.imagen)]),
+  );
+  const indice = new Map<number | null, number>(orden.map((cat) => [cat, 0]));
+
+  for (let vuelta = 0; vitrina.length < 12 && vuelta < 200; vuelta++) {
+    let agregoAlguno = false;
+    for (const cat of orden) {
+      if (vitrina.length >= 12) break;
+      const lista = conFoto.get(cat) ?? [];
+      let i = indice.get(cat) ?? 0;
+      while (i < lista.length && nombresUsados.has(lista[i].nombre)) i++;
+      if (i < lista.length) {
+        vitrina.push(lista[i]);
+        nombresUsados.add(lista[i].nombre);
+        indice.set(cat, i + 1);
+        agregoAlguno = true;
+      } else {
+        indice.set(cat, i);
+      }
+    }
+    if (!agregoAlguno) break; // se agotaron los nombres distintos con foto
+  }
 
   return (
     <>
-      {/* ── HERO ─────────────────────────────────────────────────────────
-          Navy con luz cálida: es la fachada del local al atardecer. La masa
-          azul con los halos dorados arriba reproduce los faroles y los focos
-          del alero, que es lo que hace que la tienda se vea encendida en vez
-          de simplemente iluminada.
+      {/* FOTO REAL EN EL HERO — decisión de Oscar, 17/08/2026.
+          Se compararon en pantalla cuatro variantes: (a) isotipo + halo
+          dorado, (b) esta foto sin gradar, (c) la misma foto forzada a tono
+          de atardecer, (d) el isotipo con una textura de fondo casi
+          imperceptible. Ganó la (b).
 
-          El hero es el único bloque grande en oscuro de la página. La lectura
-          larga —fichas de producto, catálogo— sigue sobre crema: texto claro
-          sobre fondo oscuro cansa a los párrafos largos, y no vale la pena
-          cambiar conversión por ambiente. En el local pasa igual: la fachada
-          es oscura, el interior donde se compra está iluminado. */}
+          Esto contradice a propósito una regla que este mismo archivo tenía
+          escrita hasta hoy: "el degradado cálido reemplaza a la fotografía
+          como recurso de ambiente del hero, por rendimiento". Se documenta el
+          cambio en vez de borrar la razón vieja sin dejar rastro — el costo
+          de rendimiento es real (una foto más en la ruta crítica) y se pesó
+          a propósito. Detalle completo, con el resto de las variantes
+          descartadas, en DESIGN.md → "Hero: fotografía real".
+
+          `next/image` con `priority`: esta foto es la candidata a LCP de la
+          página (lo primero grande que pinta el navegador), así que se
+          precarga en vez de esperar a que el navegador la descubra sola. */}
       <section className="superficie-navy relative overflow-hidden">
-        <div className="mx-auto grid max-w-contenido items-center gap-12 px-6 py-20 sm:py-24 lg:grid-cols-[1.15fr_0.85fr] lg:py-28">
-          <div className="relative">
+        <Image
+          src="/categorias/hogar.jpg"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          style={{ objectPosition: "center 30%" }}
+          className="object-cover"
+        />
+        {/* Scrim de dos capas, el mismo patrón que TarjetaCategoria: una base
+            uniforme leve que evita que un punto claro de la foto borre una
+            letra, más un degradado horizontal fuerte donde vive el texto. La
+            foto no está gradada —es de mediodía, no de atardecer, ver la nota
+            de arriba— pero el scrim sí es intencional: nunca se apoya texto
+            sobre una foto sin una capa de contraste debajo. */}
+        <div className="absolute inset-0 bg-navy-900/10" aria-hidden="true" />
+        <div
+          className="absolute inset-0 bg-gradient-to-r from-navy-900/95 via-navy-900/75 to-navy-900/20"
+          aria-hidden="true"
+        />
+        <div
+          className="absolute inset-0 bg-gradient-to-t from-navy-900/70 via-transparent to-transparent"
+          aria-hidden="true"
+        />
+        <div className="relative mx-auto max-w-contenido px-6 py-20 sm:py-24 lg:py-28">
+          <div className="max-w-xl">
             <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-dorado-400">
-              Tienda de mascotas en Heredia, Costa Rica
+              Tienda de mascotas · Heredia centro
             </p>
             {/* Un solo h1 por página, y es la promesa —no el nombre de la
-                marca. El nombre ya está en el logo del encabezado; repetirlo
-                aquí gasta el elemento más importante del documento. */}
-            {/* Evolución Premium: el mismo hero, hablado más fuerte — la
-                escala sube un paso en cada quiebre en vez de detenerse en
-                54px. */}
-            <h1 className="mt-4 font-display text-[46px] font-light leading-[1.03] tracking-tight text-crema-100 sm:text-[62px] lg:text-[68px]">
+                marca, que ya está en el logo del encabezado—. */}
+            <h1 className="mt-4 font-display text-[42px] font-light leading-[1.04] tracking-tight text-crema-100 sm:text-[58px] lg:text-[64px]">
               Todo para tu mascota,
               <br />
               elegido con criterio.
             </h1>
-            <p className="mt-6 max-w-md text-[17px] font-light leading-relaxed text-navy-100">
-              Juguetes, collares, camas e higiene para perros y gatos. Te decimos
+            <p className="mt-6 text-[17px] font-light leading-relaxed text-navy-100">
+              Juguetes, arneses, camas e higiene para perros y gatos. Te decimos
               qué le sirve realmente, no qué nos conviene vender.
             </p>
 
-            <div className="mt-9 flex flex-wrap items-center gap-4">
-              {/* Sobre navy el botón se invierte: crema sólido. Un botón navy
-                  sobre fondo navy desaparece, y uno dorado grande rompería la
-                  regla de que el dorado va en dosis pequeñas. */}
-              <Link
-                href="/catalogo"
-                className="rounded-full bg-crema-100 px-8 py-3.5 text-sm font-medium text-navy-500 transition-colors hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado-400 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-600"
+            {/* GET a /catalogo: sin estado, sin cliente, sin JavaScript. */}
+            <form
+              action="/catalogo"
+              method="get"
+              role="search"
+              className="mt-9 flex flex-col gap-2.5 rounded-card border border-dorado-400/35 bg-white/[0.08] p-3.5 sm:flex-row sm:items-center sm:rounded-full sm:py-1.5 sm:pl-6 sm:pr-1.5"
+            >
+              <label htmlFor="q-inicio" className="sr-only">
+                Buscar en el catálogo
+              </label>
+              <input
+                id="q-inicio"
+                type="search"
+                name="q"
+                placeholder="¿Qué andás buscando?"
+                className="min-w-0 flex-1 bg-transparent py-2.5 text-[15px] text-crema-100 placeholder:text-navy-200 focus:outline-none"
+              />
+              <button
+                type="submit"
+                className="rounded-full bg-crema-100 px-7 py-3 text-sm font-medium text-navy-500 transition-colors hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado-400 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-600"
               >
-                Ver catálogo
-              </Link>
-              <Link
-                href="/contacto"
-                className="rounded-full px-2 py-3.5 text-sm font-medium text-navy-100 underline decoration-navy-300 underline-offset-4 transition-colors hover:text-white hover:decoration-dorado-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado-400 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-600"
-              >
-                Hablar con nosotros
-              </Link>
-            </div>
+                Buscar
+              </button>
+            </form>
 
-            {/* Micro-señal bajo el CTA: responde "¿me van a obligar a
-                registrarme?" justo cuando surge la duda, no tres pantallas
-                más abajo. */}
-            <p className="mt-6 text-xs font-light text-navy-200">
-              Sin registro · Sin tarjeta · Confirmás por WhatsApp antes de pagar
+            {/* Responde "¿me van a obligar a registrarme?" donde surge la duda,
+                no tres pantallas más abajo. */}
+            <p className="mt-6 text-[13px] font-light text-navy-100">
+              <span className="font-medium text-dorado-300">
+                {disponibles.length} productos con existencia confirmada
+              </span>{" "}
+              · Sin registro · Sin tarjeta · Confirmás por WhatsApp antes de pagar
             </p>
           </div>
-
-          {/* El isotipo sobre el halo cálido: la luz del interior derramándose
-              por la vitrina. Sin el halo el logo flotaría sobre un fondo
-              muerto; con él, la composición tiene un foco.
-
-              Sin disco ni aro detrás, a propósito. Con el perro en blanco el
-              logo ya se sostiene solo sobre el navy —igual que en el rótulo
-              de la fachada, que tampoco lleva contenedor—. Un círculo de
-              fondo agregaría un borde que compite con la P sin aportar nada. */}
-          <div className="relative hidden justify-self-center lg:block" aria-hidden="true">
-            <div className="halo-calido absolute -inset-20 rounded-full" />
-            <Marca variante="iso" decorativo className="relative h-[230px] w-auto" />
-          </div>
         </div>
-
-        {/* La franja dorada que remata el alero de la fachada. */}
         <div className="franja-dorada" aria-hidden="true" />
       </section>
 
-      {/* ── PIEZA DEL MES ───────────────────────────────────────────────────
-          Único punto del sitio donde el dorado enmarca en vez de aparecer en
-          dosis mínimas — ver `.marco-dorado` en globals.css. Se reserva a
-          propósito a UN producto a la vez, nunca a una grilla: es lo que
-          mantiene el marco leyéndose como metal y no como relleno. Segunda
-          superficie navy de la página, igual que la fachada tiene más de un
-          punto de luz. */}
-      {piezaDelMes && (
-        <section className="superficie-navy-plana relative overflow-hidden">
-          <div className="mx-auto grid max-w-contenido items-center gap-10 px-6 py-16 sm:py-20 lg:grid-cols-[1fr_1.1fr] lg:gap-16">
-            <div>
-              <p className="flex items-center gap-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-dorado-400">
-                <span className="h-px w-6 bg-dorado-400" aria-hidden="true" />
-                Pieza del mes
-              </p>
-              <h2 className="mt-4 font-display text-[26px] font-light leading-tight text-crema-100 sm:text-[32px]">
-                {piezaDelMes.nombre}
-              </h2>
-              {piezaDelMes.descripcion && (
-                <p className="mt-3 max-w-sm text-[13px] font-light leading-relaxed text-navy-100">
-                  {piezaDelMes.descripcion}
-                </p>
-              )}
-              <p className="mt-5 font-display text-2xl font-light text-crema-100">
-                {formatoColones(piezaDelMes.precio_venta)}
-              </p>
-              <Link
-                href={`/producto/${encodeURIComponent(piezaDelMes.sku)}`}
-                className="mt-7 inline-block rounded-full bg-crema-100 px-8 py-3.5 text-sm font-medium text-navy-500 transition-colors hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado-400 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-600"
-              >
-                Ver producto
-              </Link>
-            </div>
-
-            <div className="marco-dorado justify-self-center" aria-hidden="true">
-              <div
-                className={`relative grid aspect-square w-full max-w-[280px] place-items-center overflow-hidden rounded ${
-                  piezaDelMes.imagen ? "bg-white" : tinteDeSku(piezaDelMes.sku)
-                }`}
-              >
-                {piezaDelMes.imagen ? (
-                  <Image
-                    src={piezaDelMes.imagen}
-                    alt=""
-                    fill
-                    sizes="280px"
-                    className="object-contain p-7"
-                  />
-                ) : (
-                  <span className="text-label uppercase text-navy-400">Foto pendiente</span>
-                )}
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ── CATEGORÍAS ──────────────────────────────────────────────────── */}
+      {/* ── DOS PUERTAS ───────────────────────────────────────────────────
+          Elemento firma de la portada. El porqué —y por qué no contradice a
+          lib/navegacion.ts— está en components/PuertaEspecie.tsx. */}
       <section className="mx-auto max-w-contenido px-6 py-20">
-        <div className="mb-9 flex items-end justify-between gap-5">
-          <div>
-            <h2 className="font-display text-headline text-navy-500">
-              Comprar por categoría
-            </h2>
-            <p className="mt-1.5 text-sm font-light text-navy-400">
-              {productos.length} productos disponibles en tienda
-            </p>
-          </div>
-          <Link
-            href="/catalogo"
-            className="shrink-0 border-b border-crema-500 pb-1 text-sm text-navy-400 transition-colors hover:border-navy-300 hover:text-navy-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500"
-          >
-            Ver todas
-          </Link>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {destacadas.map((c, i) => (
-            <TarjetaCategoria
-              key={c.nombre}
-              nombre={c.nombre}
-              detalle={c.detalle}
-              href={c.href}
-              imagen={c.imagen}
-              posicion={c.posicion}
-              tinte={c.tinte}
-              icono={c.icono}
-              prioridad={i < 2}
+        <h2 className="font-display text-headline text-navy-500">
+          ¿Para quién comprás?
+        </h2>
+        <p className="mt-1.5 text-sm font-light text-navy-400">
+          Es la primera pregunta que hacemos en el mostrador. Acá también.
+        </p>
+
+        <div className="mt-8 grid gap-5 sm:grid-cols-2">
+          {PUERTAS.map((p, i) => (
+            <PuertaEspecie
+              key={p.clave}
+              nombre={p.nombre}
+              conteo={conteoEspecie.get(p.clave) ?? 0}
+              href={hrefEspecie(p.clave)}
+              imagen={p.imagen}
+              posicion={p.posicion}
+              tinte={p.tinte}
+              icono={p.icono}
+              prioridad={i === 0}
             />
           ))}
         </div>
+
+        {/* La aclaración va debajo y no escondida: sin ella los dos conteos
+            suman más que el catálogo y el número parece inflado. */}
+        <p className="mt-4 text-[13px] font-light text-navy-400">
+          {ambas} productos sirven para los dos y aparecen en ambas listas.
+        </p>
+
+        <ul className="mt-7 flex flex-wrap gap-x-7 gap-y-2.5 border-t border-crema-400 pt-5">
+          {categoriasConConteo.map((c) => (
+            <li key={c.nombre}>
+              <Link
+                href={hrefCategoria(c.nombre)}
+                className="text-sm text-navy-400 transition-colors hover:text-navy-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500"
+              >
+                {c.nombre}{" "}
+                <span className="font-medium text-dorado-700">{c.total}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
       </section>
 
-      {/* ── DESTACADOS ──────────────────────────────────────────────────── */}
-      {destacadosProd.length > 0 && (
+      {/* ── LA VITRINA ────────────────────────────────────────────────────── */}
+      {vitrina.length > 0 && (
         <section className="border-y border-crema-300 bg-crema-200">
           <div className="mx-auto max-w-contenido px-6 py-20">
             <div className="mb-9 flex items-end justify-between gap-5">
-              <h2 className="font-display text-headline text-navy-500">
-                Del catálogo
-              </h2>
+              <div>
+                <h2 className="font-display text-headline text-navy-500">La vitrina</h2>
+                <p className="mt-1.5 text-sm font-light text-navy-400">
+                  Lo que hay hoy en la tienda. Si aparece acá, está en existencia.
+                </p>
+              </div>
               <Link
                 href="/catalogo"
                 className="shrink-0 border-b border-crema-500 pb-1 text-sm text-navy-400 transition-colors hover:border-navy-300 hover:text-navy-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500"
               >
-                Ver todo
+                Ver los {disponibles.length}
               </Link>
             </div>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {destacadosProd.map((p) => (
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {vitrina.map((p) => (
                 <TarjetaProducto
                   key={p.sku}
                   producto={p}
@@ -295,19 +317,24 @@ export default async function HomePage() {
                 />
               ))}
             </div>
+            <div className="mt-10 text-center">
+              <Link
+                href="/catalogo"
+                className="inline-block rounded-full bg-navy-500 px-8 py-3.5 text-sm font-medium text-crema-100 transition-colors hover:bg-navy-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:ring-offset-2"
+              >
+                Ver el catálogo completo
+              </Link>
+            </div>
           </div>
         </section>
       )}
 
-      {/* ── CÓMO FUNCIONA ───────────────────────────────────────────────── */}
-      {/* Va antes de las señales de confianza porque responde la duda más
-          concreta que queda a esta altura: "no veo botón de pagar, ¿entonces
-          cómo compro?". Una tienda sin pasarela tiene que explicar su
-          mecánica, o el visitante asume que está rota. */}
+      {/* ── CÓMO COMPRAR ──────────────────────────────────────────────────
+          Responde la duda más concreta que queda a esta altura: "no veo botón
+          de pagar, ¿entonces cómo compro?". Una tienda sin pasarela tiene que
+          explicar su mecánica o el visitante asume que está rota. */}
       <section className="mx-auto max-w-contenido px-6 py-20">
-        <h2 className="font-display text-headline text-navy-500">
-          Cómo comprar
-        </h2>
+        <h2 className="font-display text-headline text-navy-500">Cómo comprar</h2>
         <p className="mt-1.5 max-w-lg text-sm font-light leading-relaxed text-navy-400">
           No cobramos en línea a propósito: preferimos confirmar existencias y
           total con vos antes de que pagués nada.
@@ -327,49 +354,70 @@ export default async function HomePage() {
         </ol>
       </section>
 
-      {/* ── CONFIANZA ─────────────────────────────────────────────────────
-          Segunda superficie navy de la página, y la que la cierra. Entre esta
-          y el hero queda todo el contenido de compra sobre crema: la página
-          tiene la misma estructura que la visita al local —fachada oscura,
-          interior claro, y otra vez oscuro al salir—. */}
+      {/* ── LA TIENDA FÍSICA ──────────────────────────────────────────────
+          Cierra la página en oscuro: entre esta banda y el hero queda todo lo
+          transaccional sobre crema, que es la misma secuencia que la visita
+          al local —fachada, interior claro, y otra vez oscuro al salir—.
+          La dirección real es la señal de confianza más barata y más fuerte
+          que tiene un comercio local. Solo se muestra si el dato existe: un
+          "PENDIENTE" acá haría el efecto contrario. */}
       <section className="superficie-navy-plana">
         <div className="franja-dorada" aria-hidden="true" />
-        <div className="mx-auto max-w-contenido px-6 py-16">
-          {/* sr-only: los h3 de abajo colgaban sin un h2 que los agrupara. */}
-          <h2 className="sr-only">Por qué confiar en AllPet</h2>
-          <div className="grid gap-9 sm:grid-cols-2 lg:grid-cols-4">
-            {confianza.map((c) => (
-              <div key={c.titulo}>
-                {/* Hueco de foto real, marcado como pendiente — no se
-                    inventa contenido. Reemplazar por una foto real del
-                    local/equipo que respalde la afirmación. */}
-                <div
-                  className="mb-4 flex aspect-[4/3] items-center justify-center rounded-lg border border-dashed border-dorado-300/30 bg-white/[0.03]"
-                  aria-hidden="true"
-                >
-                  <span className="px-3 text-center text-[10px] uppercase tracking-wider text-navy-200">
-                    Foto pendiente
-                  </span>
-                </div>
-                <h3 className="text-sm font-medium text-white">{c.titulo}</h3>
-                <p className="mt-2 text-[13px] font-light leading-relaxed text-navy-100">
-                  {c.texto}
-                </p>
-              </div>
-            ))}
+        <div className="mx-auto grid max-w-contenido gap-12 px-6 py-16 lg:grid-cols-2 lg:gap-16">
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-dorado-400">
+              La tienda
+            </p>
+            <h2 className="mt-4 font-display text-[28px] font-light leading-tight text-crema-100 sm:text-[34px]">
+              Existimos en una dirección.
+            </h2>
+            <p className="mt-4 max-w-md text-[15px] font-light leading-relaxed text-navy-100">
+              No somos un catálogo sin local. Podés venir, ver el producto,
+              preguntar y llevártelo el mismo día.
+            </p>
+            <Link
+              href="/contacto"
+              className="mt-7 inline-block rounded-full bg-crema-100 px-8 py-3.5 text-sm font-medium text-navy-500 transition-colors hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado-400 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-600"
+            >
+              Cómo llegar
+            </Link>
           </div>
 
-          {/* La dirección real como cierre: es la señal de confianza más
-              barata y más fuerte que tiene un comercio local. Solo se
-              muestra si el dato existe —un "PENDIENTE" aquí haría el efecto
-              contrario. */}
-          {!faltante(negocio.direccion.linea) && (
-            <p className="mt-12 border-t border-navy-400/40 pt-6 text-xs font-light text-navy-100">
-              {negocio.direccion.linea}, {negocio.direccion.canton},{" "}
-              {negocio.direccion.provincia}
-              {!faltante(negocio.horarioTexto) && ` · ${negocio.horarioTexto}`}
-            </p>
-          )}
+          <dl className="text-[14px]">
+            {!faltante(negocio.direccion.linea) && (
+              <div className="grid gap-1 border-t border-navy-400/35 py-4 sm:grid-cols-[132px_1fr] sm:gap-4">
+                <dt className="text-[11px] uppercase tracking-[0.09em] text-dorado-300">
+                  Dirección
+                </dt>
+                <dd className="font-light leading-relaxed text-crema-100">
+                  {negocio.direccion.linea}, {negocio.direccion.canton},{" "}
+                  {negocio.direccion.provincia}
+                </dd>
+              </div>
+            )}
+            {!faltante(negocio.horarioTexto) && (
+              <div className="grid gap-1 border-t border-navy-400/35 py-4 sm:grid-cols-[132px_1fr] sm:gap-4">
+                <dt className="text-[11px] uppercase tracking-[0.09em] text-dorado-300">
+                  Horario
+                </dt>
+                <dd className="font-light text-crema-100">{negocio.horarioTexto}</dd>
+              </div>
+            )}
+            {!faltante(negocio.telefonoVisible) && (
+              <div className="grid gap-1 border-t border-navy-400/35 py-4 sm:grid-cols-[132px_1fr] sm:gap-4">
+                <dt className="text-[11px] uppercase tracking-[0.09em] text-dorado-300">
+                  Teléfono
+                </dt>
+                <dd className="font-light text-crema-100">{negocio.telefonoVisible}</dd>
+              </div>
+            )}
+            <div className="grid gap-1 border-y border-navy-400/35 py-4 sm:grid-cols-[132px_1fr] sm:gap-4">
+              <dt className="text-[11px] uppercase tracking-[0.09em] text-dorado-300">
+                Retiro en tienda
+              </dt>
+              <dd className="font-light text-crema-100">Sin costo</dd>
+            </div>
+          </dl>
         </div>
       </section>
     </>

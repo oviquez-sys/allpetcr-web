@@ -131,46 +131,18 @@ body {
   );
 }
 
-/* EL RESPLANDOR DEL INTERIOR
-   En la foto, la luz del interior se derrama por la vitrina hacia la acera.
-   Este halo hace lo mismo detrás de un elemento —el isotipo del hero— para
-   que no flote sobre un fondo muerto. Decorativo: siempre con aria-hidden. */
-.halo-calido {
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgb(224 182 110 / 0.26),
-    rgb(204 149 57 / 0.1) 42%,
-    transparent 68%
-  );
-}
+/* El .halo-calido que vivía acá se retiró el 17/08/2026: era el resplandor
+   detrás del isotipo del hero, y el hero cambió a una foto real (Oscar
+   escogió "foto de mediodía sin gradar" frente al isotipo con halo). Un halo
+   detrás de una fotografía no tiene sentido —la luz ya está en la foto—, así
+   que no quedó ningún uso. Detalle de las variantes comparadas y por qué
+   ganó la foto en DESIGN.md, "Hero: fotografía real". Si el hero vuelve
+   alguna vez a un elemento flotante sobre fondo plano, el degradado que
+   define este halo sigue documentado ahí para no tener que re-derivarlo. */
 
-/* MARCO DORADO — dirección "Evolución Premium" (aprobada), única superficie
-   del sitio donde el dorado ENMARCA una foto en vez de aparecer en dosis
-   mínimas (hairline, ícono, badge). Reservado EXCLUSIVAMENTE a la sección
-   "Pieza del mes" del home: un producto a la vez, nunca una grilla — es lo
-   que mantiene el marco leyéndose como metal y no como relleno. No usar en
-   ningún otro componente sin revisar antes esa regla en DESIGN.md. */
-.marco-dorado {
-  position: relative;
-  padding: 22px;
-}
-.marco-dorado::before,
-.marco-dorado::after {
-  content: "";
-  position: absolute;
-  width: 26px;
-  height: 26px;
-  border: 1.5px solid theme("colors.dorado.500");
-}
-.marco-dorado::before {
-  top: 0;
-  left: 0;
-  border-right: none;
-  border-bottom: none;
-}
-.marco-dorado::after {
-  bottom: 0;
-  right: 0;
-  border-left: none;
-  border-top: none;
-}
+/* El .marco-dorado que vivía acá se retiró el 17/08/2026 junto con la
+   sección "Pieza del mes" del inicio, que era su único uso. El dorado como
+   marco no desapareció del sistema: vive ahora en las dos puertas de especie
+   (components/PuertaEspecie.tsx), como filete por dentro del borde. La regla
+   de fondo es la misma de siempre y no cambió — el dorado TRAZA, no RELLENA.
+   Ver DESIGN.md, "La regla del acento único". */

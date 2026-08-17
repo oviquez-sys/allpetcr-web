@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
 import { useCarrito, resolverCarrito } from "@/lib/carrito";
-import { formatoColones } from "@/lib/formato";
+import { formatoColones, presentacionVisible } from "@/lib/formato";
 import { negocio, urlWhatsApp, faltante } from "@/lib/negocio";
 import type { Producto } from "@/lib/types";
 
@@ -67,7 +67,11 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
     const l: string[] = ["*Pedido desde allpetcr.com*", ""];
     for (const i of comprables) {
       const p = i.producto!;
-      l.push(`• ${i.cantidad} × ${p.nombre}${p.presentacion ? ` (${p.presentacion})` : ""} — ${formatoColones(i.subtotal)}`);
+      // Sin el empaque de bodega: "1 × Alimentador (Paquete: 12 / Caja: 216)"
+      // llega a la tienda pareciendo un pedido de doce unidades. Acá la
+      // confusión no es cosmética, termina en un pedido mal armado.
+      const pres = presentacionVisible(p.presentacion);
+      l.push(`• ${i.cantidad} × ${p.nombre}${pres ? ` (${pres})` : ""} — ${formatoColones(i.subtotal)}`);
     }
     l.push("", `*Total: ${formatoColones(totalComprable)}*`, "");
     l.push(`Nombre: ${nombre.trim()}`);

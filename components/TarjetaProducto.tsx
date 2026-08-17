@@ -2,7 +2,7 @@ import { memo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import type { Producto } from "@/lib/types";
-import { formatoColones, tinteDeSku } from "@/lib/formato";
+import { formatoColones, presentacionVisible, tinteDeSku } from "@/lib/formato";
 import BotonAgregar from "./BotonAgregar";
 
 interface Props {
@@ -77,8 +77,13 @@ function TarjetaProducto({ producto, categoria }: Props) {
           <h3 className="text-title font-normal leading-snug text-navy-500 transition-colors group-hover:text-dorado-700">
             {producto.nombre}
           </h3>
-          {producto.presentacion && (
-            <p className="mt-1 text-xs text-navy-400">{producto.presentacion}</p>
+          {/* Filtrado: lo que el ERP manda hoy es empaque de bodega
+              ("Paquete: 12 / Caja: 216"), no presentación de venta. Ver
+              presentacionVisible en lib/formato.ts. */}
+          {presentacionVisible(producto.presentacion) && (
+            <p className="mt-1 text-xs text-navy-400">
+              {presentacionVisible(producto.presentacion)}
+            </p>
           )}
           <p className="mt-auto pt-3 text-price text-navy-500">
             {formatoColones(producto.precio_venta)}

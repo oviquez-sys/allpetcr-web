@@ -7,3 +7,12 @@ npm-debug.log*
 .DS_Store
 *.pem
 next-env.d.ts
+
+# Carpeta de descarte: el puente de Claude no puede borrar archivos en este
+# disco, solo moverlos, así que lo que hay que eliminar se acumula acá hasta
+# que se borre a mano desde Windows. Nunca debe versionarse.
+/_to_delete/
+
+# Caché incremental de TypeScript: se regenera solo en cada build. Estaba
+# versionado por error y ensuciaba el diff de todos los commits.
+tsconfig.tsbuildinfo

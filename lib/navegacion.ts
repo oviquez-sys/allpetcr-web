@@ -260,3 +260,69 @@ export const destacadas: DestacadaNav[] = [
   },
 ].filter((d) => d.href !== "/catalogo");
 
+
+/**
+ * ENLACE POR ESPECIE SOLA — /catalogo?para=gato
+ *
+ * `app/catalogo/page.tsx` entiende `?para=` desde que existe el filtro
+ * lateral; lo que faltaba era un ayudante para armar el enlace.
+ *
+ * ── POR QUÉ ESTO NO CONTRADICE A hrefCatsEspecie
+ * Arriba está escrito que "un enlace de especie sin categoría mostraría 159
+ * de 184 productos, que es el caso que este archivo prohíbe". Eso vale para
+ * la NAVEGACIÓN, y sigue en pie: el menú no usa esta función y las secciones
+ * siguen siendo las cuatro categorías del ERP.
+ *
+ * Esta función existe solo para las dos puertas del inicio, donde el criterio
+ * es otro: una portada orienta, no filtra. Ver el encabezado de
+ * `components/PuertaEspecie.tsx` para el argumento completo.
+ */
+export function hrefEspecie(especie: ClaveEspecie): string {
+  return `/catalogo?para=${especie}`;
+}
+
+/**
+ * LAS DOS PUERTAS DEL INICIO
+ *
+ * El conteo NO va acá: se calcula en `app/page.tsx` contra los productos
+ * reales con `esParaEspecie`, para que no exista una cifra escrita a mano que
+ * se desactualice cuando cambie el inventario. Es el mismo principio que rige
+ * `secciones()`: la navegación refleja el catálogo que existe.
+ *
+ * `imagen` está deliberadamente ausente en gato — ver la nota de fotografía
+ * en `components/PuertaEspecie.tsx`. Para agregarla: guardar el archivo en
+ * `public/categorias/` y sumar `imagen` y, si hace falta, `posicion`.
+ */
+export interface PuertaNav {
+  clave: ClaveEspecie;
+  nombre: string;
+  icono: string;
+  tinte: string;
+  imagen?: string;
+  posicion?: string;
+}
+
+export const PUERTAS: PuertaNav[] = [
+  {
+    clave: "perro",
+    nombre: "Para perro",
+    icono: "huella",
+    tinte: "bg-crema-300",
+    imagen: "/categorias/paseo.jpg",
+    posicion: "center 40%",
+  },
+  {
+    clave: "gato",
+    nombre: "Para gato",
+    icono: "gatos",
+    tinte: "bg-navy-50",
+    // PROVISIONAL. Es la única foto de gato que hay en public/categorias/, y
+    // es un gato siendo bañado: no es la imagen con la que uno quiere abrir
+    // una tienda. Se usa igual porque la alternativa —dejar la puerta con
+    // tinte al lado de una con foto— se ve rota, no intencional (probado en
+    // pantalla el 17/08/2026). Reemplazar en cuanto haya una foto de gato en
+    // reposo; criterios y licencias en docs/DIRECCION-DE-ARTE.md.
+    imagen: "/categorias/higiene.jpg",
+    posicion: "center 35%",
+  },
+];

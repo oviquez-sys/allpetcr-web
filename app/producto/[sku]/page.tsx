@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import TarjetaProducto from "@/components/TarjetaProducto";
 import BotonAgregar from "@/components/BotonAgregar";
 import { getCategorias, getProductoPorSku, getProductos } from "@/lib/data";
-import { formatoColones, tinteDeSku } from "@/lib/formato";
+import { formatoColones, presentacionVisible, tinteDeSku } from "@/lib/formato";
 import { negocio, urlWhatsApp, faltante } from "@/lib/negocio";
 
 // Genera una página estática por producto al compilar: son instantáneas al
@@ -29,7 +29,7 @@ export async function generateMetadata({
   const descripcion = producto.descripcion
     ? `${producto.descripcion} ${formatoColones(producto.precio_venta)}. ` +
       "Retiro en tienda sin costo en Heredia."
-    : `${producto.nombre}${producto.presentacion ? ` · ${producto.presentacion}` : ""} — ` +
+    : `${producto.nombre}${presentacionVisible(producto.presentacion) ? ` · ${presentacionVisible(producto.presentacion)}` : ""} — ` +
       `${formatoColones(producto.precio_venta)}. Disponible en AllPet Costa Rica, ` +
       "con retiro en tienda sin costo.";
   const ruta = `/producto/${encodeURIComponent(producto.sku)}`;
@@ -91,7 +91,11 @@ export default async function ProductoPage({
     // Absoluta: Google necesita resolver la imagen sin depender de la página
     // desde la que se lee el marcado.
     ...(producto.imagen ? { image: `${negocio.sitioUrl}${producto.imagen}` } : {}),
-    ...(producto.presentacion ? { size: producto.presentacion } : {}),
+    // `size` solo si es presentación de venta: marcar "Paquete: 12 / Caja: 216"
+    // como talla es marcado incorrecto, y Google lo penaliza o lo descarta.
+    ...(presentacionVisible(producto.presentacion)
+      ? { size: presentacionVisible(producto.presentacion) }
+      : {}),
     ...(categoria ? { category: categoria.nombre } : {}),
     // `mascota` NO se marca: schema.org no tiene una propiedad para la especie
     // destino de un producto, y forzarla dentro de `audience` (que es para
@@ -130,7 +134,9 @@ export default async function ProductoPage({
 
   const consultaWa = urlWhatsApp(
     `Hola, quiero consultar por: ${producto.nombre}` +
-      (producto.presentacion ? ` (${producto.presentacion})` : ""),
+      (presentacionVisible(producto.presentacion)
+        ? ` (${presentacionVisible(producto.presentacion)})`
+        : ""),
   );
 
   return (
@@ -165,8 +171,15 @@ export default async function ProductoPage({
             la ampliaba hasta llenar y le cortaba los costados, que en la
             ficha del producto es justo donde suele estar la medida o la
             variante de color. Mejor verla completa con aire a los lados. */}
+        {/* "relative" es obligatorio acá: <Image fill> se posiciona contra
+            el ancestro posicionado más cercano. Sin esta clase no tenía
+            ninguno, así que la foto se anclaba contra un elemento mucho más
+            grande arriba en la página, se salía del recuadro y tapaba el
+            precio y el botón (reportado por Oscar, 17/08/2026). El mismo
+            patrón en TarjetaProducto.tsx sí tenía "relative" — por eso ahí
+            nunca se rompió. */}
         <div
-          className={`grid aspect-square place-items-center overflow-hidden rounded-card ${
+          className={`relative grid aspect-square place-items-center overflow-hidden rounded-card ${
             producto.imagen ? "bg-white" : tinteDeSku(producto.sku)
           }`}
         >
@@ -195,8 +208,10 @@ export default async function ProductoPage({
           <h1 className="mt-2 font-display text-headline leading-tight text-navy-500">
             {producto.nombre}
           </h1>
-          {producto.presentacion && (
-            <p className="mt-2 text-sm text-navy-400">{producto.presentacion}</p>
+          {presentacionVisible(producto.presentacion) && (
+            <p className="mt-2 text-sm text-navy-400">
+              {presentacionVisible(producto.presentacion)}
+            </p>
           )}
 
           {/* La descripción va ARRIBA del precio, no enterrada al final: es
@@ -263,10 +278,12 @@ export default async function ProductoPage({
               <dt className="text-navy-400">Código</dt>
               <dd className="text-navy-400">{producto.sku}</dd>
             </div>
-            {producto.presentacion && (
+            {presentacionVisible(producto.presentacion) && (
               <div className="flex justify-between py-3">
                 <dt className="text-navy-400">Presentación</dt>
-                <dd className="text-navy-400">{producto.presentacion}</dd>
+                <dd className="text-navy-400">
+                  {presentacionVisible(producto.presentacion)}
+                </dd>
               </div>
             )}
             <div className="flex justify-between py-3">

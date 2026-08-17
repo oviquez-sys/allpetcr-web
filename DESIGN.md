@@ -105,7 +105,7 @@ The tone matching this world is **honest and unhurried**: a sober fixed hero ins
 **Key Characteristics:**
 - Two dark "facade" bands (hero, closing trust strip) bracket a light "interior" (everything transactional).
 - Gold only ever appears as trim: hairlines, icon rings, small text accents — never a fill.
-- Warm radial-gradient light replaces photography as the primary atmosphere device; it is pure CSS, adds no requests, and costs nothing on slow connections.
+- The hero uses a real photograph as its atmosphere device (see "Hero: fotografía real" below); the warm radial-gradient light treatment (`.superficie-navy`) remains the default for every *other* dark band — hero excepted, and only there, on a deliberate, documented trade-off.
 - Buttons are full pills everywhere; corners get harder (8px) only on cards and functional chrome.
 - Motion is restrained and instant-feeling: 150–300ms color/transform transitions, never `transition-all`, always disabled under `prefers-reduced-motion`.
 
@@ -218,3 +218,101 @@ Photo or tint background with a two-layer navy scrim (a faint uniform base plus 
 - **Don't** introduce a third hue or a pure-white page background; the system is built on exactly cream + navy + gold-as-accent.
 - **Don't** use `transition-all` on repeated elements (product cards, buttons) — the catalog renders up to 184 at once, and only color/transform should be watched.
 - **Don't** add a carousel, autoplay, or urgency-manufacturing UI (countdowns, fake low-stock flags) — it contradicts the "honest and unhurried" tone and the product's actual stock-accuracy commitment.
+
+## Puertas de especie (componente firma del inicio) — 17/08/2026
+
+Las dos entradas grandes que abren la portada bajo el hero: **Para perro** y
+**Para gato**, cada una con foto, velo navy de dos capas, filete dorado por
+dentro del borde y el conteo real de productos a la vista.
+
+Es la única pieza del sitio donde el dorado dibuja un rectángulo completo. No
+rompe **La regla del acento único**: sigue siendo trazo de 1px, no relleno. La
+regla nunca fue sobre el tamaño del dorado, sino sobre si traza o rellena.
+
+### Reglas con nombre
+
+**La regla del conteo a la vista.** Una puerta siempre dice cuántos productos
+hay del otro lado, y el número se calcula contra el catálogo real — nunca se
+escribe a mano. Sin conteo, la puerta pide un clic a ciegas; con un conteo
+escrito a mano, miente en cuanto cambia el inventario.
+
+**La especie orienta en la portada, no navega en el menú.** `lib/navegacion.ts`
+demuestra que "Perros" no sirve como sección de menú: 159 de 184 productos
+sirven para perro, así que filtra casi nada. Ese argumento sigue vigente y el
+menú no lo usa. En la portada el criterio es otro —orientar, no filtrar—: para
+quien tiene gato, la puerta le quita de encima 101 productos que no le sirven.
+Por eso la asimetría (159 contra 83) se muestra en vez de disimularse, con la
+nota de los 58 compartidos debajo.
+
+### Qué se retiró ese mismo día
+
+- **"Pieza del mes"**: ponía una segunda banda navy pegada al hero y rompía el
+  ritmo oscuro → claro → oscuro que este documento declara estructural.
+- **`.marco-dorado`** de `globals.css`: era exclusivo de esa sección.
+- **Las cuatro cajas "FOTO PENDIENTE"** del cierre: la intención era no
+  inventar contenido, pero el efecto era de sitio a medio hacer justo donde
+  había que dar confianza. Las reemplazan los datos reales de la tienda.
+- **Las cuatro tarjetas de categoría del inicio**: con dos puertas arriba eran
+  seis entradas compitiendo. Las categorías bajan a una línea de texto con su
+  conteo. `TarjetaCategoria` sigue existiendo y sirve para otras páginas.
+
+### Pendiente conocido
+
+La foto de la puerta de gato es provisional: es la única de gato que hay en
+`public/categorias/` y es un gato siendo bañado. Se dejó porque una puerta con
+tinte al lado de una con foto se ve rota, no intencional. Reemplazar por una
+foto de gato en reposo — ver `docs/DIRECCION-DE-ARTE.md`.
+
+## Hero: fotografía real — 17/08/2026
+
+El hero cambió de isotipo + halo dorado a una fotografía real de fondo
+(`public/categorias/hogar.jpg`, un perro sobre un sofá) con velo navy de tres
+capas para que el texto quede legible encima. Decisión de Oscar, tras
+comparar cuatro variantes renderizadas en pantalla:
+
+1. **Isotipo + halo dorado** — la versión que este documento describía como
+   regla ("el degradado cálido reemplaza a la fotografía"). Correcta y
+   barata, pero leída como "sin efecto wow" al compararla con las otras tres.
+2. **Esta foto, sin gradar** — de mediodía, tal cual sale de la cámara. **Ganó.**
+3. **La misma foto forzada a tono de atardecer** — para casar con la premisa
+   general del sitio ("Lit Facade... visto al atardecer"). Descartada: el
+   forzado se notaba y restaba en vez de sumar.
+4. **Isotipo con una textura de fondo casi imperceptible** — una salida
+   intermedia entre 1 y 2. Descartada junto con la 1 por el mismo motivo.
+
+### Por qué esto contradice una regla escrita del sistema, a propósito
+
+La característica documentada arriba en "Key Characteristics" decía que el
+degradado cálido reemplaza a la fotografía como recurso de ambiente "por
+rendimiento". Eso seguía siendo cierto en abstracto —una foto más en la ruta
+crítica cuesta red y un `next/image` con `priority` en el hero es candidato a
+LCP— y se pesó a propósito, no por descuido: Oscar comparó las cuatro
+opciones ya renderizadas (no como mockup) y prefirió la foto sabiendo el
+costo. Se documenta el cambio en vez de borrar la regla vieja sin dejar
+rastro, porque la próxima persona que lea "Key Characteristics" merece saber
+que hay una excepción real, no una inconsistencia sin explicar.
+
+La regla de fondo — que el resto de las bandas navy (puertas de especie
+aparte, que ya tienen foto propia; la banda de confianza del cierre) siga
+usando `.superficie-navy` en vez de fotografía — **no cambió**. Es una
+excepción de una sola sección, no un giro del sistema completo.
+
+### Qué se retiró ese mismo día
+
+- **`Marca` (isotipo) del hero**: seguía viviendo en `NavBar` y `Footer`;
+  solo se retiró del hero.
+- **`.halo-calido` de `globals.css`**: existía únicamente para el isotipo del
+  hero. Un halo detrás de una fotografía no tiene sentido —la luz ya está en
+  la foto—, así que se retiró sin reemplazo. La regla del degradado queda
+  documentada en el comentario que dejó en su lugar, por si el hero vuelve
+  alguna vez a un elemento flotante sobre fondo plano.
+
+### Pendiente conocido
+
+`hogar.jpg` se fotografió/compuso originalmente para una tarjeta de
+categoría, no para un hero — es una foto de mediodía, no de atardecer, lo que
+se aparta de la premisa "Lit Facade... visto al atardecer" que abre este
+documento. Oscar conoció y aceptó ese contraste al elegir la opción 2 sobre
+la 3 (que sí forzaba el tono de atardecer y se veía peor). Si más adelante
+aparece una foto de la fachada real tomada al atardecer, es la candidata
+natural a reemplazar esta.
