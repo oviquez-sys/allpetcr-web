@@ -1,3 +1,18 @@
 {
-  "buildPath": "comp"
+  "buildPath": "comp",
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-font-size",
+        "value": "22px",
+        "files": [
+          "components/PedidoSeguimientoCliente.tsx"
+        ],
+        "createdAt": "2026-08-29T13:16:50.898Z",
+        "reason": "Consistente con el patron ya existente del repo de usar un tamano mayor al token text-price (17px) para totales destacados: app/producto/[sku]/page.tsx usa 30px para el precio principal, CheckoutCliente.tsx usa 26px para su total. 22px aca es la misma escala de enfasis aplicada a una tarjeta mas chica (seguimiento de pedido)."
+      }
+    ]
+  }
 }
