@@ -268,6 +268,14 @@ export default function NavBar() {
 
               <li className="ml-auto">
                 <Link
+                  href="/recompra"
+                  className="rounded-lg px-3.5 py-2.5 text-sm text-navy-400 transition-colors hover:text-navy-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500"
+                >
+                  Repetir pedido
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/contacto"
                   className="rounded-lg px-3.5 py-2.5 text-sm text-navy-400 transition-colors hover:text-navy-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500"
                 >
@@ -323,6 +331,12 @@ export default function NavBar() {
                 </li>
               ))}
               <li className="pt-1">
+                <Link
+                  href="/recompra"
+                  className="block rounded-lg px-2 py-3 text-[15px] text-navy-500 transition-colors hover:bg-crema-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500"
+                >
+                  Repetir pedido
+                </Link>
                 <Link
                   href="/contacto"
                   className="block rounded-lg px-2 py-3 text-[15px] text-navy-500 transition-colors hover:bg-crema-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500"

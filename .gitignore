@@ -13,6 +13,10 @@ next-env.d.ts
 # que se borre a mano desde Windows. Nunca debe versionarse.
 /_to_delete/
 
+# Igual que _to_delete/: acá quedó el .git corrupto del 28/08/2026 (ver
+# REPORTE-NOCHE.md del ERP), movido en vez de borrado. Nunca versionar.
+/_descartado/
+
 # Caché incremental de TypeScript: se regenera solo en cada build. Estaba
 # versionado por error y ensuciaba el diff de todos los commits.
 tsconfig.tsbuildinfo

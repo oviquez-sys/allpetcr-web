@@ -27,6 +27,7 @@ import { navegacion, destacadas, ESPECIES, esParaEspecie } from "./navegacion";
 const raiz = join(__dirname, "..");
 const RUTAS_VALIDAS = [
   "/", "/catalogo", "/contacto", "/sobre-nosotros", "/carrito", "/checkout",
+  "/recompra",
 ];
 
 const idsValidos = new Set(categorias.map((c) => c.id));

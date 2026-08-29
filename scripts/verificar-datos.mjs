@@ -30,6 +30,18 @@ if (pendientes.length > 0) {
   );
 }
 
+// Valores que ya se usaron como relleno y que nunca deben volver a pasar el
+// guardián como si fueran una cédula válida. La validación de formato no basta:
+// una cédula ficticia puede tener exactamente el mismo formato que una real.
+const cedulasFicticiasConocidas = ["3-101-999999", "3-102-999999"];
+for (const cedula of cedulasFicticiasConocidas) {
+  if (negocio.includes(`cedulaJuridica: "${cedula}"`)) {
+    problemas.push(
+      `La cédula jurídica sigue siendo un valor ficticio conocido (${cedula}).`,
+    );
+  }
+}
+
 // 2. Catálogo con productos de demostración.
 const productos = JSON.parse(readFileSync(join(raiz, "data/productos.json"), "utf8"));
 const demo = productos.filter((p) => /^DEMO-/i.test(p.sku));

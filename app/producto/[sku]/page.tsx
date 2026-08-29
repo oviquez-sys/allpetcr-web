@@ -132,11 +132,18 @@ export default async function ProductoPage({
     ],
   };
 
+  // Una consulta directa debe identificar el artículo sin obligar a quien
+  // atiende WhatsApp a adivinar cuál de los productos con nombre parecido es.
+  // Es una consulta, no un pedido ni una reserva: stock y total se confirman
+  // siempre por el canal habitual.
   const consultaWa = urlWhatsApp(
-    `Hola, quiero consultar por: ${producto.nombre}` +
-      (presentacionVisible(producto.presentacion)
-        ? ` (${presentacionVisible(producto.presentacion)})`
-        : ""),
+    [
+      "Hola, quiero consultar por este producto:",
+      `Producto: ${producto.nombre}`,
+      `Código: ${producto.sku}`,
+      `Precio mostrado: ${formatoColones(producto.precio_venta)}`,
+      `Enlace: ${url}`,
+    ].join("\n"),
   );
 
   return (
@@ -213,6 +220,11 @@ export default async function ProductoPage({
               {presentacionVisible(producto.presentacion)}
             </p>
           )}
+          {producto.mascota && (
+            <p className="mt-2 text-sm text-navy-400">
+              Para: <span className="font-medium text-navy-500">{producto.mascota}</span>
+            </p>
+          )}
 
           {/* La descripción va ARRIBA del precio, no enterrada al final: es
               lo que responde "¿es esto lo que busco?", y esa pregunta viene
@@ -284,6 +296,12 @@ export default async function ProductoPage({
                 <dd className="text-navy-400">
                   {presentacionVisible(producto.presentacion)}
                 </dd>
+              </div>
+            )}
+            {producto.mascota && (
+              <div className="flex justify-between py-3">
+                <dt className="text-navy-400">Para</dt>
+                <dd className="text-navy-400">{producto.mascota}</dd>
               </div>
             )}
             <div className="flex justify-between py-3">

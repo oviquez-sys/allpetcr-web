@@ -161,24 +161,34 @@ export default async function HomePage() {
           página (lo primero grande que pinta el navegador), así que se
           precarga en vez de esperar a que el navegador la descubra sola.
 
-          AJUSTE 17/08/2026 (mismo día, después de que Oscar viera el hero en
-          su pantalla real): en escritorios anchos `object-cover` recortaba
-          mucho más de lo que se veía en las capturas de comparación de
-          1440px —la lámpara quedaba cortada arriba, la alfombra abajo—.
-          Se resuelve con `object-contain` desde `lg:` para arriba: la foto
-          se ve completa, sin recorte, con el navy de `.superficie-navy`
-          rellenando a los costados si sobra espacio (rellena en vez de
-          recortar). En mobile se mantiene `object-cover` con el encuadre
-          original: ahí el contenedor es más angosto que alto y `contain`
-          dejaba una costura visible partiendo el texto a la mitad. */}
-      <section className="superficie-navy relative overflow-hidden">
+          AJUSTE 17/08/2026, primera vuelta: en escritorios anchos
+          `object-cover` recortaba de más —la lámpara quedaba cortada
+          arriba—, así que se probó `object-contain` desde `lg:`. Duró poco:
+          Oscar lo vio en su pantalla real (1920px) y la foto se veía
+          "incrustada" —dos barras navy planas a los costados, cortando el
+          efecto de punta a punta que es justo lo que pidió al elegir esta
+          opción sobre el isotipo con halo—.
+
+          AJUSTE 17/08/2026, segunda vuelta (la que quedó): se vuelve a
+          `object-cover` de punta a punta —sin barras, nunca— y en cambio la
+          SECCIÓN crece de alto en pantallas anchas (`lg:`/`xl:`/`2xl:`
+          `min-h`). Es el ajuste correcto para este problema: en una foto
+          3:2 dentro de un banner panorámico no se puede mostrarla completa
+          sin barras Y de punta a punta a la vez —son objetivos que se
+          excluyen—, pero si el contenedor crece en vez de quedarse fijo,
+          el recorte deja ver una porción de la foto parecida a la que se
+          veía en 1440px, en vez de reducirse a una tira angosta al crecer
+          el ancho. Sigue existiendo *algo* de recorte vertical en pantallas
+          muy anchas —es inherente al formato, no un bug— pero ya no se nota
+          como tal. */}
+      <section className="superficie-navy relative overflow-hidden lg:min-h-[640px] xl:min-h-[740px] 2xl:min-h-[860px]">
         <Image
           src="/categorias/hogar.jpg"
           alt=""
           fill
           priority
           sizes="100vw"
-          className="object-cover object-[center_30%] lg:object-contain lg:object-center"
+          className="object-cover object-[center_28%]"
         />
         {/* Scrim de dos capas, el mismo patrón que TarjetaCategoria: una base
             uniforme leve que evita que un punto claro de la foto borre una

@@ -5,6 +5,7 @@ import { useMemo, useRef, useState } from "react";
 import { useCarrito, resolverCarrito } from "@/lib/carrito";
 import { formatoColones, presentacionVisible } from "@/lib/formato";
 import { negocio, urlWhatsApp, faltante } from "@/lib/negocio";
+import { guardarUltimoPedido, programarRecordatorio } from "@/lib/recompra";
 import type { Producto } from "@/lib/types";
 
 type Entrega = "retiro" | "coordinar";
@@ -43,6 +44,7 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
   const [nota, setNota] = useState("");
   const [errores, setErrores] = useState<Errores>({});
   const [enviado, setEnviado] = useState(false);
+  const [recordatorioDias, setRecordatorioDias] = useState<number | null>(null);
   const refNombre = useRef<HTMLInputElement>(null);
   const refTelefono = useRef<HTMLInputElement>(null);
 
@@ -95,6 +97,17 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
     }
     const url = urlWhatsApp(textoPedido());
     if (url) window.open(url, "_blank", "noopener,noreferrer");
+    // Guardamos solo una copia local del pedido preparado. Al volver a pedir,
+    // se resuelve otra vez contra el catálogo actual: este historial nunca
+    // impone precios ni disponibilidad viejos.
+    guardarUltimoPedido(
+      comprables.map((i) => ({
+        sku: i.sku,
+        cantidad: i.cantidad,
+        nombreGuardado: i.producto!.nombre,
+        precioGuardado: i.producto!.precio_venta,
+      })),
+    );
     setEnviado(true);
     vaciar();
   }
@@ -119,18 +132,50 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
             </svg>
           </div>
           <h1 className="mt-7 font-display text-headline text-navy-500">
-            Pedido enviado
+            Pedido preparado
           </h1>
           <p className="mt-3 text-[15px] font-light leading-relaxed text-navy-400">
             Se abrió WhatsApp con tu pedido. Si no se abrió, escribinos
-            directamente y te lo confirmamos.
+            directamente para enviarlo y confirmarlo.
           </p>
           <p className="mt-2 text-sm font-light text-navy-400">
             Te confirmamos existencias y el total antes de preparar todo.
           </p>
+          <section className="mt-8 rounded-card border border-crema-400 bg-white p-5 text-left">
+            <h2 className="text-sm font-medium text-navy-500">¿Cuándo querés volver a pedir?</h2>
+            <p className="mt-1.5 text-xs font-light leading-relaxed text-navy-400">
+              Te lo mostraremos al volver a este navegador. No enviamos notificaciones ni
+              compartimos tus datos.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {[15, 30, 45].map((dias) => (
+                <button
+                  key={dias}
+                  type="button"
+                  onClick={() => {
+                    programarRecordatorio(dias);
+                    setRecordatorioDias(dias);
+                  }}
+                  className={`rounded-full border px-4 py-2 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 ${
+                    recordatorioDias === dias
+                      ? "border-navy-500 bg-navy-500 text-crema-100"
+                      : "border-crema-400 text-navy-400 hover:border-navy-300 hover:text-navy-500"
+                  }`}
+                >
+                  {recordatorioDias === dias ? `Recordatorio en ${dias} días ✓` : `${dias} días`}
+                </button>
+              ))}
+            </div>
+          </section>
+          <Link
+            href="/recompra"
+            className="mt-5 inline-block rounded-full border border-crema-400 px-6 py-3 text-sm text-navy-400 transition-colors hover:border-navy-300 hover:text-navy-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500"
+          >
+            Ver mi último pedido
+          </Link>
           <Link
             href="/catalogo"
-            className="mt-8 inline-block rounded-full bg-navy-500 px-8 py-3.5 text-sm font-medium text-crema-100 transition-colors hover:bg-navy-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:ring-offset-2"
+            className="mt-5 inline-block rounded-full bg-navy-500 px-8 py-3.5 text-sm font-medium text-crema-100 transition-colors hover:bg-navy-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:ring-offset-2"
           >
             Seguir viendo productos
           </Link>

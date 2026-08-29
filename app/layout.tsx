@@ -3,6 +3,7 @@ import "./globals.css";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import AvisoConfiguracion from "@/components/AvisoConfiguracion";
+import AvisoRecompra from "@/components/AvisoRecompra";
 import { ProveedorCarrito } from "@/lib/carrito";
 import { negocio, faltante } from "@/lib/negocio";
 
@@ -98,6 +99,7 @@ export default function RootLayout({
           </a>
           <AvisoConfiguracion />
           <NavBar />
+          <AvisoRecompra />
           <main id="contenido" className="min-h-screen">
             {children}
           </main>

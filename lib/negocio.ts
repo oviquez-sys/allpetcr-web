@@ -25,9 +25,8 @@ export const negocio = {
   nombre: "AllPet",
   nombreLegal: "AllPetcr",
 
-  /** Cédula jurídica REAL. En el ERP vive en Empresa.identificacion.
-   *  La que estaba antes en el pie (3-101-999999) era ficticia. */
-  cedulaJuridica: "3-102-999999",
+  /** Cédula jurídica REAL. Proviene de Empresa.identificacion en el ERP. */
+  cedulaJuridica: "3-102-969361",
 
   regimen: "Régimen de Tributación Simplificada",
 

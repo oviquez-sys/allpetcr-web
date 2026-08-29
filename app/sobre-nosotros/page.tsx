@@ -14,17 +14,12 @@ export default function SobreNosotrosPage() {
       </h1>
       <div className="mt-8 space-y-5 text-[16.5px] font-light leading-relaxed text-navy-400">
         <p>
-          AllPet es una tienda de productos para mascotas en Costa Rica. Nuestro
-          punto de partida es simple: recomendar lo que realmente le sirve a tu
-          perro o gato, no lo que más se vende.
+          AllPet es una tienda de productos para mascotas en Heredia Central,
+          Costa Rica.
         </p>
-        <p className="rounded-card bg-dorado-50 p-5 text-sm text-dorado-800">
-          [Placeholder: historia real de la tienda — cuándo empezó, quiénes la
-          fundaron, qué la hace distinta. Reemplazar con contenido real.]
-        </p>
-        <p className="rounded-card bg-dorado-50 p-5 text-sm text-dorado-800">
-          [Placeholder: filosofía de atención, criterios de selección de
-          productos, compromiso con el cliente.]
+        <p>
+          Encontrá la dirección, horario y canales de atención verificados en
+          nuestra página de contacto.
         </p>
       </div>
     </section>
