@@ -3,6 +3,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import TarjetaProducto from "@/components/TarjetaProducto";
 import BotonAgregar from "@/components/BotonAgregar";
+import BotonAvisoDisponibilidad from "@/components/BotonAvisoDisponibilidad";
 import { getCategorias, getProductoPorSku, getProductos } from "@/lib/data";
 import { formatoColones, presentacionVisible, tinteDeSku } from "@/lib/formato";
 import { negocio, urlWhatsApp, faltante } from "@/lib/negocio";
@@ -266,7 +267,13 @@ export default async function ProductoPage({
           </p>
 
           <div className="mt-8 flex flex-wrap gap-3">
-            <BotonAgregar producto={producto} />
+            {/* Un agotado no se compra: el botón de aviso REEMPLAZA al de
+                comprar, no convive con uno deshabilitado al lado. */}
+            {producto.disponible ? (
+              <BotonAgregar producto={producto} />
+            ) : (
+              <BotonAvisoDisponibilidad producto={producto} />
+            )}
             {!faltante(negocio.whatsapp) && consultaWa && (
               <a
                 href={consultaWa}

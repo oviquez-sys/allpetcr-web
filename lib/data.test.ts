@@ -25,7 +25,7 @@ describe("getProductos / getCategorias", () => {
   it("con ERP configurado, pide el catálogo en vivo con el token", async () => {
     vi.stubEnv("ERP_API_URL", "http://erp-de-prueba");
     vi.stubEnv("ERP_API_TOKEN", "token-123");
-    const fetchMock = vi.fn(async () =>
+    const fetchMock = vi.fn(async (_url: string, _init?: RequestInit) =>
       new Response(
         JSON.stringify({
           count: 1, next: null, previous: null,
@@ -42,7 +42,7 @@ describe("getProductos / getCategorias", () => {
     expect(productos).toEqual([{ sku: "X1", nombre: "Producto de prueba" }]);
     const [url, init] = fetchMock.mock.calls[0];
     expect(url).toBe("http://erp-de-prueba/api/catalogo/productos/");
-    expect((init as RequestInit).headers).toMatchObject({ Authorization: "Token token-123" });
+    expect(init?.headers).toMatchObject({ Authorization: "Token token-123" });
   });
 
   it("sigue el link 'next' hasta traer todas las páginas", async () => {
