@@ -55,7 +55,10 @@ const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${esDesarrollo ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
-  `img-src 'self' data: blob: https://*.googleapis.com https://*.gstatic.com${origenErp ? ` ${origenErp}` : ""}`,
+  // *.tile.openstreetmap.org: los cuadros del mapa de MapaDireccion.tsx
+  // (ítem 33) — Leaflet los carga como <img> normales, no via next/image,
+  // así que entran por CSP y no por remotePatterns.
+  `img-src 'self' data: blob: https://*.googleapis.com https://*.gstatic.com https://*.tile.openstreetmap.org${origenErp ? ` ${origenErp}` : ""}`,
   "font-src 'self' data:",
   "connect-src 'self'",
   "frame-src https://www.google.com https://maps.google.com",

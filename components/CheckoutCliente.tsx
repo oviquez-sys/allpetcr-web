@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
 import { useCarrito, resolverCarrito } from "@/lib/carrito";
+import DireccionEntregaCliente, { type DireccionEntrega } from "@/components/DireccionEntregaCliente";
 import { formatoColones, presentacionVisible } from "@/lib/formato";
 import { negocio, urlWhatsApp, faltante } from "@/lib/negocio";
 import { guardarUltimoPedido, programarRecordatorio } from "@/lib/recompra";
@@ -13,7 +14,12 @@ type Entrega = "retiro" | "coordinar";
 interface Errores {
   nombre?: string;
   telefono?: string;
+  direccion?: string;
 }
+
+const DIRECCION_VACIA: DireccionEntrega = {
+  lat: null, lng: null, provincia: "", canton: "", distrito: "", senas: "",
+};
 
 /**
  * Confirmación de pedido.
@@ -41,6 +47,7 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
   const [nombre, setNombre] = useState("");
   const [telefono, setTelefono] = useState("");
   const [entrega, setEntrega] = useState<Entrega>("retiro");
+  const [direccion, setDireccion] = useState<DireccionEntrega>(DIRECCION_VACIA);
   const [nota, setNota] = useState("");
   const [errores, setErrores] = useState<Errores>({});
   const [enviado, setEnviado] = useState(false);
@@ -62,6 +69,15 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
     // Costa Rica: 8 dígitos. Se aceptan espacios y guiones al escribir.
     const soloDigitos = telefono.replace(/\D/g, "");
     if (soloDigitos.length < 8) e.telefono = "El teléfono debe tener 8 dígitos.";
+    // Solo se exige dirección cuando hay que llevar el pedido a algún lado
+    // (ítem 33): retiro en tienda no necesita ni mapa ni señas.
+    if (entrega === "coordinar") {
+      if (direccion.lat === null || direccion.lng === null) {
+        e.direccion = "Marcá el punto de entrega en el mapa.";
+      } else if (!direccion.senas.trim()) {
+        e.direccion = "Agregá más señas exactas (el mapa solo no alcanza para el courier).";
+      }
+    }
     return e;
   }
 
@@ -78,7 +94,21 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
     l.push("", `*Total: ${formatoColones(totalComprable)}*`, "");
     l.push(`Nombre: ${nombre.trim()}`);
     l.push(`Teléfono: ${telefono.trim()}`);
-    l.push(entrega === "retiro" ? "Entrega: retiro en tienda" : "Entrega: coordinar envío");
+    if (entrega === "retiro") {
+      l.push("Entrega: retiro en tienda");
+    } else {
+      l.push("Entrega: coordinar envío");
+      const divisiones = [direccion.provincia, direccion.canton, direccion.distrito]
+        .filter((v) => v.trim())
+        .join(", ");
+      if (divisiones) l.push(`Provincia/cantón/distrito: ${divisiones}`);
+      if (direccion.senas.trim()) l.push(`Señas: ${direccion.senas.trim()}`);
+      if (direccion.lat !== null && direccion.lng !== null) {
+        // Enlace directo a Google Maps con las coordenadas: quien despache
+        // no tiene que copiar números a mano para ubicar el punto.
+        l.push(`Ubicación: https://www.google.com/maps?q=${direccion.lat},${direccion.lng}`);
+      }
+    }
     if (nota.trim()) l.push(`Nota: ${nota.trim()}`);
     return l.join("\n");
   }
@@ -296,7 +326,7 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
             <div className="mt-4 space-y-3">
               {([
                 ["retiro", "Retiro en tienda", "Sin costo. Te avisamos cuando esté listo."],
-                ["coordinar", "Coordinar envío", "Lo conversamos por WhatsApp según tu zona."],
+                ["coordinar", "Coordinar envío", "Marcá el punto de entrega y coordinamos por WhatsApp."],
               ] as const).map(([valor, titulo, detalle]) => (
                 <label
                   key={valor}
@@ -321,6 +351,17 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
                 </label>
               ))}
             </div>
+
+            {entrega === "coordinar" && (
+              <div className="mt-5">
+                <DireccionEntregaCliente valor={direccion} onCambiar={setDireccion} />
+                {errores.direccion && (
+                  <p role="alert" className="mt-2 text-[13px] text-red-700">
+                    {errores.direccion}
+                  </p>
+                )}
+              </div>
+            )}
           </fieldset>
 
           <div className="mt-9">

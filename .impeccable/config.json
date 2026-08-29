@@ -12,6 +12,42 @@
         ],
         "createdAt": "2026-08-29T13:16:50.898Z",
         "reason": "Consistente con el patron ya existente del repo de usar un tamano mayor al token text-price (17px) para totales destacados: app/producto/[sku]/page.tsx usa 30px para el precio principal, CheckoutCliente.tsx usa 26px para su total. 22px aca es la misma escala de enfasis aplicada a una tarjeta mas chica (seguimiento de pedido)."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "12.5px",
+        "files": [
+          "components/CheckoutCliente.tsx"
+        ],
+        "createdAt": "2026-08-29T13:34:30.974Z",
+        "reason": "Preexistente en todo el archivo desde antes de esta sesion (texto fino/ayuda/error consistente en 12.5px y 13px, titulo de radio en 15px) - no lo introduje ni lo modifique tocando el checkout para el mapa de direccion (item 33)."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "13px",
+        "files": [
+          "components/CheckoutCliente.tsx"
+        ],
+        "createdAt": "2026-08-29T13:34:31.069Z",
+        "reason": "Preexistente en todo el archivo desde antes de esta sesion (texto fino/ayuda/error consistente en 12.5px y 13px, titulo de radio en 15px) - no lo introduje ni lo modifique tocando el checkout para el mapa de direccion (item 33)."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "15px",
+        "files": [
+          "components/CheckoutCliente.tsx"
+        ],
+        "createdAt": "2026-08-29T13:34:31.149Z",
+        "reason": "Preexistente en todo el archivo desde antes de esta sesion (texto fino/ayuda/error consistente en 12.5px y 13px, titulo de radio en 15px) - no lo introduje ni lo modifique tocando el checkout para el mapa de direccion (item 33)."
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "26px",
+        "files": [
+          "components/CheckoutCliente.tsx"
+        ],
+        "createdAt": "2026-08-29T13:34:45.314Z",
+        "reason": "Preexistente: tamano del total destacado del pedido, ya estaba en el archivo antes de esta sesion (mismo patron que 22px en PedidoSeguimientoCliente.tsx y 30px en la ficha de producto)."
       }
     ]
   }
