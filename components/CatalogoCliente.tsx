@@ -3,6 +3,7 @@
 import { useDeferredValue, useMemo, useState } from "react";
 import TarjetaProducto from "@/components/TarjetaProducto";
 import { ESPECIES, esParaEspecie, type ClaveEspecie } from "@/lib/navegacion";
+import { coincideAproximado } from "@/lib/busqueda";
 import { presentacionVisible } from "@/lib/formato";
 import type { Categoria, Producto } from "@/lib/types";
 
@@ -113,15 +114,20 @@ export default function CatalogoCliente({
         if (p.categoria_id === null || !idsElegidos.includes(p.categoria_id)) return false;
       }
       if (term) {
-        const enNombre = p.nombre.toLowerCase().includes(term);
+        // El SKU es un código, no lenguaje: un típeo ahí no "significa
+        // casi lo mismo" como con una palabra (75341 no es "casi" 75342).
+        // Se busca exacto por substring, nunca aproximado.
         const enSku = p.sku.toLowerCase().includes(term);
-        // Solo la presentación que el cliente puede ver: buscar "paquete"
-        // devolvía 141 de 184 productos por un dato que no está en pantalla.
-        const enPres = presentacionVisible(p.presentacion).toLowerCase().includes(term);
-        // La descripción también entra en la búsqueda: es donde están el
-        // material, la talla y el uso ("arnés acolchado", "para cachorro"),
-        // que es como la gente busca de verdad.
-        const enDesc = p.descripcion.toLowerCase().includes(term);
+        // Nombre, presentación y descripción sí toleran errores de
+        // escritura (ítem 32): "coyar" encuentra "collar". Solo la
+        // presentación que el cliente puede ver: buscar "paquete" devolvía
+        // 141 de 184 productos por un dato que no está en pantalla. La
+        // descripción entra porque es donde están el material, la talla y
+        // el uso ("arnés acolchado", "para cachorro"), que es como la
+        // gente busca de verdad.
+        const enNombre = coincideAproximado(p.nombre, term);
+        const enPres = coincideAproximado(presentacionVisible(p.presentacion), term);
+        const enDesc = coincideAproximado(p.descripcion, term);
         if (!enNombre && !enSku && !enPres && !enDesc) return false;
       }
       return true;
