@@ -88,13 +88,40 @@ describe("navegación", () => {
   });
 
   it("ningún enlace de navegación queda sin filtro", () => {
-    // Un enlace de categoría que apunta a /catalogo pelado es el síntoma
-    // exacto del defecto original: parece que filtra y no filtra.
+    // Un enlace que apunta a /catalogo pelado es el síntoma exacto del
+    // defecto original: parece que filtra y no filtra.
+    //
+    // Antes esta prueba exigía `?cats=`. Desde que el menú es mascota-primero
+    // (01/09/2026) el enlace de la sección es `?para=perro`, sin categoría, y
+    // está bien que lo sea: "Perro" es la puerta de la tienda y tiene que
+    // mostrar todo lo de perro. Lo que sigue siendo un defecto es un enlace
+    // SIN NINGÚN filtro, y eso es lo que se verifica.
     for (const { href, origen } of todosLosEnlaces()) {
+      const query = new URLSearchParams(href.split("?")[1] ?? "");
+      const filtra = query.has("cats") || query.has("para");
       expect(
-        href.includes("?cats="),
+        filtra,
         `${origen} apunta a "${href}" sin filtro — mostraría el catálogo completo`,
       ).toBe(true);
+    }
+  });
+
+  it("ningún enlace de especie sola queda vacío", () => {
+    // La puerta de una especie tiene que llevar a productos de esa especie.
+    // Las dos pruebas de más abajo se saltan los enlaces sin `cats`, así que
+    // sin esta un "Gato" sin un solo producto de gato pasaría en verde.
+    for (const { href, origen } of todosLosEnlaces()) {
+      const query = new URLSearchParams(href.split("?")[1] ?? "");
+      if (query.has("cats")) continue;
+      const para = query.get("para");
+      if (!para) continue;
+
+      const especie = ESPECIES.find((e) => e.clave === para);
+      expect(especie, `${origen}: "${para}" no es una especie conocida`).toBeDefined();
+      const cuantos = productos.filter((p) =>
+        esParaEspecie(p.mascota ?? "", especie!.clave),
+      ).length;
+      expect(cuantos, `${origen} no muestra ni un producto`).toBeGreaterThan(0);
     }
   });
 
@@ -131,10 +158,12 @@ describe("navegación", () => {
   });
 
   it("ningún enlace de categoría + especie queda vacío", () => {
-    // Desde el 04/08/2026 el segundo nivel del menú es la especie, no la
-    // subcategoría (ver lib/navegacion.ts). La prueba de arriba mira solo
-    // `cats`, así que un "Juguetes → Para gatos" sin un solo juguete de gato
-    // pasaría en verde: el id de Juguetes sí tiene productos.
+    // Desde el 01/09/2026 el menú cruza mascota y categoría al revés que
+    // antes —"Gato › Juguetes" en vez de "Juguetes › Para gatos"— pero el
+    // enlace que se genera es el mismo y el riesgo también: la prueba de
+    // arriba mira solo `cats`, así que un "Gato › Juguetes" sin un solo
+    // juguete de gato pasaría en verde, porque el id de Juguetes sí tiene
+    // productos.
     //
     // Acá se evalúan las DOS condiciones juntas, que es lo que ve el cliente
     // cuando hace clic. Sin esto, aplanar el catálogo habría cambiado veinte

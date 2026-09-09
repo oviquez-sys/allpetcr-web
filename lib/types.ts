@@ -15,6 +15,10 @@ export interface Categoria {
   id: number;
   nombre: string;
   padre_id: number | null;
+  /** Posición en los menús, decidida en el ERP (`catalogo.Categoria.orden`).
+   *  Menor sale primero. Existe para que el sitio y el ERP muestren las
+   *  categorías en el mismo orden sin que nadie mantenga dos listas. */
+  orden: number;
 }
 
 export interface Producto {

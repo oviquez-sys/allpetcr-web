@@ -1,5 +1,6 @@
 import categoriasJson from "@/data/categorias.json";
-import type { Categoria } from "./types";
+import productosJson from "@/data/productos.json";
+import type { Categoria, Producto } from "./types";
 
 /**
  * NAVEGACIÓN DEL SITIO
@@ -47,14 +48,42 @@ import type { Categoria } from "./types";
  * 20 productos: eso sí es un filtro. Y es como piensa quien compra, que llega
  * sabiendo para cuál de sus animales viene.
  *
- * ── POR QUÉ CUATRO SECCIONES Y NO CINCO
- * Las categorías del ERP son cinco, pero Acuario tiene HOY cero productos en
- * existencia y el ERP publica solo lo que hay. `idDe("Acuario")` devuelve null,
- * `secciones()` descarta la sección y el menú queda con cuatro. Cuando entre
- * mercadería de acuario, la quinta aparece sola: no hay que tocar este archivo.
+ * ── EL MENÚ SE DIO VUELTA: PRIMERO LA MASCOTA (01/09/2026)
+ * Hasta hoy el primer nivel eran las categorías (Juguetes, Ropa y paseo…) y
+ * la especie era el segundo. Se invirtió: ahora es Perro / Gato arriba y las
+ * categorías adentro.
  *
- * El principio es el mismo de siempre: la navegación refleja el catálogo que
- * existe, no el que uno quisiera tener.
+ * El motivo no es estético. Quien entra a una tienda de mascotas llega
+ * sabiendo para cuál de sus animales viene; nadie entra pensando "quiero ver
+ * juguetes". Es como lo hacen las tiendas grandes del rubro —Chewy abre con
+ * Perro / Gato / Otros animales— y coincide con lo que este mismo archivo ya
+ * había concluido más arriba al justificar el filtro cruzado por especie.
+ *
+ * ── ESTE ARCHIVO YA NO SABE QUÉ CATEGORÍAS EXISTEN
+ * Antes tenía las cinco escritas a mano. Eso significaba que crear una
+ * categoría en el ERP —"Alimento", por ejemplo— NO la hacía aparecer en el
+ * menú hasta que alguien se acordara de editar acá. Dos listas separadas que
+ * se desincronizan es cuestión de tiempo, y el que la descubre es el cliente.
+ *
+ * Ahora las categorías salen de `data/categorias.json` ordenadas por el campo
+ * `orden`, que decide el ERP (`catalogo/management/commands/asegurar_categorias.py`).
+ * Una categoría nueva aparece sola, en su lugar, sin tocar una línea de acá.
+ *
+ * ── POR QUÉ EL ENLACE DE "PERRO" NO LLEVA FILTRO DE CATEGORÍA
+ * Más arriba está escrito que un enlace de especie sin categoría "mostraría
+ * 159 de 184 productos, que es el caso que este archivo prohíbe". Esa regla se
+ * escribió cuando la especie era el SEGUNDO nivel, y ahí tenía razón: un
+ * subgrupo que muestra casi todo no filtra nada.
+ *
+ * Como primer nivel es al revés. "Perro" es la puerta de la tienda: tiene que
+ * mostrar todo lo de perro, igual que la sección "Perro" de cualquier tienda
+ * del rubro. Lo que sigue prohibido es un enlace a `/catalogo` pelado, sin
+ * ningún filtro — eso lo verifica `lib/enlaces.test.ts`.
+ *
+ * ── EL PRINCIPIO QUE NO CAMBIA
+ * La navegación refleja el catálogo que existe, no el que uno quisiera tener.
+ * Una categoría sin existencias no sale en `categorias.json`, así que
+ * desaparece del menú sola y vuelve sola cuando entra mercadería.
  *
  * ── AL CAMBIAR EL INVENTARIO
  * Los nombres de abajo se resuelven a id contra data/categorias.json. Como el
@@ -147,47 +176,86 @@ export function hrefCatsEspecie(ids: number[], especie: ClaveEspecie): string {
   return ids.length > 0 ? `${hrefCats(ids)}&para=${especie}` : "/catalogo";
 }
 
+// Se conservan para las tarjetas de la portada (`destacadas`), que sí son una
+// selección escrita a mano: cuatro categorías elegidas por surtido, no el
+// catálogo entero. El MENÚ ya no las usa.
 const JUGUETES = idsDe("Juguetes");
 const ROPA_PASEO = idsDe("Ropa y paseo");
 const CASA_COMIDA = idsDe("Casa y comida");
 const HIGIENE_SALUD = idsDe("Higiene y salud");
-const ACUARIO = idsDe("Acuario");
 
 /**
- * Navegación principal: una sección por categoría del ERP.
+ * Las categorías raíz que HOY tienen productos, en el orden que manda el ERP.
  *
- * El segundo nivel ya no son subcategorías —no existen— sino la especie
- * cruzada con la categoría. Ver el encabezado del archivo para el porqué y
- * para los conteos que respaldan que ninguna combinación queda vacía.
+ * No hay ninguna lista de nombres acá a propósito: si mañana el ERP publica
+ * "Alimento" y "Snacks y premios", aparecen en el menú sin tocar este archivo.
+ * Ese es el punto del campo `orden` (ver el encabezado).
  *
- * `secciones()` descarta las que no tienen id: una categoría sin existencias
- * no sale en data/categorias.json, y un enlace a /catalogo pelado mostraría
- * el catálogo completo fingiendo que filtra.
+ * Solo raíces: las subcategorías (Alimento seco, Alimento húmedo) no entran al
+ * menú todavía porque el encabezado tiene dos niveles y el primero se lo lleva
+ * la mascota. Viven en el filtro lateral del catálogo.
  */
-function seccion(
-  id: string,
-  label: string,
-  ids: number[],
-): SeccionNav | null {
-  if (ids.length === 0) return null;
-  return {
-    id,
-    label,
-    href: hrefCats(ids),
-    grupos: ESPECIES.map((e) => ({
-      label: `Para ${e.label.toLowerCase()}`,
-      href: hrefCatsEspecie(ids, e.clave),
-    })),
-  };
+const RAICES = categorias
+  .filter((c) => c.padre_id === null)
+  .sort((a, b) => a.orden - b.orden || a.nombre.localeCompare(b.nombre, "es"));
+
+const productos = productosJson as Producto[];
+
+/** Ids de una raíz más los de todas sus hijas: un producto vive en la hoja. */
+function ramaDe(raizId: number): Set<number> {
+  return new Set([
+    raizId,
+    ...categorias.filter((c) => c.padre_id === raizId).map((c) => c.id),
+  ]);
 }
 
-export const navegacion: SeccionNav[] = [
-  seccion("juguetes", "Juguetes", JUGUETES),
-  seccion("ropa-paseo", "Ropa y paseo", ROPA_PASEO),
-  seccion("casa-comida", "Casa y comida", CASA_COMIDA),
-  seccion("higiene-salud", "Higiene y salud", HIGIENE_SALUD),
-  seccion("acuario", "Acuario", ACUARIO),
-].filter((s): s is SeccionNav => s !== null);
+/**
+ * ¿Esta categoría tiene algo para esta especie?
+ *
+ * Hace falta porque el menú de perro y el de gato NO pueden ser la misma
+ * lista: "Rascadores y muebles" son 19 productos, todos de gato, y
+ * "Perro › Rascadores y muebles" llevaba a una página vacía. Lo cazó
+ * `lib/enlaces.test.ts` el 01/09/2026 antes de que lo viera un cliente, que
+ * es exactamente para lo que esa prueba existe.
+ *
+ * Se calcula de los productos publicados en vez de escribir a mano qué
+ * categoría es de perro y cuál de gato: esa lista escrita a mano envejece —es
+ * el mismo error que tenía el menú antes— y además el surtido cambia. Si
+ * mañana entra un rascador para perro, aparece solo.
+ */
+function tieneProductos(raizId: number, clave: ClaveEspecie): boolean {
+  const rama = ramaDe(raizId);
+  return productos.some(
+    (p) => p.categoria_id !== null && rama.has(p.categoria_id) && esParaEspecie(p.mascota ?? "", clave),
+  );
+}
+
+/**
+ * Navegación principal: una sección por MASCOTA, con las categorías adentro.
+ *
+ * Cada especie arma sus grupos por separado —y no comparten un arreglo— para
+ * que el día que el menú de gato tenga que diferir del de perro (arena y
+ * rascadores para gato, entrenamiento para perro, como hacen las tiendas
+ * grandes) sea un cambio local y no una excepción incrustada.
+ *
+ * Se descarta la especie que no tenga ni una categoría con producto: una
+ * puerta que no lleva a nada es peor que no tener la puerta.
+ */
+function seccionDeEspecie(clave: ClaveEspecie, label: string): SeccionNav | null {
+  const grupos: GrupoNav[] = RAICES.filter((c) => tieneProductos(c.id, clave))
+    .map((c) => ({ label: c.nombre, href: hrefCatsEspecie([c.id], clave) }))
+    .filter((g) => g.href !== "/catalogo");
+
+  if (grupos.length === 0) return null;
+  return { id: clave, label, href: hrefEspecie(clave), grupos };
+}
+
+export const navegacion: SeccionNav[] = ESPECIES.map((e) =>
+  // "Perros" → "Perro": el menú nombra al animal, no al grupo. Es como lo
+  // dice quien compra ("algo para mi perro") y como lo rotulan las tiendas
+  // del rubro.
+  seccionDeEspecie(e.clave, e.label.replace(/s$/, "")),
+).filter((s): s is SeccionNav => s !== null);
 
 /**
  * Las cuatro tarjetas de categoría del inicio.

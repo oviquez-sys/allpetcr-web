@@ -1,22 +1,314 @@
 [
   {
-    "id": 184,
-    "nombre": "Casa y comida",
-    "padre_id": null
-  },
-  {
-    "id": 185,
-    "nombre": "Higiene y salud",
-    "padre_id": null
-  },
-  {
     "id": 123,
     "nombre": "Juguetes",
-    "padre_id": null
+    "padre_id": null,
+    "orden": 30
   },
   {
-    "id": 183,
-    "nombre": "Ropa y paseo",
-    "padre_id": null
+    "id": 102,
+    "nombre": "Paseo",
+    "padre_id": null,
+    "orden": 40
+  },
+  {
+    "id": 97,
+    "nombre": "Ropa y accesorios",
+    "padre_id": null,
+    "orden": 50
+  },
+  {
+    "id": 8,
+    "nombre": "Comederos y bebederos",
+    "padre_id": null,
+    "orden": 60
+  },
+  {
+    "id": 108,
+    "nombre": "Descanso",
+    "padre_id": null,
+    "orden": 70
+  },
+  {
+    "id": 119,
+    "nombre": "Higiene y aseo",
+    "padre_id": null,
+    "orden": 80
+  },
+  {
+    "id": 112,
+    "nombre": "Salud y cuidado",
+    "padre_id": null,
+    "orden": 90
+  },
+  {
+    "id": 122,
+    "nombre": "Accesorios de baño",
+    "padre_id": 119,
+    "orden": 100
+  },
+  {
+    "id": 133,
+    "nombre": "Accesorios de cuidado",
+    "padre_id": 112,
+    "orden": 100
+  },
+  {
+    "id": 99,
+    "nombre": "Accesorios para el pelo",
+    "padre_id": 97,
+    "orden": 100
+  },
+  {
+    "id": 138,
+    "nombre": "Alimentación lenta",
+    "padre_id": 8,
+    "orden": 100
+  },
+  {
+    "id": 100,
+    "nombre": "Areneros",
+    "padre_id": 95,
+    "orden": 100
+  },
+  {
+    "id": 103,
+    "nombre": "Arnés con correa",
+    "padre_id": 102,
+    "orden": 100
+  },
+  {
+    "id": 106,
+    "nombre": "Arneses",
+    "padre_id": 102,
+    "orden": 100
+  },
+  {
+    "id": 132,
+    "nombre": "Bolsos y mochilas",
+    "padre_id": 104,
+    "orden": 100
+  },
+  {
+    "id": 107,
+    "nombre": "Bozales",
+    "padre_id": 102,
+    "orden": 100
+  },
+  {
+    "id": 110,
+    "nombre": "Camas",
+    "padre_id": 108,
+    "orden": 100
+  },
+  {
+    "id": 141,
+    "nombre": "Camisetas y polos",
+    "padre_id": 97,
+    "orden": 100
+  },
+  {
+    "id": 111,
+    "nombre": "Casas y cuevas",
+    "padre_id": 108,
+    "orden": 100
+  },
+  {
+    "id": 120,
+    "nombre": "Cepillos y peines",
+    "padre_id": 119,
+    "orden": 100
+  },
+  {
+    "id": 117,
+    "nombre": "Cinturones de seguridad",
+    "padre_id": 104,
+    "orden": 100
+  },
+  {
+    "id": 114,
+    "nombre": "Collares",
+    "padre_id": 102,
+    "orden": 100
+  },
+  {
+    "id": 113,
+    "nombre": "Collares isabelinos",
+    "padre_id": 112,
+    "orden": 100
+  },
+  {
+    "id": 143,
+    "nombre": "Comederos automáticos",
+    "padre_id": 8,
+    "orden": 100
+  },
+  {
+    "id": 115,
+    "nombre": "Correas",
+    "padre_id": 102,
+    "orden": 100
+  },
+  {
+    "id": 116,
+    "nombre": "Correas retráctiles",
+    "padre_id": 102,
+    "orden": 100
+  },
+  {
+    "id": 140,
+    "nombre": "Disfraces",
+    "padre_id": 97,
+    "orden": 100
+  },
+  {
+    "id": 96,
+    "nombre": "Dispensadores de bolsas",
+    "padre_id": 95,
+    "orden": 100
+  },
+  {
+    "id": 118,
+    "nombre": "Entrenamiento",
+    "padre_id": 112,
+    "orden": 100
+  },
+  {
+    "id": 144,
+    "nombre": "Fiesta y celebración",
+    "padre_id": 97,
+    "orden": 100
+  },
+  {
+    "id": 105,
+    "nombre": "Fundas para auto",
+    "padre_id": 104,
+    "orden": 100
+  },
+  {
+    "id": 98,
+    "nombre": "Gorras y sombreros",
+    "padre_id": 97,
+    "orden": 100
+  },
+  {
+    "id": 145,
+    "nombre": "Higiene dental",
+    "padre_id": 112,
+    "orden": 100
+  },
+  {
+    "id": 124,
+    "nombre": "Juguetes de cuerda",
+    "padre_id": 123,
+    "orden": 100
+  },
+  {
+    "id": 142,
+    "nombre": "Juguetes de tela",
+    "padre_id": 123,
+    "orden": 100
+  },
+  {
+    "id": 129,
+    "nombre": "Juguetes de vinil",
+    "padre_id": 123,
+    "orden": 100
+  },
+  {
+    "id": 130,
+    "nombre": "Juguetes dentales",
+    "padre_id": 123,
+    "orden": 100
+  },
+  {
+    "id": 126,
+    "nombre": "Juguetes interactivos",
+    "padre_id": 123,
+    "orden": 100
+  },
+  {
+    "id": 127,
+    "nombre": "Juguetes para gato",
+    "padre_id": 123,
+    "orden": 100
+  },
+  {
+    "id": 125,
+    "nombre": "Lanzar y buscar",
+    "padre_id": 123,
+    "orden": 100
+  },
+  {
+    "id": 109,
+    "nombre": "Mantas y colchonetas",
+    "padre_id": 108,
+    "orden": 100
+  },
+  {
+    "id": 139,
+    "nombre": "Otros juguetes",
+    "padre_id": 123,
+    "orden": 100
+  },
+  {
+    "id": 101,
+    "nombre": "Palas",
+    "padre_id": 95,
+    "orden": 100
+  },
+  {
+    "id": 134,
+    "nombre": "Pañuelos y corbatines",
+    "padre_id": 97,
+    "orden": 100
+  },
+  {
+    "id": 131,
+    "nombre": "Pelotas",
+    "padre_id": 123,
+    "orden": 100
+  },
+  {
+    "id": 128,
+    "nombre": "Peluches",
+    "padre_id": 123,
+    "orden": 100
+  },
+  {
+    "id": 137,
+    "nombre": "Platos y comederos",
+    "padre_id": 8,
+    "orden": 100
+  },
+  {
+    "id": 121,
+    "nombre": "Quita pelusas",
+    "padre_id": 119,
+    "orden": 100
+  },
+  {
+    "id": 136,
+    "nombre": "Rascadores",
+    "padre_id": 135,
+    "orden": 100
+  },
+  {
+    "id": 95,
+    "nombre": "Arena y sanitarios",
+    "padre_id": null,
+    "orden": 110
+  },
+  {
+    "id": 135,
+    "nombre": "Rascadores y muebles",
+    "padre_id": null,
+    "orden": 120
+  },
+  {
+    "id": 104,
+    "nombre": "Transporte",
+    "padre_id": null,
+    "orden": 130
   }
 ]
