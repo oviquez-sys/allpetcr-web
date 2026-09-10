@@ -4,7 +4,7 @@ import { loadEnvConfig } from "@next/env";
 // Next.js carga .env DESPUÉS de evaluar next.config.ts (es un orden de
 // arranque documentado, no un descuido de acá) — sin esta línea,
 // process.env.ERP_API_URL todavía no existe cuando corre
-// patronesDeImagenDelErp() de abajo, y remotePatterns queda vacío en
+// patronesDeImagenExternas() de abajo, y remotePatterns queda vacío en
 // silencio (las imágenes del ERP se ven "no permitidas" con 400, no con un
 // error claro). @next/env es el paquete que el propio Next.js usa para
 // leer .env; llamarlo acá adelanta esa carga.
@@ -17,17 +17,36 @@ loadEnvConfig(process.cwd());
 // que cualquiera use tu optimizador de imágenes como proxy gratis de lo
 // que sea. Sin ERP_API_URL, remotePatterns queda vacío: el sitio sigue
 // sirviendo desde su propio public/ como siempre.
-function patronesDeImagenDelErp() {
-  if (!process.env.ERP_API_URL) return [];
-  const erp = new URL(process.env.ERP_API_URL);
-  return [
-    {
+//
+// 10/09/2026: el ERP puede guardar las fotos en disco propio (URL bajo el
+// mismo host del ERP, "/media/**") O en un bucket S3-compatible — Spaces,
+// en este despliegue — cuando el ERP tiene MEDIA_STORAGE_BACKEND=s3. En ese
+// caso api/serializers.py::get_imagen ya devuelve la URL del bucket
+// directamente, NO la del ERP, así que hace falta declarar TAMBIÉN ese
+// dominio o next/image la rechaza con "hostname no configurado". De ahí
+// PRODUCTOS_CDN_URL, aparte de ERP_API_URL: son dos orígenes distintos que
+// pueden estar activos a la vez.
+function patronesDeImagenExternas() {
+  const patrones: NonNullable<NextConfig["images"]>["remotePatterns"] = [];
+  if (process.env.ERP_API_URL) {
+    const erp = new URL(process.env.ERP_API_URL);
+    patrones.push({
       protocol: erp.protocol.replace(":", "") as "http" | "https",
       hostname: erp.hostname,
       port: erp.port || "",
       pathname: "/media/**",
-    },
-  ];
+    });
+  }
+  if (process.env.PRODUCTOS_CDN_URL) {
+    const cdn = new URL(process.env.PRODUCTOS_CDN_URL);
+    patrones.push({
+      protocol: cdn.protocol.replace(":", "") as "http" | "https",
+      hostname: cdn.hostname,
+      port: cdn.port || "",
+      pathname: "/**",
+    });
+  }
+  return patrones;
 }
 
 /**
@@ -46,10 +65,13 @@ function patronesDeImagenDelErp() {
  */
 const esDesarrollo = process.env.NODE_ENV !== "production";
 
-// El origen del ERP entra en img-src (las fotos de producto vienen de ahí,
-// ver patronesDeImagenDelErp arriba) solo cuando ERP_API_URL está definida.
-// Sin ella, la CSP no se afloja para nada que no exista.
+// El origen del ERP y, si aplica, el del bucket de fotos entran en img-src
+// (ver patronesDeImagenExternas arriba) solo cuando la variable respectiva
+// está definida. Sin ellas, la CSP no se afloja para nada que no exista.
 const origenErp = process.env.ERP_API_URL ? new URL(process.env.ERP_API_URL).origin : "";
+const origenCdnFotos = process.env.PRODUCTOS_CDN_URL
+  ? new URL(process.env.PRODUCTOS_CDN_URL).origin
+  : "";
 
 const csp = [
   "default-src 'self'",
@@ -58,7 +80,7 @@ const csp = [
   // *.tile.openstreetmap.org: los cuadros del mapa de MapaDireccion.tsx
   // (ítem 33) — Leaflet los carga como <img> normales, no via next/image,
   // así que entran por CSP y no por remotePatterns.
-  `img-src 'self' data: blob: https://*.googleapis.com https://*.gstatic.com https://*.tile.openstreetmap.org${origenErp ? ` ${origenErp}` : ""}`,
+  `img-src 'self' data: blob: https://*.googleapis.com https://*.gstatic.com https://*.tile.openstreetmap.org${origenErp ? ` ${origenErp}` : ""}${origenCdnFotos ? ` ${origenCdnFotos}` : ""}`,
   "font-src 'self' data:",
   "connect-src 'self'",
   "frame-src https://www.google.com https://maps.google.com",
@@ -75,7 +97,7 @@ const nextConfig: NextConfig = {
   images: {
     // Los formatos modernos reducen mucho el peso de las fotos de catálogo,
     // que es el punto donde más se degrada el móvil.
-    remotePatterns: patronesDeImagenDelErp(),
+    remotePatterns: patronesDeImagenExternas(),
     formats: ["image/avif", "image/webp"],
     // El ERP en desarrollo vive en localhost: next/image bloquea por
     // defecto traer imágenes de una IP privada/loopback (protección contra
