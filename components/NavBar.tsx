@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { useCarrito } from "@/lib/carrito";
 import Marca from "./Marca";
 import IconoCategoria from "./IconoCategoria";
-import { navegacion } from "@/lib/navegacion";
+import type { SeccionNav } from "@/lib/navegacion";
 
 /**
  * ENCABEZADO
@@ -54,7 +54,7 @@ function IconoBuscar({ className = "" }: { className?: string }) {
   );
 }
 
-export default function NavBar() {
+export default function NavBar({ navegacion }: { navegacion: SeccionNav[] }) {
   const { unidades, listo } = useCarrito();
   const [abierto, setAbierto] = useState(false);
   const [megaAbierto, setMegaAbierto] = useState<string | null>(null);
@@ -77,7 +77,10 @@ export default function NavBar() {
     if (!abierto && !megaAbierto) return;
     const alTeclear = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
-      if (megaAbierto) setMegaAbierto(null);
+      if (megaAbierto) {
+        document.getElementById(`menu-boton-${megaAbierto}`)?.focus();
+        setMegaAbierto(null);
+      }
       if (abierto) {
         setAbierto(false);
         botonMenu.current?.focus();
@@ -120,7 +123,7 @@ export default function NavBar() {
         type="search"
         name="q"
         placeholder="Buscar juguetes, collares, shampoo…"
-        className="w-full bg-transparent text-sm text-navy-500 outline-none placeholder:text-navy-300"
+        className="w-full rounded bg-transparent text-sm text-navy-500 placeholder:text-navy-400 focus-visible:ring-2 focus-visible:ring-navy-500"
       />
       <button
         type="submit"
@@ -208,7 +211,9 @@ export default function NavBar() {
           <div className="pb-3 sm:hidden">{buscador("buscar-mov")}</div>
 
           {/* Fila 2: categorías con mega menú (solo escritorio) */}
-          <nav aria-label="Categorías" className="hidden lg:block">
+          <nav aria-label="Categorías" className="hidden lg:block" onClick={(e) => {
+            if ((e.target as Element).closest("a")) setMegaAbierto(null);
+          }}>
             <ul className="flex items-center gap-1 pb-1">
               {navegacion.map((seccion) => {
                 const tieneHijos = seccion.grupos.length > 0;
@@ -216,14 +221,13 @@ export default function NavBar() {
                 return (
                   <li
                     key={seccion.id}
-                    className="relative"
+                    className="relative flex items-center"
+                    onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setMegaAbierto(null); }}
                     onMouseEnter={() => tieneHijos && abrirMega(seccion.id)}
                     onMouseLeave={cerrarMega}
                   >
                     <Link
                       href={seccion.href}
-                      onFocus={() => tieneHijos && abrirMega(seccion.id)}
-                      {...(tieneHijos ? { "aria-expanded": desplegado } : {})}
                       className="flex items-center gap-1.5 rounded-lg px-3.5 py-2.5 text-sm text-navy-400 transition-colors hover:bg-crema-200 hover:text-navy-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500"
                     >
                       {seccion.label}
@@ -235,9 +239,11 @@ export default function NavBar() {
                         </svg>
                       )}
                     </Link>
+                    {tieneHijos && <button type="button" id={`menu-boton-${seccion.id}`} aria-label={`Categorías de ${seccion.label}`} aria-expanded={desplegado} aria-controls={`submenu-${seccion.id}`} onClick={() => setMegaAbierto(desplegado ? null : seccion.id)} className="min-h-11 min-w-11 rounded-lg text-navy-500">⌄</button>}
 
                     {tieneHijos && desplegado && (
                       <div
+                        id={`submenu-${seccion.id}`}
                         onMouseEnter={() => abrirMega(seccion.id)}
                         onMouseLeave={cerrarMega}
                         className="absolute left-0 top-full z-50 w-max min-w-[270px] rounded-2xl border border-crema-400 bg-white p-4 shadow-[0_16px_48px_rgba(9,46,94,0.13)]"
@@ -292,8 +298,9 @@ export default function NavBar() {
         {abierto && (
           <nav
             id="menu-movil"
+            onClick={(e) => { if ((e.target as Element).closest("a")) setAbierto(false); }}
             aria-label="Categorías"
-            className="max-h-[70vh] overflow-y-auto border-t border-crema-400 bg-crema-100 lg:hidden"
+            className="max-h-[calc(100dvh-10rem)] overflow-y-auto overscroll-contain border-t border-crema-400 bg-crema-100 lg:hidden"
           >
             <ul className="mx-auto max-w-contenido px-6 py-3">
               {navegacion.map((seccion) => (
@@ -315,6 +322,8 @@ export default function NavBar() {
                     {seccion.label}
                   </Link>
                   {seccion.grupos.length > 0 && (
+                    <details>
+                    <summary className="cursor-pointer rounded-lg px-5 py-3 text-sm text-navy-500">Ver categorías de {seccion.label.toLowerCase()}</summary>
                     <ul className="pb-1.5">
                       {seccion.grupos.map((g) => (
                         <li key={g.href + g.label}>
@@ -327,6 +336,7 @@ export default function NavBar() {
                         </li>
                       ))}
                     </ul>
+                    </details>
                   )}
                 </li>
               ))}

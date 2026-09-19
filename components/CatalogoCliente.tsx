@@ -1,8 +1,8 @@
 "use client";
 
-import { useDeferredValue, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import TarjetaProducto from "@/components/TarjetaProducto";
-import { ESPECIES, esParaEspecie, type ClaveEspecie } from "@/lib/navegacion";
+import { ESPECIES, esParaEspecie, idsRama, type ClaveEspecie } from "@/lib/navegacion";
 import { coincideAproximado } from "@/lib/busqueda";
 import { presentacionVisible } from "@/lib/formato";
 import type { Categoria, Producto } from "@/lib/types";
@@ -16,6 +16,8 @@ interface Props {
   idsIniciales?: number[];
   /** Especie preseleccionada (parámetro ?para=perro|gato). */
   especieInicial?: ClaveEspecie | null;
+  ordenInicial?: Orden;
+  disponiblesInicial?: boolean;
 }
 
 type Orden = "relevancia" | "precio-asc" | "precio-desc" | "nombre";
@@ -27,8 +29,11 @@ export default function CatalogoCliente({
   categoriaInicial = "",
   idsIniciales = [],
   especieInicial = null,
+  ordenInicial = "relevancia",
+  disponiblesInicial = false,
 }: Props) {
   const [busqueda, setBusqueda] = useState(busquedaInicial);
+  const [filtrosAbiertos, setFiltrosAbiertos] = useState(false);
   const [catsElegidas, setCatsElegidas] = useState<number[]>(() => {
     // `cats` (ids) tiene prioridad: es lo que generan los enlaces del sitio.
     // `c` (nombre) queda como respaldo para enlaces viejos ya compartidos.
@@ -40,8 +45,21 @@ export default function CatalogoCliente({
     return encontrada ? [encontrada.id] : [];
   });
   const [especie, setEspecie] = useState<ClaveEspecie | null>(especieInicial);
-  const [soloDisponibles, setSoloDisponibles] = useState(false);
-  const [orden, setOrden] = useState<Orden>("relevancia");
+  const [soloDisponibles, setSoloDisponibles] = useState(disponiblesInicial);
+  const [orden, setOrden] = useState<Orden>(ordenInicial);
+  useEffect(() => {
+    const temporizador = setTimeout(() => {
+      const params = new URLSearchParams();
+      if (busqueda.trim()) params.set("q", busqueda.trim());
+      if (catsElegidas.length) params.set("cats", catsElegidas.join(","));
+      if (especie) params.set("para", especie);
+      if (soloDisponibles) params.set("disponibles", "1");
+      if (orden !== "relevancia") params.set("orden", orden);
+      const query = params.toString();
+      window.history.replaceState(null, "", `/catalogo${query ? `?${query}` : ""}`);
+    }, 400);
+    return () => clearTimeout(temporizador);
+  }, [busqueda, catsElegidas, especie, soloDisponibles, orden]);
 
   // El ERP publica solo lo que hay en existencia (regla del 02/08/2026), así
   // que normalmente TODO lo que llega está disponible y la casilla "solo con
@@ -81,8 +99,7 @@ export default function CatalogoCliente({
   // render si no estuviera envuelta aquí).
   const idsConHijos = useMemo(() => {
     return (id: number): number[] => {
-      const hijos = categorias.filter((c) => c.padre_id === id).map((c) => c.id);
-      return [id, ...hijos];
+      return idsRama(categorias, id);
     };
   }, [categorias]);
 
@@ -96,12 +113,12 @@ export default function CatalogoCliente({
       .map((c) => {
         const ids = idsConHijos(c.id);
         const cuantos = productos.filter(
-          (p) => p.categoria_id !== null && ids.includes(p.categoria_id)
+          (p) => p.categoria_id !== null && ids.includes(p.categoria_id) && (!especie || esParaEspecie(p.mascota, especie))
         ).length;
         return { ...c, cuantos };
       })
-      .filter((c) => c.cuantos > 0);
-  }, [productos, categorias, idsConHijos]);
+      .filter((c) => c.cuantos > 0 || catsElegidas.includes(c.id));
+  }, [productos, categorias, idsConHijos, especie, catsElegidas]);
 
   const filtrados = useMemo(() => {
     const term = busquedaDiferida.trim().toLowerCase();
@@ -182,7 +199,8 @@ export default function CatalogoCliente({
 
   return (
     <div className="mx-auto max-w-contenido px-6 py-12">
-      <h1 className="font-display text-headline text-navy-500">Catálogo</h1>
+      <h1 className="font-display text-headline text-navy-500">{especie ? `Productos para ${especie === "perro" ? "perros" : "gatos"}` : "Catálogo"}</h1>
+      {hayFiltros && <p className="mt-3 text-sm text-navy-400">{[busqueda && `Búsqueda: ${busqueda}`, ...catsElegidas.map((id) => nombrePorCategoria.get(id)), soloDisponibles && "Con existencias"].filter(Boolean).join(" · ")}</p>}
 
       {/* md, no lg: a ~900px (tablet) el panel de filtros a ancho completo
           enterraba la grilla de 184 productos bajo el fold. Con dos columnas
@@ -190,7 +208,8 @@ export default function CatalogoCliente({
           visible de inmediato en todo el rango donde ya hay espacio real. */}
       <div className="mt-8 grid gap-8 md:grid-cols-[200px_1fr] md:gap-6 lg:grid-cols-[230px_1fr] lg:gap-10">
         <aside className="md:sticky md:top-40 md:self-start">
-          <div className="rounded-card border border-crema-400 bg-white p-5">
+          <button type="button" aria-expanded={filtrosAbiertos} aria-controls="filtros-catalogo" onClick={() => setFiltrosAbiertos(!filtrosAbiertos)} className="w-full rounded-lg border border-navy-500 px-5 py-3 text-left text-sm text-navy-500 md:hidden">{filtrosAbiertos ? "Ocultar filtros" : "Buscar y filtrar"}{hayFiltros ? " · filtros activos" : ""}</button>
+          <div id="filtros-catalogo" className={`${filtrosAbiertos ? "block" : "hidden"} rounded-card border border-crema-400 bg-white p-5 md:block`}>
             <label className="block text-xs font-medium uppercase tracking-wider text-navy-400">
               Buscar
               <input
@@ -240,7 +259,7 @@ export default function CatalogoCliente({
                 </legend>
                 <div className="mt-2 space-y-1.5">
                   {categoriasConProductos.map((c) => (
-                    <label key={c.id} className="flex items-center gap-2.5 text-sm text-navy-400">
+                    <label key={c.id} className="flex min-h-11 items-center gap-2.5 text-sm text-navy-400">
                       <input
                         type="checkbox"
                         checked={catsElegidas.includes(c.id)}
@@ -248,7 +267,7 @@ export default function CatalogoCliente({
                         className="h-3.5 w-3.5 accent-navy-500"
                       />
                       <span className="flex-1">{c.nombre}</span>
-                      <span className="text-xs text-navy-200">{c.cuantos}</span>
+                      <span className="text-xs text-navy-400">{c.cuantos}</span>
                     </label>
                   ))}
                 </div>
@@ -286,7 +305,7 @@ export default function CatalogoCliente({
               encabezados de lectores de pantalla. No cambia nada visible. */}
           <h2 className="sr-only">Resultados</h2>
           <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-crema-400 pb-4">
-            <p className="text-sm text-navy-400">
+            <p role="status" aria-atomic="true" className="text-sm text-navy-400">
               {filtrados.length}{" "}
               {filtrados.length === 1 ? "producto" : "productos"}
             </p>

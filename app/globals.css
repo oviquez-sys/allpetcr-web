@@ -8,6 +8,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Foco consistente incluso en controles sin una utilidad específica. */
+:where(a, button, input, select, textarea, summary):focus-visible {
+  outline: 2px solid #96692A;
+  outline-offset: 3px;
+}
+html { scroll-padding-top: 11rem; }
+
 html {
   scroll-behavior: smooth;
 }

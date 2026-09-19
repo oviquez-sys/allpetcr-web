@@ -7,6 +7,7 @@ export const metadata = {
   // Escribirlo acá también duplicaba el sufijo en la pestaña y en resultados
   // de búsqueda ("Catálogo | AllPetcr.com | AllPet").
   title: "Catálogo",
+  alternates: { canonical: "/catalogo" },
   description:
     "Juguetes, collares, camas e higiene para perros y gatos en Costa Rica. Buscá y filtrá por categoría y disponibilidad. Retiro en tienda sin costo.",
 };
@@ -33,7 +34,7 @@ export const metadata = {
 export default async function CatalogoPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; c?: string; cats?: string; para?: string }>;
+  searchParams: Promise<{ q?: string; c?: string; cats?: string; para?: string; orden?: string; disponibles?: string }>;
 }) {
   const [productos, categorias, params] = await Promise.all([
     getProductos(),
@@ -70,7 +71,7 @@ export default async function CatalogoPage({
   // viejo y montar uno de cero con las props correctas ya en su useState
   // inicial. Se deja `q` fuera de la key a propósito: escribir en el
   // buscador no debe reiniciar el componente en cada tecla.
-  const key = `${idsIniciales.join(",")}|${especieInicial ?? ""}|${params.c ?? ""}`;
+  const key = `${idsIniciales.join(",")}|${especieInicial ?? ""}|${params.c ?? ""}|${params.q ?? ""}`;
 
   return (
     <CatalogoCliente
@@ -81,6 +82,8 @@ export default async function CatalogoPage({
       categoriaInicial={params.c ?? ""}
       idsIniciales={idsIniciales}
       especieInicial={especieInicial}
+      ordenInicial={params.orden === "precio-asc" || params.orden === "precio-desc" || params.orden === "nombre" ? params.orden : "relevancia"}
+      disponiblesInicial={params.disponibles === "1"}
     />
   );
 }

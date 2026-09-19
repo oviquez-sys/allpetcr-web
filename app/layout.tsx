@@ -6,6 +6,9 @@ import AvisoConfiguracion from "@/components/AvisoConfiguracion";
 import AvisoRecompra from "@/components/AvisoRecompra";
 import { ProveedorCarrito } from "@/lib/carrito";
 import { negocio, faltante } from "@/lib/negocio";
+import { getCategorias, getProductos } from "@/lib/data";
+import { construirNavegacion } from "@/lib/navegacion";
+import { sitioIndexable } from "@/lib/sitio";
 
 const titulo = "AllPet Costa Rica | Productos para perros y gatos";
 const descripcion =
@@ -19,7 +22,6 @@ export const metadata: Metadata = {
   title: { default: titulo, template: "%s | AllPet" },
   description: descripcion,
   applicationName: "AllPet",
-  alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     locale: "es_CR",
@@ -29,7 +31,7 @@ export const metadata: Metadata = {
     description: descripcion,
   },
   twitter: { card: "summary_large_image", title: titulo, description: descripcion },
-  robots: { index: true, follow: true },
+  robots: { index: sitioIndexable, follow: sitioIndexable },
   formatDetection: { telephone: true },
 };
 
@@ -76,9 +78,12 @@ function esquemaNegocio() {
   return base;
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const navegacion = await Promise.all([getCategorias(), getProductos()])
+    .then(([categorias, productos]) => construirNavegacion(categorias, productos))
+    .catch(() => construirNavegacion([], []));
   return (
     <html lang="es-CR">
       <head>
@@ -98,7 +103,7 @@ export default function RootLayout({
             Saltar al contenido
           </a>
           <AvisoConfiguracion />
-          <NavBar />
+          <NavBar navegacion={navegacion} />
           <AvisoRecompra />
           <main id="contenido" className="min-h-screen">
             {children}

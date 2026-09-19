@@ -77,6 +77,8 @@ function TarjetaProducto({ producto, categoria }: Props) {
           <h3 className="text-title font-normal leading-snug text-navy-500 transition-colors group-hover:text-dorado-700">
             {producto.nombre}
           </h3>
+          <p className="mt-2 text-xs text-navy-400">Código {producto.sku}{producto.mascota ? ` · ${producto.mascota}` : ""}</p>
+          {producto.descripcion && <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-navy-400">{producto.descripcion}</p>}
           {/* Filtrado: lo que el ERP manda hoy es empaque de bodega
               ("Paquete: 12 / Caja: 216"), no presentación de venta. Ver
               presentacionVisible en lib/formato.ts. */}
@@ -98,16 +100,5 @@ function TarjetaProducto({ producto, categoria }: Props) {
   );
 }
 
-// Comparación explícita: el SKU identifica al producto de forma única, así que
-// si no cambió el sku, el precio, la disponibilidad ni la categoría mostrada,
-// la tarjeta no necesita volver a renderizarse. Filtrar y ordenar la lista
-// reordena los elementos, pero no los muta.
-export default memo(TarjetaProducto, (anterior, nuevo) => {
-  return (
-    anterior.producto.sku === nuevo.producto.sku &&
-    anterior.producto.precio_venta === nuevo.producto.precio_venta &&
-    anterior.producto.disponible === nuevo.producto.disponible &&
-    anterior.producto.imagen === nuevo.producto.imagen &&
-    anterior.categoria === nuevo.categoria
-  );
-});
+// La comparación estándar también actualiza nombres y descripciones recibidos.
+export default memo(TarjetaProducto);

@@ -71,6 +71,7 @@ export default function PedidoSeguimientoCliente({ numero }: { numero: string })
           <input
             id="telefono"
             type="tel"
+            autoComplete="tel"
             inputMode="tel"
             required
             placeholder="8888-7777"
@@ -101,7 +102,7 @@ export default function PedidoSeguimientoCliente({ numero }: { numero: string })
               className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ${COLOR_ESTADO[estado.estado] ?? "bg-navy-200"}`}
               aria-hidden="true"
             />
-            <span className="text-[15px] font-medium text-navy-500">{estado.estado_display}</span>
+            <span role="status" className="text-[15px] font-medium text-navy-500">{estado.estado_display}</span>
           </div>
           <p className="mt-1.5 text-xs text-navy-400">
             {new Intl.DateTimeFormat("es-CR", { dateStyle: "long", timeStyle: "short" }).format(

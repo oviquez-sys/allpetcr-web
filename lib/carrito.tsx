@@ -105,6 +105,7 @@ function leerAlmacen(): LineaCarrito[] {
  */
 let cacheLineas: LineaCarrito[] = [];
 let cacheJson = "";
+let soloMemoria = false;
 const oyentes = new Set<() => void>();
 
 function suscribir(cb: () => void) {
@@ -128,7 +129,10 @@ function notificar() {
 /** Debe devolver la MISMA referencia si nada cambió, o React re-renderiza
  *  en bucle. Por eso se compara el JSON crudo antes de reconstruir. */
 function instantanea(): LineaCarrito[] {
-  const bruto = typeof window === "undefined" ? "" : window.localStorage.getItem(CLAVE) ?? "";
+  if (soloMemoria) return cacheLineas;
+  let bruto = "";
+  try { bruto = typeof window === "undefined" ? "" : window.localStorage.getItem(CLAVE) ?? ""; }
+  catch { soloMemoria = true; return cacheLineas; }
   if (bruto !== cacheJson) {
     cacheJson = bruto;
     cacheLineas = leerAlmacen();
@@ -152,6 +156,7 @@ function guardar(lineas: LineaCarrito[]) {
     // Almacenamiento lleno o modo privado: el carrito sigue funcionando en
     // memoria durante la sesión. No vale la pena molestar al cliente.
     cacheLineas = lineas;
+    soloMemoria = true;
     cacheJson = "";
   }
   notificar();

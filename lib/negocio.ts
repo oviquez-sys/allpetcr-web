@@ -19,6 +19,7 @@
  * teléfono que no existe.
  */
 
+import { sitioUrl } from "./sitio";
 export const PENDIENTE = "PENDIENTE" as const;
 
 export const negocio = {
@@ -64,14 +65,14 @@ export const negocio = {
 
   /** Horario en formato schema.org. Mo,Tu,We,Th,Fr,Sa,Su
    *  Ej: [{ dias: "Mo-Fr", abre: "08:00", cierra: "18:00" }] */
-  horario: [{ dias: "Mo-Fr", abre: "08:30", cierra: "19:00" }],
+  horario: [{ dias: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], abre: "09:00", cierra: "19:00" }],
 
   /** Texto legible del horario, para mostrar en la página de contacto. */
-  horarioTexto: "Lunes a viernes, 8:30 a.m. – 7:00 p.m.",
+  horarioTexto: "Lunes a sábado, 9:00 a.m. – 7:00 p.m. Domingo: local cerrado. La web recibe pedidos todos los días.",
 
   /** Dominio final, sin barra al final. Necesario para el sitemap,
    *  las URLs canónicas y las vistas previas al compartir. */
-  sitioUrl: "https://allpetcr.com",
+  sitioUrl,
 
   redes: {
     facebook: "",

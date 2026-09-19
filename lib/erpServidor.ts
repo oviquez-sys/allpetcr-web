@@ -46,6 +46,8 @@ async function erpRequest<T>(ruta: string, init: RequestInit): Promise<T> {
     // Estas llamadas son transaccionales (crean o consultan un pedido, un
     // aviso): nunca deben servirse de una caché vieja.
     cache: "no-store",
+    redirect: "error",
+    signal: AbortSignal.timeout(15000),
   });
   const cuerpo = await respuesta.json().catch(() => null);
   if (!respuesta.ok) throw new ErpRespuestaError(respuesta.status, cuerpo);

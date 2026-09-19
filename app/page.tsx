@@ -2,9 +2,10 @@ import Link from "next/link";
 import Image from "next/image";
 import TarjetaProducto from "@/components/TarjetaProducto";
 import PuertaEspecie from "@/components/PuertaEspecie";
-import { PUERTAS, ESPECIES, esParaEspecie, hrefEspecie, hrefCategoria } from "@/lib/navegacion";
+import { PUERTAS, ESPECIES, esParaEspecie, hrefEspecie, hrefCats, idsRama } from "@/lib/navegacion";
 import { getCategorias, getProductos } from "@/lib/data";
 import { negocio, faltante } from "@/lib/negocio";
+export const metadata = { alternates: { canonical: "/" } };
 
 /**
  * INICIO
@@ -60,7 +61,7 @@ const pasos = [
   {
     n: "3",
     titulo: "Retirás o coordinamos entrega",
-    texto: "Pagás al retirar en la tienda. Sin sorpresas.",
+    texto: "Coordinamos con vos el retiro o envío y el medio de pago.",
   },
 ];
 
@@ -89,8 +90,9 @@ export default async function HomePage() {
   const categoriasConConteo = categorias
     .filter((c) => c.padre_id === null)
     .map((c) => ({
+      id: c.id,
       nombre: c.nombre,
-      total: disponibles.filter((p) => p.categoria_id === c.id).length,
+      total: disponibles.filter((p) => p.categoria_id !== null && idsRama(categorias, c.id).includes(p.categoria_id)).length,
     }))
     .filter((c) => c.total > 0)
     .sort((a, b) => b.total - a.total);
@@ -181,7 +183,7 @@ export default async function HomePage() {
           el ancho. Sigue existiendo *algo* de recorte vertical en pantallas
           muy anchas —es inherente al formato, no un bug— pero ya no se nota
           como tal. */}
-      <section className="superficie-navy relative overflow-hidden lg:min-h-[640px] xl:min-h-[740px] 2xl:min-h-[860px]">
+      <section className="superficie-navy relative overflow-hidden lg:min-h-[480px]">
         <Image
           src="/categorias/hogar.jpg"
           alt=""
@@ -205,7 +207,7 @@ export default async function HomePage() {
           className="absolute inset-0 bg-gradient-to-t from-navy-900/70 via-transparent to-transparent"
           aria-hidden="true"
         />
-        <div className="relative mx-auto max-w-contenido px-6 py-20 sm:py-24 lg:py-28">
+        <div className="relative mx-auto max-w-contenido px-6 py-12 sm:py-16 lg:py-20">
           <div className="max-w-xl">
             <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-dorado-400">
               Tienda de mascotas · Heredia centro
@@ -213,45 +215,26 @@ export default async function HomePage() {
             {/* Un solo h1 por página, y es la promesa —no el nombre de la
                 marca, que ya está en el logo del encabezado—. */}
             <h1 className="mt-4 font-display text-[42px] font-light leading-[1.04] tracking-tight text-crema-100 sm:text-[58px] lg:text-[64px]">
-              Todo para tu mascota,
+              Para su juego, paseo
               <br />
-              elegido con criterio.
+              y cuidado diario.
             </h1>
             <p className="mt-6 text-[17px] font-light leading-relaxed text-navy-100">
               Juguetes, arneses, camas e higiene para perros y gatos. Te decimos
-              qué le sirve realmente, no qué nos conviene vender.
+              ayudamos a elegir y podés retirar tu pedido en nuestra tienda de Heredia.
             </p>
 
-            {/* GET a /catalogo: sin estado, sin cliente, sin JavaScript. */}
-            <form
-              action="/catalogo"
-              method="get"
-              role="search"
-              className="mt-9 flex flex-col gap-2.5 rounded-card border border-dorado-400/35 bg-white/[0.08] p-3.5 sm:flex-row sm:items-center sm:rounded-full sm:py-1.5 sm:pl-6 sm:pr-1.5"
-            >
-              <label htmlFor="q-inicio" className="sr-only">
-                Buscar en el catálogo
-              </label>
-              <input
-                id="q-inicio"
-                type="search"
-                name="q"
-                placeholder="¿Qué andás buscando?"
-                className="min-w-0 flex-1 bg-transparent py-2.5 text-[15px] text-crema-100 placeholder:text-navy-200 focus:outline-none"
-              />
-              <button
-                type="submit"
-                className="rounded-full bg-crema-100 px-7 py-3 text-sm font-medium text-navy-500 transition-colors hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado-400 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-600"
-              >
-                Buscar
-              </button>
-            </form>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Link href="/catalogo?para=perro" className="rounded-full bg-crema-100 px-6 py-3 text-sm font-medium text-navy-500">Comprar para perro</Link>
+              <Link href="/catalogo?para=gato" className="rounded-full bg-crema-100 px-6 py-3 text-sm font-medium text-navy-500">Comprar para gato</Link>
+              <Link href="/catalogo" className="rounded-full border border-crema-100 px-6 py-3 text-sm text-crema-100">Ver todo</Link>
+            </div>
 
             {/* Responde "¿me van a obligar a registrarme?" donde surge la duda,
                 no tres pantallas más abajo. */}
             <p className="mt-6 text-[13px] font-light text-navy-100">
               <span className="font-medium text-dorado-300">
-                {disponibles.length} productos con existencia confirmada
+                {disponibles.length} productos disponibles en el catálogo
               </span>{" "}
               · Sin registro · Sin tarjeta · Confirmás por WhatsApp antes de pagar
             </p>
@@ -297,7 +280,7 @@ export default async function HomePage() {
           {categoriasConConteo.map((c) => (
             <li key={c.nombre}>
               <Link
-                href={hrefCategoria(c.nombre)}
+                href={hrefCats([c.id])}
                 className="text-sm text-navy-400 transition-colors hover:text-navy-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500"
               >
                 {c.nombre}{" "}
@@ -389,11 +372,11 @@ export default async function HomePage() {
               La tienda
             </p>
             <h2 className="mt-4 font-display text-[28px] font-light leading-tight text-crema-100 sm:text-[34px]">
-              Existimos en una dirección.
+              Visitá nuestra tienda en Heredia.
             </h2>
             <p className="mt-4 max-w-md text-[15px] font-light leading-relaxed text-navy-100">
-              No somos un catálogo sin local. Podés venir, ver el producto,
-              preguntar y llevártelo el mismo día.
+              Vení a conocer los productos y consultanos antes de elegir.
+              También podés retirar aquí tu pedido cuando te confirmemos que está listo.
             </p>
             <Link
               href="/contacto"

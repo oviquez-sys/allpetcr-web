@@ -55,9 +55,9 @@ describe("calcularTotalCheckout", () => {
     }
   });
 
-  it("cantidad con decimales se trunca hacia abajo", () => {
+  it("rechaza cantidades fraccionarias sin modificar silenciosamente el pedido", () => {
     const resultado = calcularTotalCheckout([{ sku: "A1", cantidad: 2.9 }], catalogo);
-    expect(resultado.items[0].cantidad).toBe(2);
-    expect(resultado.total).toBe(20000);
+    expect(resultado.items).toHaveLength(0);
+    expect(resultado.problemas).toEqual(["A1: cantidad inválida."]);
   });
 });

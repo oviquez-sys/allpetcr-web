@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useCarrito, resolverCarrito } from "@/lib/carrito";
 import DireccionEntregaCliente, { type DireccionEntrega } from "@/components/DireccionEntregaCliente";
 import { formatoColones, presentacionVisible } from "@/lib/formato";
 import { negocio, urlWhatsApp, faltante } from "@/lib/negocio";
 import { guardarUltimoPedido, programarRecordatorio } from "@/lib/recompra";
 import type { Producto } from "@/lib/types";
+import type { ResultadoCheckout } from "@/lib/checkoutServidor";
 
 type Entrega = "retiro" | "coordinar";
 
@@ -35,10 +36,11 @@ const DIRECCION_VACIA: DireccionEntrega = {
  * poder leerlo sin descifrar códigos.
  */
 export default function CheckoutCliente({ productos }: { productos: Producto[] }) {
-  const { lineas, vaciar, listo } = useCarrito();
-  const { items, total } = useMemo(
-    () => resolverCarrito(lineas, productos),
-    [lineas, productos],
+  const { lineas, listo } = useCarrito();
+  const [catalogo, setCatalogo] = useState(productos);
+  const { items } = useMemo(
+    () => resolverCarrito(lineas, catalogo),
+    [lineas, catalogo],
   );
 
   const comprables = items.filter((i) => i.producto && i.producto.disponible);
@@ -51,9 +53,17 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
   const [nota, setNota] = useState("");
   const [errores, setErrores] = useState<Errores>({});
   const [enviado, setEnviado] = useState(false);
+  const [verificando, setVerificando] = useState(false);
+  const [errorPedido, setErrorPedido] = useState("");
+  const [mensajePreparado, setMensajePreparado] = useState("");
+  const [copiado, setCopiado] = useState(false);
   const [recordatorioDias, setRecordatorioDias] = useState<number | null>(null);
   const refNombre = useRef<HTMLInputElement>(null);
   const refTelefono = useRef<HTMLInputElement>(null);
+  const refPreparado = useRef<HTMLHeadingElement>(null);
+  const pedidoActual = useRef("");
+  useEffect(() => { pedidoActual.current = JSON.stringify(lineas); }, [lineas]);
+  useEffect(() => { if (enviado) refPreparado.current?.focus(); }, [enviado]);
 
   const sinWhatsApp = faltante(negocio.whatsapp);
 
@@ -68,30 +78,28 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
     if (nombre.trim().length < 3) e.nombre = "Escribí tu nombre completo.";
     // Costa Rica: 8 dígitos. Se aceptan espacios y guiones al escribir.
     const soloDigitos = telefono.replace(/\D/g, "");
-    if (soloDigitos.length < 8) e.telefono = "El teléfono debe tener 8 dígitos.";
+    if (!/^(506)?[2-8]\d{7}$/.test(soloDigitos)) e.telefono = "Escribí un teléfono de Costa Rica de 8 dígitos, con +506 opcional.";
     // Solo se exige dirección cuando hay que llevar el pedido a algún lado
     // (ítem 33): retiro en tienda no necesita ni mapa ni señas.
     if (entrega === "coordinar") {
-      if (direccion.lat === null || direccion.lng === null) {
-        e.direccion = "Marcá el punto de entrega en el mapa.";
-      } else if (!direccion.senas.trim()) {
-        e.direccion = "Agregá más señas exactas (el mapa solo no alcanza para el courier).";
+      if (!direccion.provincia.trim() || !direccion.canton.trim() || !direccion.distrito.trim() || !direccion.senas.trim()) {
+        e.direccion = "Completá provincia, cantón, distrito y señas. El mapa es opcional.";
       }
     }
     return e;
   }
 
-  function textoPedido(): string {
+  function textoPedido(resultado: ResultadoCheckout): string {
     const l: string[] = ["*Pedido desde allpetcr.com*", ""];
-    for (const i of comprables) {
-      const p = i.producto!;
+    for (const i of resultado.items) {
+      const p = catalogo.find((producto) => producto.sku === i.sku)!;
       // Sin el empaque de bodega: "1 × Alimentador (Paquete: 12 / Caja: 216)"
       // llega a la tienda pareciendo un pedido de doce unidades. Acá la
       // confusión no es cosmética, termina en un pedido mal armado.
       const pres = presentacionVisible(p.presentacion);
-      l.push(`• ${i.cantidad} × ${p.nombre}${pres ? ` (${pres})` : ""} — ${formatoColones(i.subtotal)}`);
+      l.push(`• ${i.cantidad} × ${i.nombre}${pres ? ` (${pres})` : ""} [Código: ${i.sku}] — ${formatoColones(i.subtotal)}`);
     }
-    l.push("", `*Total: ${formatoColones(totalComprable)}*`, "");
+    l.push("", `*Subtotal de productos: ${formatoColones(resultado.total)}*`, "Envío y condiciones de pago por confirmar con la tienda.", "");
     l.push(`Nombre: ${nombre.trim()}`);
     l.push(`Teléfono: ${telefono.trim()}`);
     if (entrega === "retiro") {
@@ -113,8 +121,9 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
     return l.join("\n");
   }
 
-  function enviar(ev: React.FormEvent) {
+  async function enviar(ev: React.FormEvent) {
     ev.preventDefault();
+    if (verificando) return;
     const e = validar();
     setErrores(e);
     if (Object.keys(e).length > 0) {
@@ -123,10 +132,41 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
       // React ya haya repintado aria-invalid.
       if (e.nombre) refNombre.current?.focus();
       else if (e.telefono) refTelefono.current?.focus();
+      else if (e.direccion) document.getElementById("direccion-provincia")?.focus();
       return;
     }
-    const url = urlWhatsApp(textoPedido());
-    if (url) window.open(url, "_blank", "noopener,noreferrer");
+    setVerificando(true);
+    setErrorPedido("");
+    const pedidoVerificado = JSON.stringify(lineas);
+    try {
+      const respuesta = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lineas: lineas.map(({ sku, cantidad }) => ({ sku, cantidad })) }),
+        signal: AbortSignal.timeout(30000),
+      });
+      if (!respuesta.ok) throw new Error("No pudimos verificar el pedido. Tu carrito se conserva; intentá de nuevo.");
+      const resultado: ResultadoCheckout = await respuesta.json();
+      if (pedidoActual.current !== pedidoVerificado) {
+        setErrorPedido("El carrito cambió durante la verificación. Revisalo y prepará nuevamente el pedido.");
+        return;
+      }
+      if (resultado.problemas.length) {
+        setErrorPedido(`${resultado.problemas.join(" ")} Volvé al carrito para revisar los productos.`);
+        return;
+      }
+      const cambio = resultado.items.some((i) => catalogo.find((p) => p.sku === i.sku)?.precio_venta !== i.precioUnitario);
+      if (cambio) {
+        setCatalogo((actual) => actual.map((p) => {
+          const vigente = resultado.items.find((i) => i.sku === p.sku);
+          return vigente ? { ...p, precio_venta: vigente.precioUnitario, nombre: vigente.nombre } : p;
+        }));
+        const diferencias = resultado.items.filter((i) => catalogo.find((p) => p.sku === i.sku)?.precio_venta !== i.precioUnitario)
+          .map((i) => `${i.nombre} (${i.sku}): ${formatoColones(catalogo.find((p) => p.sku === i.sku)?.precio_venta ?? 0)} → ${formatoColones(i.precioUnitario)}`).join(". ");
+        setErrorPedido(`Los precios cambiaron. ${diferencias}. Revisá el resumen antes de preparar nuevamente el pedido.`);
+        return;
+      }
+      setMensajePreparado(textoPedido(resultado));
     // Guardamos solo una copia local del pedido preparado. Al volver a pedir,
     // se resuelve otra vez contra el catálogo actual: este historial nunca
     // impone precios ni disponibilidad viejos.
@@ -139,7 +179,11 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
       })),
     );
     setEnviado(true);
-    vaciar();
+    } catch {
+      setErrorPedido("No pudimos verificar el pedido. Tu carrito se conserva; intentá de nuevo.");
+    } finally {
+      setVerificando(false);
+    }
   }
 
   if (!listo) {
@@ -161,13 +205,20 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
               <path d="m20 6-11 11-5-5" />
             </svg>
           </div>
-          <h1 className="mt-7 font-display text-headline text-navy-500">
+          <h1 ref={refPreparado} tabIndex={-1} className="mt-7 font-display text-headline text-navy-500">
             Pedido preparado
           </h1>
           <p className="mt-3 text-[15px] font-light leading-relaxed text-navy-400">
-            Se abrió WhatsApp con tu pedido. Si no se abrió, escribinos
-            directamente para enviarlo y confirmarlo.
+            Revisá el texto y abrí WhatsApp para enviarlo. Prepararlo no confirma ni reserva productos. Tu carrito se conserva.
           </p>
+          <textarea aria-label="Texto del pedido preparado" readOnly value={mensajePreparado} rows={10} className="mt-5 w-full rounded-lg border border-crema-400 p-3 text-left text-sm text-navy-500" />
+          <a href={urlWhatsApp(mensajePreparado)} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block rounded-full bg-navy-500 px-6 py-3 text-white">Abrir WhatsApp para enviar</a>
+          <button type="button" onClick={async () => {
+            try { await navigator.clipboard.writeText(mensajePreparado); setCopiado(true); }
+            catch { setErrorPedido("Seleccioná y copiá el texto del pedido manualmente."); }
+          }} className="m-2 rounded-full border border-navy-500 px-5 py-3 text-navy-500">Copiar pedido</button>
+          <p role="status" className="text-sm text-navy-500">{copiado ? "Pedido copiado." : errorPedido}</p>
+          <button type="button" onClick={() => { setEnviado(false); setCopiado(false); }} className="mt-3 rounded px-4 py-3 text-navy-500 underline">Volver a revisar</button>
           <p className="mt-2 text-sm font-light text-navy-400">
             Te confirmamos existencias y el total antes de preparar todo.
           </p>
@@ -260,7 +311,8 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
       )}
 
       <div className="mt-8 grid gap-10 lg:grid-cols-[1fr_340px]">
-        <form onSubmit={enviar} noValidate>
+        <form onSubmit={enviar} noValidate aria-busy={verificando}>
+          <fieldset disabled={verificando}>
           <fieldset>
             <legend className="text-sm font-medium uppercase tracking-wider text-navy-400">
               Tus datos
@@ -326,7 +378,7 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
             <div className="mt-4 space-y-3">
               {([
                 ["retiro", "Retiro en tienda", "Sin costo. Te avisamos cuando esté listo."],
-                ["coordinar", "Coordinar envío", "Marcá el punto de entrega y coordinamos por WhatsApp."],
+                ["coordinar", "Coordinar envío", "Completá la dirección. Costo y plazo se confirman por WhatsApp."],
               ] as const).map(([valor, titulo, detalle]) => (
                 <label
                   key={valor}
@@ -354,9 +406,9 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
 
             {entrega === "coordinar" && (
               <div className="mt-5">
-                <DireccionEntregaCliente valor={direccion} onCambiar={setDireccion} />
+                <DireccionEntregaCliente valor={direccion} onCambiar={setDireccion} error={errores.direccion} />
                 {errores.direccion && (
-                  <p role="alert" className="mt-2 text-[13px] text-red-700">
+                  <p id="err-direccion" role="alert" className="mt-2 text-[13px] text-red-700">
                     {errores.direccion}
                   </p>
                 )}
@@ -381,15 +433,17 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
 
           <button
             type="submit"
-            disabled={sinWhatsApp}
+            disabled={sinWhatsApp || verificando}
             className="mt-8 w-full rounded-full bg-navy-500 py-4 text-sm font-medium text-crema-100 transition-colors hover:bg-navy-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-crema-400 disabled:text-navy-300 lg:w-auto lg:px-12"
           >
-            Enviar pedido por WhatsApp
+            {verificando ? "Verificando precios y existencias…" : "Verificar y preparar pedido"}
           </button>
           <p className="mt-3 text-[12.5px] font-light text-navy-400">
             No se cobra nada en línea. Confirmamos existencias y total antes de
             preparar el pedido.
           </p>
+          </fieldset>
+          <p role="alert" className="mt-4 text-sm text-red-700">{errorPedido}</p>
         </form>
 
         <aside className="lg:sticky lg:top-40 lg:self-start">
@@ -408,7 +462,7 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
               ))}
             </ul>
             <div className="mt-5 flex items-baseline justify-between border-t border-crema-400 pt-5">
-              <span className="text-sm font-medium text-navy-500">Total</span>
+              <span className="text-sm font-medium text-navy-500">Subtotal de productos</span>
               <span className="text-[26px] font-medium text-navy-500">
                 {formatoColones(totalComprable)}
               </span>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useCarrito, resolverCarrito } from "@/lib/carrito";
 import { formatoColones, presentacionVisible, tinteDeSku } from "@/lib/formato";
 import type { Producto } from "@/lib/types";
@@ -10,11 +10,15 @@ import type { Producto } from "@/lib/types";
 function Cantidad({
   valor, onCambio, nombre,
 }: { valor: number; onCambio: (n: number) => void; nombre: string }) {
+  const [borrador, setBorrador] = useState(String(valor));
+  const [previo, setPrevio] = useState(valor);
+  if (previo !== valor) { setPrevio(valor); setBorrador(String(valor)); }
   return (
     <div className="inline-flex items-center rounded-full border border-crema-400 bg-white">
       <button
         type="button"
         onClick={() => onCambio(valor - 1)}
+        disabled={valor <= 1}
         aria-label={`Quitar una unidad de ${nombre}`}
         className="grid h-10 w-10 place-items-center rounded-full text-navy-400 transition-colors hover:bg-crema-200 hover:text-navy-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500"
       >
@@ -25,14 +29,20 @@ function Cantidad({
         type="number"
         min={1}
         max={99}
-        value={valor}
-        onChange={(e) => onCambio(Number(e.target.value))}
+        value={borrador}
+        onChange={(e) => setBorrador(e.target.value)}
+        onBlur={() => {
+          const numero = Number(borrador);
+          if (Number.isInteger(numero) && numero >= 1 && numero <= 99) onCambio(numero);
+          else setBorrador(String(valor));
+        }}
         aria-label={`Cantidad de ${nombre}`}
         className="w-11 border-0 bg-transparent text-center text-sm font-medium text-navy-500 outline-none [appearance:textfield] focus-visible:ring-2 focus-visible:ring-navy-500 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
       />
       <button
         type="button"
         onClick={() => onCambio(valor + 1)}
+        disabled={valor >= 99}
         aria-label={`Agregar una unidad de ${nombre}`}
         className="grid h-10 w-10 place-items-center rounded-full text-navy-400 transition-colors hover:bg-crema-200 hover:text-navy-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500"
       >

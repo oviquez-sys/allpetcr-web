@@ -24,9 +24,9 @@ export default function BotonAvisoDisponibilidad({ producto }: Props) {
 
   if (estado === "ok") {
     return (
-      <p className="mt-1 flex items-center gap-2 text-sm text-navy-500">
+      <p role="status" className="mt-1 flex items-center gap-2 text-sm text-navy-500">
         <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-emerald-600" aria-hidden="true" />
-        Listo, te escribimos a {email} apenas vuelva a haber.
+        Registramos tu interés y el correo {email}. Consultá con la tienda para conocer la disponibilidad; todavía no hay una fecha de reposición confirmada.
       </p>
     );
   }
@@ -55,6 +55,7 @@ export default function BotonAvisoDisponibilidad({ producto }: Props) {
       <input
         id={`aviso-email-${producto.sku}`}
         type="email"
+        autoComplete="email"
         required
         placeholder="tu@correo.com"
         value={email}

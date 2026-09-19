@@ -3,7 +3,8 @@ import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import categorias from "@/data/categorias.json";
 import productos from "@/data/productos.json";
-import { navegacion, destacadas, ESPECIES, esParaEspecie } from "./navegacion";
+import { construirNavegacion, ESPECIES, esParaEspecie } from "./navegacion";
+const navegacion = construirNavegacion(categorias, productos);
 
 /**
  * Esta prueba existe por un defecto real: la barra de navegación enlazaba a
@@ -27,7 +28,7 @@ import { navegacion, destacadas, ESPECIES, esParaEspecie } from "./navegacion";
 const raiz = join(__dirname, "..");
 const RUTAS_VALIDAS = [
   "/", "/catalogo", "/contacto", "/sobre-nosotros", "/carrito", "/checkout",
-  "/recompra",
+  "/recompra", "/envios",
 ];
 
 const idsValidos = new Set(categorias.map((c) => c.id));
@@ -72,9 +73,6 @@ function todosLosEnlaces(): { href: string; origen: string }[] {
     for (const g of s.grupos) {
       out.push({ href: g.href, origen: `"${s.label}" → "${g.label}"` });
     }
-  }
-  for (const d of destacadas) {
-    out.push({ href: d.href, origen: `destacada "${d.nombre}"` });
   }
   return out;
 }

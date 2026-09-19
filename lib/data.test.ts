@@ -8,6 +8,46 @@ import categoriasJson from "@/data/categorias.json";
  * de siempre); con ambas, pide el catálogo en vivo al ERP.
  */
 describe("getProductos / getCategorias", () => {
+  it("consulta directamente una ficha agotada y distingue un 404 de una falla del ERP", async () => {
+    vi.stubEnv("ERP_API_URL", "http://erp-de-prueba");
+    vi.stubEnv("ERP_API_TOKEN", "token-prueba");
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ sku: "A1", disponible: false })))
+      .mockResolvedValueOnce(new Response("", { status: 404 }))
+      .mockResolvedValueOnce(new Response("", { status: 503 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const { getProductoPorSku } = await import("./data");
+    await expect(getProductoPorSku("A1")).resolves.toEqual({ sku: "A1", disponible: false });
+    expect(fetchMock.mock.calls[0][0]).toBe("http://erp-de-prueba/api/catalogo/productos/A1/");
+    await expect(getProductoPorSku("NO-EXISTE")).resolves.toBeUndefined();
+    await expect(getProductoPorSku("A2")).rejects.toThrow("503");
+  });
+  it("no publica el catálogo estático si falta el ERP en producción", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("ERP_API_URL", "");
+    vi.stubEnv("ERP_API_TOKEN", "");
+    const { getProductos } = await import("./data");
+    await expect(getProductos()).rejects.toThrow("requiere configurar");
+  });
+
+  it("no envía el token al origen indicado por un next externo", async () => {
+    vi.stubEnv("ERP_API_URL", "http://erp-de-prueba");
+    vi.stubEnv("ERP_API_TOKEN", "token-prueba");
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ results: [], next: "https://externo.invalid/productos" })));
+    vi.stubGlobal("fetch", fetchMock);
+    const { getProductos } = await import("./data");
+    await expect(getProductos()).rejects.toThrow("Origen");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock.mock.calls[0]).toEqual(expect.arrayContaining([expect.objectContaining({ cache: "no-store", redirect: "error" })]));
+  });
+
+  it("interrumpe una paginación cíclica", async () => {
+    vi.stubEnv("ERP_API_URL", "http://erp-de-prueba");
+    vi.stubEnv("ERP_API_TOKEN", "token-prueba");
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ results: [], next: "/api/catalogo/productos/" }))));
+    const { getProductos } = await import("./data");
+    await expect(getProductos()).rejects.toThrow("Paginación");
+  });
   afterEach(() => {
     vi.unstubAllEnvs();
     vi.unstubAllGlobals();

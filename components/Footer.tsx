@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { negocio, direccionCompleta, faltante } from "@/lib/negocio";
-import { navegacion } from "@/lib/navegacion";
+import { ESPECIES, hrefEspecie } from "@/lib/navegacion";
 import Marca from "./Marca";
 
 // Los enlaces de "Comprar" salen de lib/navegacion.ts, no escritos a mano.
@@ -17,7 +17,7 @@ const columnas = [
   {
     titulo: "Comprar",
     enlaces: [
-      ...navegacion.map((s) => ({ href: s.href, label: s.label })),
+      ...ESPECIES.map((s) => ({ href: hrefEspecie(s.clave), label: s.label })),
       { href: "/catalogo", label: "Todo el catálogo" },
     ],
   },
@@ -28,7 +28,7 @@ const columnas = [
     // honesto sobre a dónde lleva, en vez de simular tres páginas que no
     // existen.
     titulo: "Ayuda",
-    enlaces: [{ href: "/contacto", label: "Contacto" }],
+    enlaces: [{ href: "/contacto", label: "Contacto" }, { href: "/envios", label: "Entregas y cómo comprar" }],
   },
   {
     titulo: "Nosotros",

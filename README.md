@@ -1,3 +1,5 @@
+> Actualización de septiembre de 2026: consultar [implementación de auditoría y lanzamiento](docs/IMPLEMENTACION-AUDITORIA-2026-09-19.md). Producción requiere ERP; el checkout verifica el catálogo antes de preparar WhatsApp. Las instrucciones históricas que indiquen catálogo estático o vaciado automático del carrito quedan sustituidas.
+
 # AllPetcr.com — sitio web
 
 Next.js 16 (App Router) + TypeScript + Tailwind. Catálogo con carrito y

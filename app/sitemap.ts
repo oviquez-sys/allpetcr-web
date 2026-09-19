@@ -16,16 +16,15 @@ import { negocio } from "@/lib/negocio";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = negocio.sitioUrl;
   const productos = await getProductos();
-  const ahora = new Date();
 
   return [
-    { url: base, lastModified: ahora, changeFrequency: "weekly", priority: 1 },
-    { url: `${base}/catalogo`, lastModified: ahora, changeFrequency: "daily", priority: 0.9 },
-    { url: `${base}/contacto`, lastModified: ahora, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${base}/sobre-nosotros`, lastModified: ahora, changeFrequency: "monthly", priority: 0.5 },
+    { url: base, changeFrequency: "weekly", priority: 1 },
+    { url: `${base}/catalogo`, changeFrequency: "daily", priority: 0.9 },
+    { url: `${base}/contacto`, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${base}/sobre-nosotros`, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${base}/envios`, changeFrequency: "monthly", priority: 0.5 },
     ...productos.map((p) => ({
       url: `${base}/producto/${encodeURIComponent(p.sku)}`,
-      lastModified: ahora,
       changeFrequency: "weekly" as const,
       priority: 0.7,
     })),

@@ -61,7 +61,7 @@ export default function MapaDireccion({ lat, lng, onCambiar }: Props) {
   const posicion: [number, number] = lat !== null && lng !== null ? [lat, lng] : CENTRO_POR_DEFECTO;
 
   return (
-    <div className="overflow-hidden rounded-card border border-crema-400">
+    <div className="relative isolate z-0 overflow-hidden rounded-card border border-crema-400">
       <MapContainer
         center={posicion}
         zoom={lat !== null ? 16 : 13}

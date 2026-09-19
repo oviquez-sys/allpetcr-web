@@ -5,6 +5,23 @@ function pedido(cuerpo: unknown) {
 }
 
 describe("POST /api/checkout", () => {
+  it("devuelve un error recuperable sin exponer detalles del ERP", async () => {
+    vi.doMock("@/lib/data", () => ({ getProductos: async () => { throw new Error("detalle privado"); } }));
+    const { POST } = await import("./route");
+    const respuesta = await POST(pedido({ lineas: [{ sku: "A1", cantidad: 1 }] }));
+    expect(respuesta.status).toBe(503);
+    const texto = JSON.stringify(await respuesta.json());
+    expect(texto).toContain("carrito se conserva");
+    expect(texto).not.toContain("detalle privado");
+  });
+  it("rechaza líneas duplicadas antes de consultar el ERP", async () => {
+    const getProductos = vi.fn();
+    vi.doMock("@/lib/data", () => ({ getProductos }));
+    const { POST } = await import("./route");
+    const respuesta = await POST(pedido({ lineas: [{ sku: "A1", cantidad: 60 }, { sku: "A1", cantidad: 60 }] }));
+    expect(respuesta.status).toBe(400);
+    expect(getProductos).not.toHaveBeenCalled();
+  });
   afterEach(() => {
     vi.resetModules();
     vi.doUnmock("@/lib/data");

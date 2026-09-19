@@ -36,8 +36,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "El pedido no tiene productos." }, { status: 400 });
   }
 
-  const productos = await getProductos();
-  const resultado = calcularTotalCheckout(lineas, productos);
-
-  return NextResponse.json(resultado);
+  if (lineas.length > 100 || new Set(lineas.map((l) => l.sku)).size !== lineas.length) {
+    return NextResponse.json({ error: "Revisá las líneas del carrito." }, { status: 400 });
+  }
+  try {
+    const productos = await getProductos();
+    const resultado = calcularTotalCheckout(lineas, productos);
+    return NextResponse.json(resultado, { headers: { "Cache-Control": "no-store" } });
+  } catch {
+    return NextResponse.json({ error: "No pudimos verificar precios y existencias. Tu carrito se conserva; intentá de nuevo." }, { status: 503 });
+  }
 }

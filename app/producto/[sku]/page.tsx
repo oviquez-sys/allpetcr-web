@@ -8,12 +8,8 @@ import { getCategorias, getProductoPorSku, getProductos } from "@/lib/data";
 import { formatoColones, presentacionVisible, tinteDeSku } from "@/lib/formato";
 import { negocio, urlWhatsApp, faltante } from "@/lib/negocio";
 
-// Genera una página estática por producto al compilar: son instantáneas al
-// abrirse y las indexa Google.
-export async function generateStaticParams() {
-  const productos = await getProductos();
-  return productos.map((p) => ({ sku: p.sku }));
-}
+// El precio y la disponibilidad se consultan durante cada visita.
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
@@ -76,7 +72,6 @@ export default async function ProductoPage({
   );
   const relacionados = [
     ...mismaCategoria.filter((p) => p.disponible),
-    ...mismaCategoria.filter((p) => !p.disponible),
   ].slice(0, 4);
 
   const url = `${negocio.sitioUrl}/producto/${encodeURIComponent(producto.sku)}`;
@@ -91,7 +86,7 @@ export default async function ProductoPage({
     ...(producto.descripcion ? { description: producto.descripcion } : {}),
     // Absoluta: Google necesita resolver la imagen sin depender de la página
     // desde la que se lee el marcado.
-    ...(producto.imagen ? { image: `${negocio.sitioUrl}${producto.imagen}` } : {}),
+    ...(producto.imagen ? { image: new URL(producto.imagen, negocio.sitioUrl).href } : {}),
     // `size` solo si es presentación de venta: marcar "Paquete: 12 / Caja: 216"
     // como talla es marcado incorrecto, y Google lo penaliza o lo descarta.
     ...(presentacionVisible(producto.presentacion)
@@ -150,9 +145,9 @@ export default async function ProductoPage({
   return (
     <>
       <script type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(ldProducto) }} />
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(ldProducto).replace(/</g, "\\u003c") }} />
       <script type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(ldMigas) }} />
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(ldMigas).replace(/</g, "\\u003c") }} />
 
       <div className="mx-auto max-w-contenido px-6 pt-6">
         <nav aria-label="Ruta" className="text-xs text-navy-400">

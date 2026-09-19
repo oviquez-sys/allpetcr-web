@@ -56,7 +56,7 @@ export default function BotonAgregar({ producto, tamano = "grande", className = 
             agotado
               ? "cursor-not-allowed bg-crema-300 text-navy-300"
               : confirmado
-                ? "bg-dorado-500 text-white"
+                ? "bg-dorado-500 text-navy-500"
                 : "bg-navy-500 text-crema-100 hover:bg-navy-600"
           } ${className}`}
         >
@@ -85,7 +85,7 @@ export default function BotonAgregar({ producto, tamano = "grande", className = 
           agotado
             ? "cursor-not-allowed bg-crema-300 text-navy-300"
             : confirmado
-              ? "bg-dorado-500 text-white"
+              ? "bg-dorado-500 text-navy-500"
               : "bg-navy-500 text-crema-100 hover:bg-navy-600"
         } ${className}`}
       >

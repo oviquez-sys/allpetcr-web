@@ -1,6 +1,9 @@
+import Link from "next/link";
+import { negocio } from "@/lib/negocio";
 export const metadata = {
   // Sin sufijo manual: app/layout.tsx ya agrega " | AllPet" vía su template.
   title: "Sobre nosotros",
+  alternates: { canonical: "/sobre-nosotros" },
 };
 
 // NOTA: borrador de copy. Reemplazar con la historia real de AllPetcr
@@ -18,9 +21,12 @@ export default function SobreNosotrosPage() {
           Costa Rica.
         </p>
         <p>
-          Encontrá la dirección, horario y canales de atención verificados en
-          nuestra página de contacto.
+          Reunimos productos para el juego, el paseo y el cuidado de perros y gatos.
+          Podés explorar el catálogo online, preparar tu pedido y confirmarlo con la tienda por WhatsApp.
         </p>
+        <p>{negocio.horarioTexto}</p>
+        <p>Si necesitás ayuda para elegir talla, material o uso, consultanos indicando el código del producto.</p>
+        <Link href="/contacto" className="inline-block rounded-full bg-navy-500 px-6 py-3 text-sm text-white">Conocer la tienda y contactar</Link>
       </div>
     </section>
   );
