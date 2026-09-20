@@ -60,7 +60,7 @@ export default function BotonAgregar({ producto, tamano = "grande", className = 
                 : "bg-navy-500 text-crema-100 hover:bg-navy-600"
           } ${className}`}
         >
-          {agotado ? "Sin existencias" : confirmado ? "Agregado ✓" : "Agregar"}
+          {agotado ? "Sin existencias" : confirmado ? "Agregado al carrito ✓" : "Agregar al carrito"}
         </button>
         {agotado && (
           <span id={idAyuda} className="sr-only">

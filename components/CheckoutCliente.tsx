@@ -272,7 +272,7 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
   }
 
   const claseCampo =
-    "mt-2 w-full rounded-lg border bg-crema-100 px-4 py-3 text-[15px] text-navy-500 outline-none transition-colors focus:border-navy-400 focus-visible:ring-2 focus-visible:ring-navy-500";
+    "mt-2 w-full rounded-lg border border-crema-400 bg-white px-4 py-3 text-[15px] text-navy-500 outline-none transition-colors focus:border-navy-400 focus-visible:ring-2 focus-visible:ring-navy-500";
 
   return (
     <div className="mx-auto max-w-contenido px-6 py-12">

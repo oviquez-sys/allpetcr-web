@@ -283,8 +283,7 @@ export default async function HomePage() {
                 href={hrefCats([c.id])}
                 className="text-sm text-navy-400 transition-colors hover:text-navy-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500"
               >
-                {c.nombre}{" "}
-                <span className="font-medium text-dorado-700">{c.total}</span>
+                {c.nombre}
               </Link>
             </li>
           ))}
@@ -309,7 +308,7 @@ export default async function HomePage() {
                 Ver los {disponibles.length}
               </Link>
             </div>
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-x-3 gap-y-8 sm:gap-x-4 sm:gap-y-10 lg:grid-cols-4">
               {vitrina.map((p, indice) => (
                 <TarjetaProducto
                   key={p.sku}

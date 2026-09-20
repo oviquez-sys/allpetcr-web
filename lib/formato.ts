@@ -61,3 +61,55 @@ export function presentacionVisible(presentacion: string | undefined): string {
   if (!limpia || EMPAQUE_DE_BODEGA.test(limpia)) return "";
   return limpia;
 }
+
+/**
+ * NOMBRE RESUMIDO PARA LA TARJETA DEL CATÁLOGO (20/09/2026, a pedido de
+ * Oscar)
+ *
+ * ── QUÉ HACE
+ * Quita, solo al final del nombre, la medida ("70 cm", "55.5x36x18.5 cm") y,
+ * si queda una palabra de forma justo detrás de esa medida ("Redonda",
+ * "Cuadrado"...), también la quita.
+ *   "Alfombrilla Refrescante Redonda 70 cm" → "Alfombrilla Refrescante"
+ *
+ * ── POR QUÉ SOLO AL FINAL Y SOLO ESE PATRÓN
+ * "Talla L" / "Talla M" / "Talla S" NO calza con el patrón (no hay número
+ * antes de la unidad), así que nunca se toca. Eso importa: cuando la talla es
+ * lo único que distingue tres productos con el mismo nombre base, borrarla
+ * dejaría tres tarjetas iguales en la grilla y el cliente no podría saber
+ * cuál es cuál. Por la misma razón nunca se acorta a la fuerza por cantidad
+ * de palabras — solo se quita lo que el patrón reconoce con certeza como
+ * medida o forma redundante, así que en un nombre sin esa cola el resultado
+ * es el nombre completo, sin recortes raros a mitad de frase.
+ *
+ * ── DÓNDE SE USA
+ * Únicamente en <TarjetaProducto> (la tarjeta del catálogo). La ficha de
+ * producto, el carrito, el checkout y el pedido por WhatsApp siguen usando
+ * `producto.nombre` completo — ahí sí importa el detalle exacto.
+ */
+const MEDIDA_AL_FINAL =
+  /\s+\d+(?:[.,]\d+)?(?:\s*[x×]\s*\d+(?:[.,]\d+)?){0,2}\s*(cm|mm|m|kg|g|ml|l)\.?\s*$/i;
+
+const FORMAS_REDUNDANTES = new Set([
+  "redonda",
+  "redondo",
+  "cuadrado",
+  "cuadrada",
+  "rectangular",
+  "ovalado",
+  "ovalada",
+]);
+
+export function nombreResumido(nombre: string): string {
+  const original = nombre.trim();
+  let s = original.replace(MEDIDA_AL_FINAL, "");
+
+  const palabras = s.split(/\s+/).filter(Boolean);
+  const ultima = palabras[palabras.length - 1]?.toLowerCase();
+  if (palabras.length > 2 && ultima && FORMAS_REDUNDANTES.has(ultima)) {
+    palabras.pop();
+    s = palabras.join(" ");
+  }
+
+  return s.trim() || original;
+}

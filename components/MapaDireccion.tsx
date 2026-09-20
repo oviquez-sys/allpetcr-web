@@ -87,7 +87,7 @@ export default function MapaDireccion({ lat, lng, onCambiar }: Props) {
         )}
         <ManejadorClicks onCambiar={onCambiar} />
       </MapContainer>
-      <p className="border-t border-crema-400 bg-crema-100 px-4 py-2.5 text-xs text-navy-400">
+      <p className="border-t border-crema-400 bg-white px-4 py-2.5 text-xs text-navy-400">
         Tocá el mapa para marcar dónde entregar. Podés arrastrar el pin para ajustarlo.
       </p>
     </div>

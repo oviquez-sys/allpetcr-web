@@ -183,7 +183,7 @@ export default async function ProductoPage({
             nunca se rompió. */}
         <div
           className={`relative grid aspect-square place-items-center overflow-hidden rounded-card ${
-            producto.imagen ? "bg-crema-100" : tinteDeSku(producto.sku)
+            producto.imagen ? "bg-white" : tinteDeSku(producto.sku)
           }`}
         >
           {producto.imagen ? (

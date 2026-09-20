@@ -77,7 +77,7 @@ export default function PedidoSeguimientoCliente({ numero }: { numero: string })
             placeholder="8888-7777"
             value={telefono}
             onChange={(e) => setTelefono(e.target.value)}
-            className="mt-2 w-full rounded-lg border border-crema-400 bg-crema-100 px-4 py-3 text-[15px] text-navy-500 outline-none transition-colors focus:border-navy-400 focus-visible:ring-2 focus-visible:ring-navy-500"
+            className="mt-2 w-full rounded-lg border border-crema-400 bg-white px-4 py-3 text-[15px] text-navy-500 outline-none transition-colors focus:border-navy-400 focus-visible:ring-2 focus-visible:ring-navy-500"
           />
         </div>
         <button

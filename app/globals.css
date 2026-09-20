@@ -40,7 +40,7 @@ html {
 }
 
 body {
-  @apply bg-crema-100 font-sans text-navy-500 antialiased;
+  @apply bg-white font-sans text-navy-500 antialiased;
 }
 
 /* Fraunces trae "opsz" (optical size): en tamaños grandes afina los trazos.

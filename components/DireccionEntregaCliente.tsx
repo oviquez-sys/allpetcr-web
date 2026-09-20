@@ -28,7 +28,7 @@ interface Props {
 }
 
 const claseCampo =
-  "mt-1.5 w-full rounded-lg border border-crema-400 bg-crema-100 px-3.5 py-2.5 text-sm text-navy-500 outline-none transition-colors focus:border-navy-400 focus-visible:ring-2 focus-visible:ring-navy-500";
+  "mt-1.5 w-full rounded-lg border border-crema-400 bg-white px-3.5 py-2.5 text-sm text-navy-500 outline-none transition-colors focus:border-navy-400 focus-visible:ring-2 focus-visible:ring-navy-500";
 
 /**
  * Dirección de entrega: mapa + provincia/cantón/distrito + señas (ítem 33).

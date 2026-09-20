@@ -147,7 +147,7 @@ export default function NavBar({ navegacion }: { navegacion: SeccionNav[] }) {
       </p>
       <div className="franja-dorada" aria-hidden="true" />
 
-      <header className="sticky top-0 z-50 border-b border-crema-400 bg-crema-100/95 backdrop-blur">
+      <header className="sticky top-0 z-50 border-b border-crema-400 bg-white/95 backdrop-blur">
         <div className="mx-auto max-w-contenido px-6">
           {/* Fila 1: menú móvil · logo · buscador · carrito */}
           <div className="flex items-center gap-4 py-3.5 sm:gap-7">
@@ -309,7 +309,7 @@ export default function NavBar({ navegacion }: { navegacion: SeccionNav[] }) {
             id="menu-movil"
             onClick={(e) => { if ((e.target as Element).closest("a")) setAbierto(false); }}
             aria-label="Categorías"
-            className="max-h-[calc(100dvh-10rem)] overflow-y-auto overscroll-contain border-t border-crema-400 bg-crema-100 lg:hidden"
+            className="max-h-[calc(100dvh-10rem)] overflow-y-auto overscroll-contain border-t border-crema-400 bg-white lg:hidden"
           >
             <ul className="mx-auto max-w-contenido px-6 py-3">
               {navegacion.map((seccion) => (

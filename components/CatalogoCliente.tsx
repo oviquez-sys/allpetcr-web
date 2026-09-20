@@ -267,7 +267,6 @@ export default function CatalogoCliente({
                         className="h-3.5 w-3.5 accent-navy-500"
                       />
                       <span className="flex-1">{c.nombre}</span>
-                      <span className="text-xs text-navy-400">{c.cuantos}</span>
                     </label>
                   ))}
                 </div>
@@ -339,7 +338,7 @@ export default function CatalogoCliente({
               // Mientras el filtrado va en camino, la grilla se atenúa un
               // poco en vez de congelarse. Es una señal honesta de "estoy
               // trabajando" y evita la sensación de que la página se trabó.
-              className={`grid gap-5 transition-opacity duration-150 sm:grid-cols-2 xl:grid-cols-3 motion-reduce:transition-none ${
+              className={`grid grid-cols-2 gap-x-3 gap-y-8 transition-opacity duration-150 sm:gap-x-4 sm:gap-y-10 xl:grid-cols-3 motion-reduce:transition-none ${
                 filtrando ? "opacity-60" : "opacity-100"
               }`}
             >
