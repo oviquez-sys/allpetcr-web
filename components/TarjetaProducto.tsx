@@ -45,7 +45,7 @@ function TarjetaProducto({ producto, categoria, cargaPrioritaria = false }: Prop
             "con zoom" y perdían parte del producto. */}
         <div
           className={`relative grid aspect-square place-items-center overflow-hidden ${
-            producto.imagen ? "bg-white" : tinteDeSku(producto.sku)
+            producto.imagen ? "bg-crema-100" : tinteDeSku(producto.sku)
           }`}
         >
           {producto.imagen ? (
