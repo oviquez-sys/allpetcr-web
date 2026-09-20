@@ -313,7 +313,10 @@ export default async function HomePage() {
                 <TarjetaProducto
                   key={p.sku}
                   producto={p}
-                  cargaPrioritaria={indice === 0}
+                  // Esta grilla llega a 4 columnas en desktop (lg): las
+                  // primeras 4 tarjetas están siempre visibles sin scroll.
+                  // Ver la nota igual en CatalogoCliente.tsx.
+                  cargaPrioritaria={indice < 4}
                   categoria={
                     p.categoria_id === null ? undefined : nombrePorId.get(p.categoria_id)
                   }

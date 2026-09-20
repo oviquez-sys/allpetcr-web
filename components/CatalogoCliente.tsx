@@ -346,7 +346,14 @@ export default function CatalogoCliente({
                 <TarjetaProducto
                   key={p.sku}
                   producto={p}
-                  cargaPrioritaria={indice === 0}
+                  // La grilla es de 2 columnas en móvil/tablet y 3 en xl: las
+                  // primeras 3 tarjetas están siempre visibles sin scroll en
+                  // cualquier ancho. Antes solo la primera tenía prioridad —
+                  // la segunda y tercera, aunque visibles de entrada, cargaban
+                  // en "lazy" y llegaban tarde. Con prioridad, el navegador
+                  // las pide de inmediato en vez de esperar a que el
+                  // IntersectionObserver las note casi-en-pantalla.
+                  cargaPrioritaria={indice < 3}
                   categoria={
                     p.categoria_id === null
                       ? undefined

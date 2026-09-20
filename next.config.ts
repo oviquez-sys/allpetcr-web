@@ -99,6 +99,17 @@ const nextConfig: NextConfig = {
     // que es el punto donde más se degrada el móvil.
     remotePatterns: patronesDeImagenExternas(),
     formats: ["image/avif", "image/webp"],
+    // Sin esto, Next cachea cada variante optimizada (tamaño × formato) solo
+    // 60 segundos (su valor por defecto) — pensado para imágenes que cambian
+    // seguido, no para fotos de producto que son casi siempre las mismas
+    // semanas seguidas. Con 60s, cada visitante nuevo fuera de esa ventana
+    // vuelve a pagar el costo de generar la variante desde cero. 30 días deja
+    // que una vez que ALGUIEN pidió, por ejemplo, "el arnés en 640px WebP",
+    // el resto de los visitantes con ese mismo ancho de pantalla reciban la
+    // copia ya generada — la primera visita de cada tamaño es la única lenta.
+    // Si algún día se reemplaza una foto usando la MISMA url, puede tardar
+    // hasta 30 días en verse el cambio; hoy las fotos no se reemplazan así.
+    minimumCacheTTL: 60 * 60 * 24 * 30,
     // El ERP en desarrollo vive en localhost: next/image bloquea por
     // defecto traer imágenes de una IP privada/loopback (protección contra
     // SSRF vía el optimizador — alguien podría usarlo para sondear la red

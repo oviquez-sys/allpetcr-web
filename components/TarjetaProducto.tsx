@@ -5,6 +5,16 @@ import type { Producto } from "@/lib/types";
 import { formatoColones, nombreResumido, tinteDeSku } from "@/lib/formato";
 import BotonAgregar from "./BotonAgregar";
 
+// Placeholder "shimmer" mientras carga la foto (20/09/2026): no reduce el
+// peso real de la imagen —para eso está `minimumCacheTTL` en next.config.ts—
+// esto es puramente de percepción. Sin esto, el cuadro queda en blanco hasta
+// que la foto entra; con esto, se ve un degradado sutil animándose desde el
+// primer instante, y el cambio a la foto real es menos brusco. Es el mismo
+// SVG para las ~184 tarjetas (no depende de cada foto), así que no cuesta
+// nada calcularlo por producto.
+const RELLENO_SHIMMER =
+  "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj4KICA8cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI0Y1RjBFOCIvPgogIDxyZWN0IGlkPSJyIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI0VGRThEQSIvPgogIDxhbmltYXRlIHhsaW5rOmhyZWY9IiNyIiBhdHRyaWJ1dGVOYW1lPSJ4IiBmcm9tPSItMTAwIiB0bz0iMTAwIiBkdXI9IjEuMXMiIHJlcGVhdENvdW50PSJpbmRlZmluaXRlIi8+Cjwvc3ZnPg==";
+
 interface Props {
   producto: Producto;
   /** Se sigue recibiendo por compatibilidad; la tarjeta ya no la muestra. */
@@ -57,6 +67,8 @@ function TarjetaProducto({ producto, cargaPrioritaria = false }: Props) {
               fill
               {...(cargaPrioritaria ? { priority: true } : { loading: "lazy" as const })}
               sizes="(max-width: 640px) 48vw, (max-width: 1280px) 32vw, 380px"
+              placeholder="blur"
+              blurDataURL={RELLENO_SHIMMER}
               className="object-cover transition-transform duration-300 ease-out group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
             />
           ) : (
