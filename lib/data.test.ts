@@ -125,7 +125,7 @@ describe("getProductos / getCategorias", () => {
     await expect(getProductos()).rejects.toThrow();
   });
 
-  it("rechaza productos incompletos y SKU duplicados", async () => {
+  it("rechaza productos incompletos y aísla SKU duplicados sin tumbar el catálogo", async () => {
     vi.stubEnv("ERP_API_URL", "http://erp-de-prueba");
     vi.stubEnv("ERP_API_TOKEN", "token-123");
     const respuestas = [
@@ -138,6 +138,6 @@ describe("getProductos / getCategorias", () => {
     await expect(modulo.getProductos()).rejects.toThrow("formato inválido");
     vi.resetModules();
     modulo = await import("./data");
-    await expect(modulo.getProductos()).rejects.toThrow("SKU duplicados");
+    await expect(modulo.getProductos()).resolves.toEqual([producto("A")]);
   });
 });

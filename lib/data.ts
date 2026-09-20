@@ -39,9 +39,15 @@ function esProducto(valor: unknown): valor is Producto {
 
 function validarProductos(valores: unknown[]): Producto[] {
   if (!valores.every(esProducto)) throw new Error("El ERP devolvió productos con un formato inválido.");
-  const skus = new Set(valores.map((p) => p.sku));
-  if (skus.size !== valores.length) throw new Error("El ERP devolvió SKU duplicados.");
-  return valores;
+  // Un SKU repetido es un defecto del ERP, pero no debe dejar la tienda
+  // completa sin catálogo. Conservamos la primera ficha recibida para que
+  // cada SKU tenga una sola representación en tarjetas, carrito y checkout.
+  // La ficha individual y el checkout siguen validándose contra el ERP.
+  const porSku = new Map<string, Producto>();
+  for (const producto of valores) {
+    if (!porSku.has(producto.sku)) porSku.set(producto.sku, producto);
+  }
+  return [...porSku.values()];
 }
 
 function esCategoria(valor: unknown): valor is Categoria {
