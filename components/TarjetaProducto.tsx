@@ -23,6 +23,14 @@ interface Props {
  * Fondo blanco con un borde muy sutil (`crema-300`) para que el cuadro se
  * distinga de la página sin usar un color de relleno. La foto en sí no se toca.
  *
+ * `object-cover`, sin relleno (20/09/2026, a pedido de Oscar: quiere la foto
+ * a tamaño completo del cuadro). Antes tenía `object-contain` + `padding`,
+ * que dejaba un margen blanco alrededor —redundante con el que ya traen las
+ * fotos del proveedor— y el producto se veía chico dentro de la tarjeta. Con
+ * `cover` la foto llena el cuadro entero; puede recortar un poco los bordes
+ * en fotos muy apaisadas, pero el catálogo es sobre todo cuadrado (1024×803)
+ * y el recorte es mínimo.
+ *
  * Rendimiento: `memo` + `tarjeta-diferida` (content-visibility) se mantienen,
  * la grilla del catálogo monta ~184 tarjetas a la vez.
  *
@@ -49,7 +57,7 @@ function TarjetaProducto({ producto, cargaPrioritaria = false }: Props) {
               fill
               {...(cargaPrioritaria ? { priority: true } : { loading: "lazy" as const })}
               sizes="(max-width: 640px) 48vw, (max-width: 1280px) 32vw, 380px"
-              className="object-contain p-4 transition-transform duration-300 ease-out group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover:scale-100 sm:p-6"
+              className="object-cover transition-transform duration-300 ease-out group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
             />
           ) : (
             <span className="text-label uppercase text-navy-400">Foto pendiente</span>

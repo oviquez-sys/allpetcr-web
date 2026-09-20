@@ -63,30 +63,39 @@ export function presentacionVisible(presentacion: string | undefined): string {
 }
 
 /**
- * NOMBRE RESUMIDO PARA LA TARJETA DEL CATÁLOGO (20/09/2026, a pedido de
- * Oscar)
+ * NOMBRE RESUMIDO PARA LA TARJETA DEL CATÁLOGO
+ * (20/09/2026, a pedido de Oscar; ajustado el mismo día a máximo 3 palabras)
  *
- * ── QUÉ HACE
- * Quita, solo al final del nombre, la medida ("70 cm", "55.5x36x18.5 cm") y,
- * si queda una palabra de forma justo detrás de esa medida ("Redonda",
- * "Cuadrado"...), también la quita.
+ * ── QUÉ HACE, EN ORDEN
+ * 1. Aparta "Talla L/M/S" (o cualquier código de talla) si está al final —
+ *    ver más abajo por qué esto nunca se toca.
+ * 2. Del resto, quita la medida final ("70 cm", "55.5x36x18.5 cm") y, si
+ *    queda pegada, una palabra de forma redundante ("Redonda", "Cuadrado"…).
+ * 3. Si aún quedan más de 3 palabras, corta a las primeras 3.
+ * 4. Si esa tercera palabra es una muletilla que no aporta nada sola
+ *    ("tipo", "para", "de"...), también se quita, y el nombre queda en 2.
+ * 5. Vuelve a pegar la talla apartada en el paso 1, sin contarla en el tope.
+ *
  *   "Alfombrilla Refrescante Redonda 70 cm" → "Alfombrilla Refrescante"
+ *   "Alimentador Lento tipo Tapete 20 cm"   → "Alimentador Lento"
+ *   "Arnés Acolchado Reflectivo Talla L"    → "Arnés Acolchado Reflectivo Talla L"
  *
- * ── POR QUÉ SOLO AL FINAL Y SOLO ESE PATRÓN
- * "Talla L" / "Talla M" / "Talla S" NO calza con el patrón (no hay número
- * antes de la unidad), así que nunca se toca. Eso importa: cuando la talla es
- * lo único que distingue tres productos con el mismo nombre base, borrarla
- * dejaría tres tarjetas iguales en la grilla y el cliente no podría saber
- * cuál es cuál. Por la misma razón nunca se acorta a la fuerza por cantidad
- * de palabras — solo se quita lo que el patrón reconoce con certeza como
- * medida o forma redundante, así que en un nombre sin esa cola el resultado
- * es el nombre completo, sin recortes raros a mitad de frase.
+ * ── POR QUÉ LA TALLA ES LA EXCEPCIÓN AL TOPE DE 3 PALABRAS
+ * Cuando la talla es lo único que distingue varios productos con el mismo
+ * nombre base, contarla dentro del tope (o recortarla) dejaría varias
+ * tarjetas con el nombre idéntico en la grilla y el cliente no podría saber
+ * cuál es cuál. Por eso se aparta ANTES de aplicar el tope y se pega después:
+ * el resto del nombre sí respeta las 3 palabras, la talla siempre se ve.
  *
  * ── DÓNDE SE USA
  * Únicamente en <TarjetaProducto> (la tarjeta del catálogo). La ficha de
  * producto, el carrito, el checkout y el pedido por WhatsApp siguen usando
  * `producto.nombre` completo — ahí sí importa el detalle exacto.
  */
+const TOPE_PALABRAS = 3;
+
+const TALLA_AL_FINAL = /\s+talla\s+\S+\s*$/i;
+
 const MEDIDA_AL_FINAL =
   /\s+\d+(?:[.,]\d+)?(?:\s*[x×]\s*\d+(?:[.,]\d+)?){0,2}\s*(cm|mm|m|kg|g|ml|l)\.?\s*$/i;
 
@@ -100,16 +109,47 @@ const FORMAS_REDUNDANTES = new Set([
   "ovalada",
 ]);
 
+// Palabras que, si quedan solas al final tras cortar a 3, no aportan nada
+// ("Alimentador Lento tipo" no dice más que "Alimentador Lento") y sobran.
+const MULETILLAS_FINALES = new Set([
+  "tipo",
+  "estilo",
+  "para",
+  "de",
+  "del",
+  "con",
+  "en",
+  "sin",
+  "y",
+  "a",
+  "al",
+  "por",
+]);
+
 export function nombreResumido(nombre: string): string {
   const original = nombre.trim();
-  let s = original.replace(MEDIDA_AL_FINAL, "");
 
-  const palabras = s.split(/\s+/).filter(Boolean);
-  const ultima = palabras[palabras.length - 1]?.toLowerCase();
-  if (palabras.length > 2 && ultima && FORMAS_REDUNDANTES.has(ultima)) {
+  const coincideTalla = original.match(TALLA_AL_FINAL);
+  const sufijoTalla = coincideTalla ? coincideTalla[0].replace(/\s+/g, " ") : "";
+  const base = coincideTalla ? original.slice(0, coincideTalla.index) : original;
+
+  let s = base.replace(MEDIDA_AL_FINAL, "");
+
+  let palabras = s.split(/\s+/).filter(Boolean);
+  const ultimaForma = palabras[palabras.length - 1]?.toLowerCase();
+  if (palabras.length > 2 && ultimaForma && FORMAS_REDUNDANTES.has(ultimaForma)) {
     palabras.pop();
-    s = palabras.join(" ");
   }
 
-  return s.trim() || original;
+  if (palabras.length > TOPE_PALABRAS) {
+    palabras = palabras.slice(0, TOPE_PALABRAS);
+  }
+
+  const ultimaMuletilla = palabras[palabras.length - 1]?.toLowerCase();
+  if (palabras.length > 1 && ultimaMuletilla && MULETILLAS_FINALES.has(ultimaMuletilla)) {
+    palabras.pop();
+  }
+
+  const resultado = `${palabras.join(" ")}${sufijoTalla}`.trim();
+  return resultado || original;
 }
