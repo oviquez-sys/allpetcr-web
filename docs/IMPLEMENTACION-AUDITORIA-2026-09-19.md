@@ -99,3 +99,45 @@ La continuación partió del commit `aa7d6ce`, que coincidía con `origin/main`,
 5. Ejecutar recorridos A–E sin enviar mensajes, pedidos ni formularios reales. Comparar SKU/precio entre catálogo, ficha, carrito, resumen y mensaje preparado.
 6. Tras resolver los pendientes comerciales y QA, activar el dominio oficial, configurar NEXT_PUBLIC_SITE_URL=https://www.allpetcr.com y NEXT_PUBLIC_SITE_INDEXABLE=true, recompilar y verificar HTTPS, redirecciones, robots y sitemap. Esta activación no forma parte del despliegue de revisión.
 7. Reversión: volver al commit anterior mediante el historial de despliegues de DigitalOcean o un commit de reversión; no requiere revertir datos ni migraciones.
+
+## Continuación — 20 de septiembre de 2026
+
+**Punto de partida real (corrección del punto de referencia).** La instrucción de continuación de hoy asumía como estado actual el commit `2558155` (5 commits). El `HEAD` real de `origin/main` es `be33da2` — **tres commits más adelante**. Se verificó con `git log --stat` que esos tres commits (`1d26351`, `cd5f0de`, `be33da2`, todos "Cambios del dom 20/09/2026") corresponden exactamente, archivo por archivo, a los cambios de diseño de tarjeta de producto (fondo blanco, botón "Agregar al carrito", nombres resumidos a 3 palabras, foto a tamaño completo, eliminación de conteos por categoría) y de rendimiento de imágenes (`minimumCacheTTL`) que se hicieron y publicaron en esta misma sesión de chat, antes de esta auditoría. No hay ningún agente ni cambio paralelo: es la propia sesión, simplemente el prompt de auditoría se redactó antes de ese trabajo.
+
+**1. Verificación del despliegue en DigitalOcean — confirmado visualmente.** Se navegó con el navegador integrado a `https://allpetcr-web-6h6iv.ondigitalocean.app/` (inicio y catálogo) y se confirmó que la revisión pública corresponde a `be33da2`:
+- Botón "Agregar al carrito" (texto completo, no solo "Agregar").
+- Fondo blanco en cabecera y tarjetas; banda `crema-100` solo en la sección "La vitrina" (uso decorativo de sección, no de fondo general — sin cambios).
+- Categoría del catálogo sin números de conteo junto al nombre; igual en la lista de categorías del pie de inicio.
+- Nombres de producto cortos ("Juguete pato", "Arnes", "Alfombra para arena") y foto de producto a tamaño completo de su recuadro, sin relleno visible.
+- Conteo global "296 productos" (dato del ERP en vivo, no el JSON estático de 184) y "Para perro 188 productos" / "Para gato 107 productos" (conteo por especie, deliberadamente sin tocar — distinto del conteo por categoría que sí se pidió quitar).
+- No se observó el `503` intermitente que se había registrado el 19/09; la página respondió con normalidad en ambas cargas.
+
+No se realizaron pedidos, mensajes de WhatsApp ni formularios.
+
+**2. Validaciones ejecutadas contra `be33da2`** (clon completo fresco de `origin/main`, `npm ci`):
+- `npx tsc --noEmit`: aprobado, sin errores.
+- `npm run lint`: aprobado, sin advertencias.
+- `npm run test`: 114 pruebas aprobadas en 16 archivos.
+- `npm run build`: falla en `prebuild` (`scripts/verificar-datos.mjs --estricto`) con "Producción requiere ERP_API_URL y ERP_API_TOKEN" — **esperado y documentado**: esta máquina de auditoría no tiene ni puede tener acceso al ERP real ni al de desarrollo de Oscar. No es una regresión; el guard está funcionando como debe (falla explícita, no sirve datos viejos).
+
+**3. Hallazgo de seguridad (nuevo, no estaba en el documento anterior) — corregido.** `npm audit` sobre `be33da2` reportó 7 vulnerabilidades. Dos eran de severidad alta/crítica y **afectan directamente a este sitio**:
+- **Crítica**: Next.js (rango vulnerable incluye la versión instalada, `16.2.12`) — ejecución remota de código no autenticada en servidores Windows-hosted, y ejecución remota de código no autenticada en la API de optimización de imágenes **cuando se usan archivos AVIF**. Este sitio sirve AVIF explícitamente (`next.config.ts`, `images.formats`).
+- **Alta**: `sharp` (`<0.35.4`, instalado `0.35.3`) — vulnerabilidades en `libheif` usadas para decodificar imágenes.
+
+Corrección aplicada y verificada: `npm audit fix` (sin `--force`, sin cambios incompatibles) subió `next` a `16.3.5` y `sharp` a `0.35.4` **solo mediante `package-lock.json`** — `package.json` no cambió (los rangos `^16.2.12` y `^0.35.3` ya permitían estas versiones). Se repitieron `tsc`, `lint` y `test` después del cambio: los tres aprobaron igual que antes. El nuevo `package-lock.json` ya se escribió en la copia de Oscar y queda pendiente de que se publique con `SUBIR_CAMBIOS.bat` — DigitalOcean lo tomará automáticamente en el próximo `npm ci` del build. Localmente, si Oscar corre `npm run dev`, conviene que ejecute `npm install` una vez para sincronizar `node_modules` con el lockfile nuevo (no es obligatorio para que el sitio funcione, solo para que coincidan).
+
+Vulnerabilidades restantes (`vitest`, `vite`, `esbuild` — 3 moderadas, 1 crítica según el resumen de `npm audit`, pero **todas en `devDependencies`**, herramienta de pruebas que nunca se despliega a producción): requieren `vitest@5` (`npm audit fix --force`), que es un cambio con posibles roturas de API de pruebas. No se aplicó sin antes migrar y volver a validar la suite completa; queda como pendiente de menor urgencia porque no afecta el sitio publicado.
+
+### Pendientes priorizados de las 8 categorías solicitadas
+
+Requieren una decisión de Oscar (no son solo técnicas):
+- Certificación manual WCAG 2.2 AA con lector de pantalla real — se puede avanzar en teclado/zoom/reflow/contraste sin él, pero la lectura de pantalla necesita confirmar con qué lector o herramienta validar.
+- Corte a dominio oficial y SEO de producción (activar indexación, `NEXT_PUBLIC_SITE_URL=https://www.allpetcr.com`) — cambio de infraestructura, requiere autorización expresa antes de tocarlo.
+- Legal/comercial: privacidad, términos, medios de pago y plazos de entrega definitivos, y las 8 preguntas abiertas de `docs/BORRADOR-CAMBIOS.md` sobre la política de cambios — son decisiones de negocio, no técnicas.
+
+Puedo continuar sin más consulta (decisión técnica):
+- Profundizar el análisis de rendimiento (separar ERP/render/servidor, repetir mediciones en las plantillas restantes).
+- Certificación de fichas de producto (nombres, precios, disponibilidad, datos suficientes para comprar).
+- Mejoras visuales sin tocar fotos (jerarquía del catálogo, comparabilidad de tarjetas, estados de carga/vacíos, microcopy comercial, señales de confianza en checkout).
+- El resto de la matriz WCAG que no depende de un lector de pantalla específico.
+
