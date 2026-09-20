@@ -17,9 +17,9 @@ No se enviaron pedidos, mensajes de WhatsApp ni formularios. Solo se añadió el
 | Intermedio 768 × 1024 | `catalogo?para=perro&orden=precio-asc` | Filtros, conteo de 188 productos y orden de menor precio correctos. |
 | Escritorio | `devoluciones` | Política visible desde el pie: cambio por otro artículo o devolución en efectivo, horario de tienda y coordinación de transporte. |
 
-## Cambio local pendiente de publicar
+## Cambio aplicado y publicado en GitHub
 
-Se cambió el fondo de los contenedores de foto existentes de blanco puro a `bg-crema-100` en `components/TarjetaProducto.tsx` y `app/producto/[sku]/page.tsx`. Esto conserva todas las fotos y reduce el aspecto de bloque vacío cuando una imagen del ERP tiene fondo blanco. Requiere validación, commit, push y despliegue antes de considerarlo publicado.
+El commit `fb608ad` cambia el fondo de los contenedores de foto existentes de blanco puro a `bg-crema-100` en `components/TarjetaProducto.tsx` y `app/producto/[sku]/page.tsx`. Esto conserva todas las fotos y reduce el aspecto de bloque vacío cuando una imagen del ERP tiene fondo blanco. Ya está en GitHub; DigitalOcean debe confirmar que terminó de desplegar exactamente ese commit antes de considerarlo activo.
 
 ## Problemas que siguen pendientes
 
