@@ -42,6 +42,7 @@ describe("POST /api/checkout", () => {
 
     expect(r.status).toBe(200);
     expect(cuerpo.total).toBe(30000); // 3 × 10000 real, no 3 × 1
+    expect(cuerpo.items[0].presentacion).toBe("");
   });
 
   it("sin líneas responde 400", async () => {
@@ -49,6 +50,35 @@ describe("POST /api/checkout", () => {
     const { POST } = await import("./route");
     const r = await POST(pedido({ lineas: [] }));
     expect(r.status).toBe(400);
+  });
+
+  it("rechaza el pedido completo si contiene una línea mal formada", async () => {
+    const getProductos = vi.fn();
+    vi.doMock("@/lib/data", () => ({ getProductos }));
+    const { POST } = await import("./route");
+    const r = await POST(pedido({ lineas: [
+      { sku: "A1", cantidad: 1 },
+      { sku: "", cantidad: 1 },
+    ] }));
+    expect(r.status).toBe(400);
+    expect(getProductos).not.toHaveBeenCalled();
+  });
+
+  it("rechaza cantidades enviadas como texto", async () => {
+    vi.doMock("@/lib/data", () => ({ getProductos: vi.fn() }));
+    const { POST } = await import("./route");
+    const r = await POST(pedido({ lineas: [{ sku: "A1", cantidad: "1" }] }));
+    expect(r.status).toBe(400);
+  });
+
+  it("limita el tamaño del cuerpo antes de consultar el ERP", async () => {
+    vi.doMock("@/lib/data", () => ({ getProductos: vi.fn() }));
+    const { POST } = await import("./route");
+    const r = await POST(new Request("http://localhost/api/checkout", {
+      method: "POST",
+      body: JSON.stringify({ lineas: [{ sku: "A".repeat(33_000), cantidad: 1 }] }),
+    }));
+    expect(r.status).toBe(413);
   });
 
   it("JSON inválido no revienta el servidor", async () => {

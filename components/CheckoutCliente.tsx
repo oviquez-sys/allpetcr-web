@@ -4,11 +4,12 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useCarrito, resolverCarrito } from "@/lib/carrito";
 import DireccionEntregaCliente, { type DireccionEntrega } from "@/components/DireccionEntregaCliente";
-import { formatoColones, presentacionVisible } from "@/lib/formato";
+import { formatoColones } from "@/lib/formato";
 import { negocio, urlWhatsApp, faltante } from "@/lib/negocio";
 import { guardarUltimoPedido, programarRecordatorio } from "@/lib/recompra";
 import type { Producto } from "@/lib/types";
 import type { ResultadoCheckout } from "@/lib/checkoutServidor";
+import { crearTextoPedido } from "@/lib/pedidoWhatsApp";
 
 type Entrega = "retiro" | "coordinar";
 
@@ -38,13 +39,17 @@ const DIRECCION_VACIA: DireccionEntrega = {
 export default function CheckoutCliente({ productos }: { productos: Producto[] }) {
   const { lineas, listo } = useCarrito();
   const [catalogo, setCatalogo] = useState(productos);
-  const { items } = useMemo(
+  const { items, hayProblemas } = useMemo(
     () => resolverCarrito(lineas, catalogo),
     [lineas, catalogo],
   );
 
   const comprables = items.filter((i) => i.producto && i.producto.disponible);
   const totalComprable = comprables.reduce((s, i) => s + i.subtotal, 0);
+  const cambiosPrecio = items.filter((i) => i.precioCambio && i.producto);
+  const problemasBloqueantes = items.filter(
+    (i) => i.descatalogado || (i.producto && !i.producto.disponible),
+  );
 
   const [nombre, setNombre] = useState("");
   const [telefono, setTelefono] = useState("");
@@ -57,10 +62,12 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
   const [errorPedido, setErrorPedido] = useState("");
   const [mensajePreparado, setMensajePreparado] = useState("");
   const [copiado, setCopiado] = useState(false);
+  const [aceptaCambios, setAceptaCambios] = useState(false);
   const [recordatorioDias, setRecordatorioDias] = useState<number | null>(null);
   const refNombre = useRef<HTMLInputElement>(null);
   const refTelefono = useRef<HTMLInputElement>(null);
   const refPreparado = useRef<HTMLHeadingElement>(null);
+  const refAceptaCambios = useRef<HTMLInputElement>(null);
   const pedidoActual = useRef("");
   useEffect(() => { pedidoActual.current = JSON.stringify(lineas); }, [lineas]);
   useEffect(() => { if (enviado) refPreparado.current?.focus(); }, [enviado]);
@@ -89,38 +96,6 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
     return e;
   }
 
-  function textoPedido(resultado: ResultadoCheckout): string {
-    const l: string[] = ["*Pedido desde allpetcr.com*", ""];
-    for (const i of resultado.items) {
-      const p = catalogo.find((producto) => producto.sku === i.sku)!;
-      // Sin el empaque de bodega: "1 × Alimentador (Paquete: 12 / Caja: 216)"
-      // llega a la tienda pareciendo un pedido de doce unidades. Acá la
-      // confusión no es cosmética, termina en un pedido mal armado.
-      const pres = presentacionVisible(p.presentacion);
-      l.push(`• ${i.cantidad} × ${i.nombre}${pres ? ` (${pres})` : ""} [Código: ${i.sku}] — ${formatoColones(i.subtotal)}`);
-    }
-    l.push("", `*Subtotal de productos: ${formatoColones(resultado.total)}*`, "Envío y condiciones de pago por confirmar con la tienda.", "");
-    l.push(`Nombre: ${nombre.trim()}`);
-    l.push(`Teléfono: ${telefono.trim()}`);
-    if (entrega === "retiro") {
-      l.push("Entrega: retiro en tienda");
-    } else {
-      l.push("Entrega: coordinar envío");
-      const divisiones = [direccion.provincia, direccion.canton, direccion.distrito]
-        .filter((v) => v.trim())
-        .join(", ");
-      if (divisiones) l.push(`Provincia/cantón/distrito: ${divisiones}`);
-      if (direccion.senas.trim()) l.push(`Señas: ${direccion.senas.trim()}`);
-      if (direccion.lat !== null && direccion.lng !== null) {
-        // Enlace directo a Google Maps con las coordenadas: quien despache
-        // no tiene que copiar números a mano para ubicar el punto.
-        l.push(`Ubicación: https://www.google.com/maps?q=${direccion.lat},${direccion.lng}`);
-      }
-    }
-    if (nota.trim()) l.push(`Nota: ${nota.trim()}`);
-    return l.join("\n");
-  }
-
   async function enviar(ev: React.FormEvent) {
     ev.preventDefault();
     if (verificando) return;
@@ -133,6 +108,15 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
       if (e.nombre) refNombre.current?.focus();
       else if (e.telefono) refTelefono.current?.focus();
       else if (e.direccion) document.getElementById("direccion-provincia")?.focus();
+      return;
+    }
+    if (problemasBloqueantes.length > 0) {
+      setErrorPedido("Quitá o reemplazá los productos no disponibles antes de preparar el pedido.");
+      return;
+    }
+    if (cambiosPrecio.length > 0 && !aceptaCambios) {
+      setErrorPedido("Confirmá que revisaste los precios vigentes.");
+      refAceptaCambios.current?.focus();
       return;
     }
     setVerificando(true);
@@ -157,6 +141,7 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
       }
       const cambio = resultado.items.some((i) => catalogo.find((p) => p.sku === i.sku)?.precio_venta !== i.precioUnitario);
       if (cambio) {
+        setAceptaCambios(false);
         setCatalogo((actual) => actual.map((p) => {
           const vigente = resultado.items.find((i) => i.sku === p.sku);
           return vigente ? { ...p, precio_venta: vigente.precioUnitario, nombre: vigente.nombre } : p;
@@ -166,16 +151,18 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
         setErrorPedido(`Los precios cambiaron. ${diferencias}. Revisá el resumen antes de preparar nuevamente el pedido.`);
         return;
       }
-      setMensajePreparado(textoPedido(resultado));
+      setMensajePreparado(crearTextoPedido(resultado, {
+        nombre, telefono, entrega, direccion, nota,
+      }));
     // Guardamos solo una copia local del pedido preparado. Al volver a pedir,
     // se resuelve otra vez contra el catálogo actual: este historial nunca
     // impone precios ni disponibilidad viejos.
     guardarUltimoPedido(
-      comprables.map((i) => ({
+      resultado.items.map((i) => ({
         sku: i.sku,
         cantidad: i.cantidad,
-        nombreGuardado: i.producto!.nombre,
-        precioGuardado: i.producto!.precio_venta,
+        nombreGuardado: i.nombre,
+        precioGuardado: i.precioUnitario,
       })),
     );
     setEnviado(true);
@@ -252,7 +239,7 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
             href="/recompra"
             className="mt-5 inline-block rounded-full border border-crema-400 px-6 py-3 text-sm text-navy-400 transition-colors hover:border-navy-300 hover:text-navy-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500"
           >
-            Ver mi último pedido
+            Ver pedido preparado
           </Link>
           <Link
             href="/catalogo"
@@ -308,6 +295,45 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
           <code className="font-mono text-[12.5px]">lib/negocio.ts</code> para que el
           pedido se pueda enviar.
         </div>
+      )}
+
+      {hayProblemas && (
+        <section aria-labelledby="cambios-carrito" className="mt-6 rounded-card border border-dorado-300 bg-dorado-50 px-5 py-4 text-sm text-dorado-900">
+          <h2 id="cambios-carrito" className="font-semibold">Revisá los cambios del carrito</h2>
+          <ul className="mt-2 list-disc space-y-1 pl-5">
+            {items.filter((i) => i.descatalogado).map((i) => (
+              <li key={i.sku}>Código {i.sku}: ya no está en el catálogo.</li>
+            ))}
+            {items.filter((i) => i.producto && !i.producto.disponible).map((i) => (
+              <li key={i.sku}>{i.producto!.nombre} ({i.sku}): sin existencias.</li>
+            ))}
+            {cambiosPrecio.map((i) => (
+              <li key={i.sku}>
+                {i.producto!.nombre} ({i.sku}): {formatoColones(i.precioAnterior)} → {formatoColones(i.producto!.precio_venta)}.
+              </li>
+            ))}
+          </ul>
+          {cambiosPrecio.length > 0 && problemasBloqueantes.length === 0 && (
+            <label className="mt-4 flex min-h-11 items-center gap-3 text-navy-500">
+              <input
+                ref={refAceptaCambios}
+                type="checkbox"
+                checked={aceptaCambios}
+                onChange={(e) => {
+                  setAceptaCambios(e.target.checked);
+                  if (e.target.checked) setErrorPedido("");
+                }}
+                className="h-5 w-5 accent-navy-500"
+              />
+              Revisé y acepto los precios vigentes mostrados.
+            </label>
+          )}
+          {problemasBloqueantes.length > 0 && (
+            <Link href="/carrito" className="mt-4 inline-block rounded underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-navy-500">
+              Volver al carrito para corregirlo
+            </Link>
+          )}
+        </section>
       )}
 
       <div className="mt-8 grid gap-10 lg:grid-cols-[1fr_340px]">
@@ -433,7 +459,7 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
 
           <button
             type="submit"
-            disabled={sinWhatsApp || verificando}
+            disabled={sinWhatsApp || verificando || problemasBloqueantes.length > 0}
             className="mt-8 w-full rounded-full bg-navy-500 py-4 text-sm font-medium text-crema-100 transition-colors hover:bg-navy-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-crema-400 disabled:text-navy-300 lg:w-auto lg:px-12"
           >
             {verificando ? "Verificando precios y existencias…" : "Verificar y preparar pedido"}

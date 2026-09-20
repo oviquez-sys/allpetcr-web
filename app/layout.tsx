@@ -6,8 +6,8 @@ import AvisoConfiguracion from "@/components/AvisoConfiguracion";
 import AvisoRecompra from "@/components/AvisoRecompra";
 import { ProveedorCarrito } from "@/lib/carrito";
 import { negocio, faltante } from "@/lib/negocio";
-import { getCategorias, getProductos } from "@/lib/data";
 import { construirNavegacion } from "@/lib/navegacion";
+import { getNavegacion } from "@/lib/navegacionServidor";
 import { sitioIndexable } from "@/lib/sitio";
 
 const titulo = "AllPet Costa Rica | Productos para perros y gatos";
@@ -81,8 +81,7 @@ function esquemaNegocio() {
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const navegacion = await Promise.all([getCategorias(), getProductos()])
-    .then(([categorias, productos]) => construirNavegacion(categorias, productos))
+  const navegacion = await getNavegacion()
     .catch(() => construirNavegacion([], []));
   return (
     <html lang="es-CR">

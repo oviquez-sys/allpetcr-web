@@ -17,9 +17,19 @@ describe("GET /api/geocodificar", () => {
     expect(r.status).toBe(400);
   });
 
+  it("rechaza coordenadas fuera de Costa Rica sin consultar al proveedor", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    const { GET } = await import("./route");
+    const r = await GET(new Request("http://localhost/api/geocodificar?lat=40.7&lng=-74"));
+    expect(r.status).toBe(400);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it("con coordenadas válidas, pide a Nominatim con User-Agent identificable y devuelve las divisiones", async () => {
     const fetchMock = vi.fn(async (_url: string, init?: RequestInit) => {
       expect((init?.headers as Record<string, string>)["User-Agent"]).toContain("AllPetCR");
+      expect(init?.signal).toBeDefined();
       return new Response(
         JSON.stringify({ address: { state: "Heredia", county: "Heredia", suburb: "Mercedes Norte" } }),
         { status: 200 },
@@ -33,6 +43,7 @@ describe("GET /api/geocodificar", () => {
 
     expect(r.status).toBe(200);
     expect(cuerpo).toEqual({ provincia: "Heredia", canton: "Heredia", distrito: "Mercedes Norte", viaSugerida: "" });
+    expect(r.headers.get("Cache-Control")).toContain("max-age=86400");
     const [url] = fetchMock.mock.calls[0];
     expect(url).toContain("lat=10.0");
     expect(url).toContain("lon=-84.1");

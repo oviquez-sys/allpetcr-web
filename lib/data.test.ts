@@ -1,6 +1,15 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import productosJson from "@/data/productos.json";
 import categoriasJson from "@/data/categorias.json";
+import type { Producto } from "./types";
+
+function producto(sku: string, cambios: Partial<Producto> = {}): Producto {
+  return {
+    sku, nombre: `Producto ${sku}`, categoria_id: 1, presentacion: "",
+    descripcion: "", mascota: "Perro", imagen: "", precio_venta: 1000,
+    disponible: true, ...cambios,
+  };
+}
 
 /**
  * lib/data.ts (Bloque 5, 2026-08-29): capa única de acceso al catálogo.
@@ -12,12 +21,12 @@ describe("getProductos / getCategorias", () => {
     vi.stubEnv("ERP_API_URL", "http://erp-de-prueba");
     vi.stubEnv("ERP_API_TOKEN", "token-prueba");
     const fetchMock = vi.fn()
-      .mockResolvedValueOnce(new Response(JSON.stringify({ sku: "A1", disponible: false })))
+      .mockResolvedValueOnce(new Response(JSON.stringify(producto("A1", { disponible: false }))))
       .mockResolvedValueOnce(new Response("", { status: 404 }))
       .mockResolvedValueOnce(new Response("", { status: 503 }));
     vi.stubGlobal("fetch", fetchMock);
     const { getProductoPorSku } = await import("./data");
-    await expect(getProductoPorSku("A1")).resolves.toEqual({ sku: "A1", disponible: false });
+    await expect(getProductoPorSku("A1")).resolves.toEqual(producto("A1", { disponible: false }));
     expect(fetchMock.mock.calls[0][0]).toBe("http://erp-de-prueba/api/catalogo/productos/A1/");
     await expect(getProductoPorSku("NO-EXISTE")).resolves.toBeUndefined();
     await expect(getProductoPorSku("A2")).rejects.toThrow("503");
@@ -69,7 +78,7 @@ describe("getProductos / getCategorias", () => {
       new Response(
         JSON.stringify({
           count: 1, next: null, previous: null,
-          results: [{ sku: "X1", nombre: "Producto de prueba" }],
+          results: [producto("X1", { nombre: "Producto de prueba" })],
         }),
         { status: 200 },
       ),
@@ -79,7 +88,7 @@ describe("getProductos / getCategorias", () => {
     const { getProductos } = await import("./data");
     const productos = await getProductos();
 
-    expect(productos).toEqual([{ sku: "X1", nombre: "Producto de prueba" }]);
+    expect(productos).toEqual([producto("X1", { nombre: "Producto de prueba" })]);
     const [url, init] = fetchMock.mock.calls[0];
     expect(url).toBe("http://erp-de-prueba/api/catalogo/productos/");
     expect(init?.headers).toMatchObject({ Authorization: "Token token-123" });
@@ -89,8 +98,8 @@ describe("getProductos / getCategorias", () => {
     vi.stubEnv("ERP_API_URL", "http://erp-de-prueba");
     vi.stubEnv("ERP_API_TOKEN", "token-123");
     const paginas = [
-      { count: 2, next: "http://erp-de-prueba/api/catalogo/productos/?page=2", previous: null, results: [{ sku: "A" }] },
-      { count: 2, next: null, previous: "x", results: [{ sku: "B" }] },
+      { count: 2, next: "http://erp-de-prueba/api/catalogo/productos/?page=2", previous: null, results: [producto("A")] },
+      { count: 2, next: null, previous: "x", results: [producto("B")] },
     ];
     let llamada = 0;
     const fetchMock = vi.fn(async () => {
@@ -103,7 +112,7 @@ describe("getProductos / getCategorias", () => {
     const { getProductos } = await import("./data");
     const productos = await getProductos();
 
-    expect(productos).toEqual([{ sku: "A" }, { sku: "B" }]);
+    expect(productos).toEqual([producto("A"), producto("B")]);
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
@@ -114,5 +123,21 @@ describe("getProductos / getCategorias", () => {
 
     const { getProductos } = await import("./data");
     await expect(getProductos()).rejects.toThrow();
+  });
+
+  it("rechaza productos incompletos y SKU duplicados", async () => {
+    vi.stubEnv("ERP_API_URL", "http://erp-de-prueba");
+    vi.stubEnv("ERP_API_TOKEN", "token-123");
+    const respuestas = [
+      { results: [{ sku: "INCOMPLETO" }], next: null },
+      { results: [producto("A"), producto("A")], next: null },
+    ];
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify(respuestas.shift())));
+    vi.stubGlobal("fetch", fetchMock);
+    let modulo = await import("./data");
+    await expect(modulo.getProductos()).rejects.toThrow("formato inválido");
+    vi.resetModules();
+    modulo = await import("./data");
+    await expect(modulo.getProductos()).rejects.toThrow("SKU duplicados");
   });
 });

@@ -22,13 +22,13 @@ const columnas = [
     ],
   },
   {
-    // Antes había tres enlaces ("Contacto", "Envíos y retiro",
-    // "Devoluciones") apuntando los tres a /contacto: tres promesas de
-    // contenido distinto que llevaban al mismo formulario genérico. Uno solo,
-    // honesto sobre a dónde lleva, en vez de simular tres páginas que no
-    // existen.
+    // Cada enlace apunta a una página con contenido propio y vigente.
     titulo: "Ayuda",
-    enlaces: [{ href: "/contacto", label: "Contacto" }, { href: "/envios", label: "Entregas y cómo comprar" }],
+    enlaces: [
+      { href: "/contacto", label: "Contacto" },
+      { href: "/envios", label: "Entregas y cómo comprar" },
+      { href: "/devoluciones", label: "Cambios y devoluciones" },
+    ],
   },
   {
     titulo: "Nosotros",

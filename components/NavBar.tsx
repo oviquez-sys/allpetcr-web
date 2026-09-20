@@ -231,15 +231,24 @@ export default function NavBar({ navegacion }: { navegacion: SeccionNav[] }) {
                       className="flex items-center gap-1.5 rounded-lg px-3.5 py-2.5 text-sm text-navy-400 transition-colors hover:bg-crema-200 hover:text-navy-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500"
                     >
                       {seccion.label}
-                      {tieneHijos && (
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    </Link>
+                    {tieneHijos && (
+                      <button
+                        type="button"
+                        id={`menu-boton-${seccion.id}`}
+                        aria-label={`Categorías de ${seccion.label}`}
+                        aria-expanded={desplegado}
+                        aria-controls={`submenu-${seccion.id}`}
+                        onClick={() => setMegaAbierto(desplegado ? null : seccion.id)}
+                        className="grid min-h-11 min-w-11 place-items-center rounded-lg text-navy-500 hover:bg-crema-200 focus-visible:ring-2 focus-visible:ring-navy-500"
+                      >
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                           strokeWidth="2.5" strokeLinecap="round" aria-hidden="true"
                           className={`transition-transform duration-200 motion-reduce:transition-none ${desplegado ? "rotate-180" : ""}`}>
                           <path d="m6 9 6 6 6-6" />
                         </svg>
-                      )}
-                    </Link>
-                    {tieneHijos && <button type="button" id={`menu-boton-${seccion.id}`} aria-label={`Categorías de ${seccion.label}`} aria-expanded={desplegado} aria-controls={`submenu-${seccion.id}`} onClick={() => setMegaAbierto(desplegado ? null : seccion.id)} className="min-h-11 min-w-11 rounded-lg text-navy-500">⌄</button>}
+                      </button>
+                    )}
 
                     {tieneHijos && desplegado && (
                       <div

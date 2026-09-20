@@ -343,10 +343,11 @@ export default function CatalogoCliente({
                 filtrando ? "opacity-60" : "opacity-100"
               }`}
             >
-              {paraMostrar.map((p) => (
+              {paraMostrar.map((p, indice) => (
                 <TarjetaProducto
                   key={p.sku}
                   producto={p}
+                  cargaPrioritaria={indice === 0}
                   categoria={
                     p.categoria_id === null
                       ? undefined

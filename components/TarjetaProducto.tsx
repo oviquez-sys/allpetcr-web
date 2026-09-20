@@ -8,6 +8,7 @@ import BotonAgregar from "./BotonAgregar";
 interface Props {
   producto: Producto;
   categoria?: string;
+  cargaPrioritaria?: boolean;
 }
 
 /**
@@ -23,7 +24,7 @@ interface Props {
  * sin librería de virtualización, y mantiene las 184 en el DOM: Ctrl+F sigue
  * encontrándolas y no se pierde nada de SEO.
  */
-function TarjetaProducto({ producto, categoria }: Props) {
+function TarjetaProducto({ producto, categoria, cargaPrioritaria = false }: Props) {
   return (
     <article className="tarjeta-diferida group flex flex-col overflow-hidden rounded-card border border-crema-400 bg-white transition-[transform,box-shadow,border-color] duration-200 ease-out hover:-translate-y-0.5 hover:border-crema-500 hover:shadow-[0_6px_24px_rgba(11,49,97,0.09)] motion-reduce:transition-none motion-reduce:hover:translate-y-0">
       <Link
@@ -52,7 +53,7 @@ function TarjetaProducto({ producto, categoria }: Props) {
               src={producto.imagen}
               alt={producto.nombre}
               fill
-              loading="lazy"
+              {...(cargaPrioritaria ? { priority: true } : { loading: "lazy" as const })}
               sizes="(max-width: 640px) 45vw, (max-width: 1280px) 30vw, 270px"
               className="object-contain p-3 transition-transform duration-300 ease-out group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
             />

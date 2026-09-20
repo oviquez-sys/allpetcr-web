@@ -75,4 +75,31 @@ describe("POST /api/avisos-disponibilidad", () => {
     const r = await POST(new Request("http://localhost/api/avisos-disponibilidad", { method: "POST", body: "{no-es-json" }));
     expect(r.status).toBe(400);
   });
+
+  it("rechaza cuerpos demasiado grandes antes de llamar al ERP", async () => {
+    vi.stubEnv("ERP_API_URL", "http://erp-de-prueba");
+    vi.stubEnv("ERP_API_TOKEN", "t");
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    const { POST } = await import("./route");
+    const r = await POST(pedido({ sku: "X1", email: `${"a".repeat(8_200)}@x.com` }));
+
+    expect(r.status).toBe(413);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("rechaza sku y correo que exceden sus límites", async () => {
+    vi.stubEnv("ERP_API_URL", "http://erp-de-prueba");
+    vi.stubEnv("ERP_API_TOKEN", "t");
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    const { POST } = await import("./route");
+
+    const skuLargo = await POST(pedido({ sku: "X".repeat(101), email: "a@x.com" }));
+    const correoLargo = await POST(pedido({ sku: "X1", email: `${"a".repeat(250)}@x.com` }));
+
+    expect(skuLargo.status).toBe(400);
+    expect(correoLargo.status).toBe(400);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
 });

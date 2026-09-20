@@ -33,16 +33,43 @@ Versión para revisar en el subdominio de DigitalOcean antes del lanzamiento ofi
 | P2 | Promesa de aviso inmediato sin automatización verificada. Mensaje confirma registro de interés, sin garantizar reposición inmediata. | `components/BotonAvisoDisponibilidad.tsx` | Verificar respuesta simulada; no registrar correos reales durante QA. |
 | P2 | API podía seguir paginación externa/cíclica o esperar indefinidamente. Origen restringido, redirecciones rechazadas, timeout y límite de páginas. | `lib/data.ts`, `lib/erpServidor.ts` | Pruebas mock de origen externo, ciclo, error y expiración. |
 
+## Continuación verificada — 19 de septiembre de 2026
+
+La continuación partió del commit `aa7d6ce`, que coincidía con `origin/main`, y de un árbol de trabajo limpio. Se revisaron en código las afirmaciones de este documento antes de agregar cambios. Este bloque permanece sin commit y sin despliegue para que pueda revisarse como un solo diff.
+
+| Prioridad | Corrección comprobada | Archivos principales | Criterio de aceptación |
+|---|---|---|---|
+| P1 | El mensaje de WhatsApp y el historial local se construyen exclusivamente con nombre, presentación, precio y total devueltos por la verificación del servidor. Ya no dependen de una copia posiblemente desactualizada del catálogo del navegador. | `lib/pedidoWhatsApp.ts`, `components/CheckoutCliente.tsx`, `lib/checkoutServidor.ts` | Las pruebas comprueban los datos verificados y una dirección escrita sin marcador de mapa. El carrito se conserva. |
+| P1 | Checkout rechaza cuerpos mayores a 32 KiB, más de 100 líneas, líneas incompletas, cantidades como texto, cantidades fuera de 1–99, SKU largos y duplicados; una línea inválida invalida toda la petición. | `app/api/checkout/route.ts`, `app/api/checkout/route.test.ts` | No consulta el ERP con entradas inválidas; responde 400 o 413 según corresponda. |
+| P1 | Los cambios de precio existentes al entrar al checkout se muestran antes del formulario y exigen aceptación explícita. Productos agotados o eliminados bloquean la preparación y ofrecen volver al carrito. | `components/CheckoutCliente.tsx` | No se prepara un pedido con problemas bloqueantes; un precio cambiado requiere marcar la confirmación. Los cambios detectados durante la verificación también obligan a revisar otra vez. |
+| P1 | La API de avisos limita el cuerpo, SKU y correo. La consulta de estado limita número/teléfono y marca todas sus respuestas `Cache-Control: no-store`. | `app/api/avisos-disponibilidad/route.ts`, `app/api/pedidos/[numero]/estado/route.ts` | Pruebas confirman rechazo temprano y que no se llama al ERP con valores excesivos. |
+| P2 | Las respuestas del ERP se validan en tiempo de ejecución: campos requeridos, precio positivo, disponibilidad booleana y ausencia de SKU/ID duplicados. | `lib/data.ts`, `lib/data.test.ts` | Un producto mal formado o SKU duplicado falla de forma controlada en vez de contaminar catálogo y checkout. |
+| P2 | El cliente del ERP restringe toda ruta al mismo origen para impedir que el token se envíe a otro host. | `lib/erpServidor.ts`, `lib/erpServidor.test.ts` | La prueba externa no ejecuta `fetch`; la ruta válida usa el token solo contra el origen configurado. |
+| P2 | La geocodificación inversa acepta únicamente coordenadas dentro de Costa Rica, expira a los 8 segundos y reutiliza respuestas durante un día. | `app/api/geocodificar/route.ts`, `app/api/geocodificar/route.test.ts` | Coordenadas externas se rechazan sin consultar Nominatim; se comprueban timeout y cabecera de caché. |
+| P2 | La navegación derivada se reutiliza durante 60 segundos y el encabezado conserva una alternativa mínima si falla el catálogo. Se eliminó el indicador visual duplicado de los desplegables. | `lib/navegacionServidor.ts`, `app/layout.tsx`, `components/NavBar.tsx` | Build correcto; menú de escritorio y móvil expone un único control por especie. Los precios siguen consultándose sin caché persistente. |
+| P2 | El campo de cantidad conserva el producto mientras se edita, confirma al salir o con Enter y el decremento queda desactivado en uno. | `components/CarritoCliente.tsx` | Prueba visual móvil: cantidad uno, decremento desactivado y eliminación separada con nombre accesible. |
+| P2 | La primera imagen visible de portada y catálogo se carga con prioridad para evitar que el LCP se solicite de forma diferida. | `components/TarjetaProducto.tsx`, `components/CatalogoCliente.tsx`, `app/page.tsx` | La consola del catálogo móvil quedó sin advertencias después del cambio. |
+| P2 | El guard de build carga las variables como Next.js, exige ERP en modo estricto, valida HTTPS y bloquea indexación del subdominio de revisión. | `scripts/verificar-datos.mjs` | `npm run verificar` y `npm run build` aprobados sin imprimir secretos. |
+| P2 | Se corrigió la frase duplicada “Te decimos ayudamos” del hero. | `app/page.tsx` | Texto comprobado visualmente en escritorio y móvil. |
+| P2 | Política de cambios publicada con la decisión comercial confirmada: cambio por otro producto o devolución en efectivo; coordinación presencial de lunes a sábado, 9–19, y solicitudes web todos los días. | `app/devoluciones/page.tsx`, `components/Footer.tsx` | El pie enlaza a una política útil; la página explica comprobante, diferencias de precio y coordinación de transporte sin prometer un plazo no definido. |
+
 ## Verificación realizada
 
-- `npm run revisar`: lint, TypeScript y 102 pruebas automatizadas aprobadas (14 archivos, 19/09/2026).
-- `npm run build`: compilación de producción local aprobada, sin pedidos, pagos, migraciones o cambios del ERP.
+- `npm run lint`: aprobado después del último cambio.
+- `npx tsc --noEmit`: aprobado después del último cambio.
+- `npm run test`: 114 pruebas automatizadas aprobadas en 16 archivos después del último cambio.
+- `npm run verificar`: configuración base aprobada sin exponer valores de entorno.
+- `npm run build`: compilación de producción local aprobada después del último cambio, sin pedidos, pagos, migraciones o cambios del ERP.
+- Tras incorporar la política de cambios: `npm run lint`, `npx tsc --noEmit` y `npm run build` volvieron a aprobar. La suite de 114 pruebas corresponde al bloque funcional inmediatamente anterior; la política es contenido estático y no altera ese flujo.
+- Comprobación visual local con catálogo de respaldo de desarrollo: portada a 1440 × 900 y 390 × 844; catálogo, menú, carrito y checkout a 390 × 844. No hubo desbordamiento horizontal en checkout y la consola terminó sin errores ni advertencias.
+- La prueba local de `next start` mostró el estado recuperable porque el ERP configurado no aceptó conexión desde esta máquina (`ECONNREFUSED`). Esto no demuestra una falla del ERP desplegado ni valida producción. La revisión visual posterior usó datos locales solo en modo desarrollo.
+- Verificación del subdominio publicado: la portada cargó inicialmente con 297 productos y datos del ERP; `canonical` apuntaba al subdominio y `robots` era `noindex, nofollow`, como corresponde a revisión. Al recargar en móvil, el proveedor devolvió una página de infraestructura `503`. Además, el hero publicado todavía mostraba la frase anterior “Te decimos ayudamos”, por lo que no corresponde al árbol local actual. Tratar la disponibilidad intermitente del despliegue como P1 y confirmar la revisión/imagen de contenedor antes de probar compras reales.
 - Las pruebas mock no confirman respuesta ni configuración actual de producción.
-- La revisión visual anterior pertenece a la versión anterior. Estos cambios requieren revisión visual nueva; no equivalen a certificación WCAG ni a certificación exhaustiva de fichas.
+- La comprobación visual local fue parcial y usó datos de respaldo. Falta revisar la revisión desplegada con el ERP real; esta comprobación no equivale a certificación WCAG ni a certificación exhaustiva de fichas.
 
 ## Pendientes que no deben inventarse
 
-1. Política de cambios: propietario quiere cambio por otro producto o devolución del dinero. Faltan plazo, estado admisible del producto, comprobantes, diferencias de precio, medio de reembolso y transporte. Borrador interno separado; no publicar promesa incondicional.
+1. Política de cambios: publicada según la decisión comercial confirmada. Falta, si se desea, definir un plazo formal y condiciones específicas de productos abiertos, usados, de higiene o alimentos; no se inventaron restricciones.
 2. Medios de pago, cobertura, tarifas y plazos de entrega: completar con operación real.
 3. Privacidad y términos: validar responsables, proveedores, conservación de datos y procedimiento antes de publicar textos definitivos.
 4. Datos del ERP: completar medidas, tallas, materiales, variantes y nombres diferenciadores únicamente con información real. El frontend no crea variantes inexistentes.
@@ -50,6 +77,14 @@ Versión para revisar en el subdominio de DigitalOcean antes del lanzamiento ofi
 6. WCAG 2.2 AA: pruebas manuales de teclado, lector, zoom 200/400 %, reflow 320 px, objetivos táctiles, foco y errores en todas las plantillas/estados. No emitir conformidad hasta completarlas.
 7. Rendimiento: medir versión desplegada con Lighthouse móvil/escritorio y latencia ERP. La eliminación de caché persistente prioriza consistencia; medir carga antes de introducir una caché de catálogo con invalidación fiable.
 8. Analítica y evolución: decidir eventos, consentimiento y herramienta antes de instrumentar; recomendaciones más avanzadas o comparador requieren datos útiles. No hay evidencia para prometer aumento de ventas.
+
+## Siguiente punto exacto de continuación
+
+1. Revisar el diff sin commit de esta continuación y, con autorización, crear un commit de revisión. No se hizo push ni despliegue.
+2. Desplegar primero al subdominio con `NEXT_PUBLIC_SITE_INDEXABLE=false` y comprobar que esa revisión exacta conecta con el ERP real. Esta acción requiere autorización expresa.
+3. Resolver o diagnosticar el `503` intermitente del subdominio desde DigitalOcean y confirmar que su revisión incluye el commit que se vaya a publicar. Esta acción requiere autorización expresa para modificar infraestructura.
+4. Ejecutar en ese despliegue los recorridos A–E, consola, red, Lighthouse móvil/escritorio y la matriz manual WCAG 2.2 AA. No enviar pedidos, formularios o mensajes reales.
+5. Completar decisiones comerciales del borrador de cambios, pagos y entregas antes de enlazar las páginas legales. Las imágenes continúan aplazadas por decisión del propietario.
 
 ## Despliegue y lanzamiento
 

@@ -21,6 +21,22 @@ describe("GET /api/pedidos/[numero]/estado", () => {
     const { GET } = await import("./route");
     const r = await GET(pedido("http://localhost/api/pedidos/PED-1/estado"), params("PED-1"));
     expect(r.status).toBe(400);
+    expect(r.headers.get("Cache-Control")).toBe("no-store");
+  });
+
+  it("rechaza parámetros excesivos sin consultar al ERP", async () => {
+    const erpGet = vi.fn();
+    vi.doMock("@/lib/erpServidor", () => ({
+      erpGet, ErpNoConfiguradoError: class extends Error {}, ErpRespuestaError: class extends Error {},
+    }));
+    const { GET } = await import("./route");
+    const r = await GET(
+      pedido(`http://localhost/api/pedidos/PED-1/estado?telefono=${"8".repeat(33)}`),
+      params("P".repeat(101)),
+    );
+
+    expect(r.status).toBe(400);
+    expect(erpGet).not.toHaveBeenCalled();
   });
 
   it("con teléfono, pide al ERP la ruta con numero y telefono", async () => {
@@ -35,6 +51,7 @@ describe("GET /api/pedidos/[numero]/estado", () => {
     expect(r.status).toBe(200);
     expect(cuerpo.numero).toBe("PED-1");
     expect(erpGet).toHaveBeenCalledWith("/api/pedidos/PED-1/estado/?telefono=8888-1234");
+    expect(r.headers.get("Cache-Control")).toBe("no-store");
   });
 
   it("si el ERP da 404 (número o teléfono no coinciden), se propaga 404, no 500", async () => {

@@ -22,6 +22,7 @@ describe("calcularTotalCheckout", () => {
 
     expect(resultado.total).toBe(20000); // 2 × 10000, NO 2 × 1
     expect(resultado.items[0].precioUnitario).toBe(10000);
+    expect(resultado.items[0].presentacion).toBe("");
   });
 
   it("suma varias líneas correctamente", () => {

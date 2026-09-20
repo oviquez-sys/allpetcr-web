@@ -11,8 +11,6 @@ function Cantidad({
   valor, onCambio, nombre,
 }: { valor: number; onCambio: (n: number) => void; nombre: string }) {
   const [borrador, setBorrador] = useState(String(valor));
-  const [previo, setPrevio] = useState(valor);
-  if (previo !== valor) { setPrevio(valor); setBorrador(String(valor)); }
   return (
     <div className="inline-flex items-center rounded-full border border-crema-400 bg-white">
       <button
@@ -20,7 +18,7 @@ function Cantidad({
         onClick={() => onCambio(valor - 1)}
         disabled={valor <= 1}
         aria-label={`Quitar una unidad de ${nombre}`}
-        className="grid h-10 w-10 place-items-center rounded-full text-navy-400 transition-colors hover:bg-crema-200 hover:text-navy-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500"
+        className="grid h-10 w-10 place-items-center rounded-full text-navy-400 transition-colors hover:bg-crema-200 hover:text-navy-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 disabled:cursor-not-allowed disabled:text-navy-200"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"
           strokeLinecap="round" aria-hidden="true"><path d="M5 12h14" /></svg>
@@ -36,6 +34,7 @@ function Cantidad({
           if (Number.isInteger(numero) && numero >= 1 && numero <= 99) onCambio(numero);
           else setBorrador(String(valor));
         }}
+        onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }}
         aria-label={`Cantidad de ${nombre}`}
         className="w-11 border-0 bg-transparent text-center text-sm font-medium text-navy-500 outline-none [appearance:textfield] focus-visible:ring-2 focus-visible:ring-navy-500 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
       />
@@ -44,7 +43,7 @@ function Cantidad({
         onClick={() => onCambio(valor + 1)}
         disabled={valor >= 99}
         aria-label={`Agregar una unidad de ${nombre}`}
-        className="grid h-10 w-10 place-items-center rounded-full text-navy-400 transition-colors hover:bg-crema-200 hover:text-navy-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500"
+        className="grid h-10 w-10 place-items-center rounded-full text-navy-400 transition-colors hover:bg-crema-200 hover:text-navy-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 disabled:cursor-not-allowed disabled:text-navy-200"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"
           strokeLinecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
@@ -201,6 +200,7 @@ export default function CarritoCliente({ productos }: { productos: Producto[] })
                         <span className="text-sm text-navy-400">—</span>
                       ) : (
                         <Cantidad
+                          key={`${item.sku}-${item.cantidad}`}
                           valor={item.cantidad}
                           nombre={nombre}
                           onCambio={(n) => cambiarCantidad(item.sku, n)}
@@ -225,6 +225,7 @@ export default function CarritoCliente({ productos }: { productos: Producto[] })
                     <button
                       type="button"
                       onClick={() => quitar(item.sku)}
+                      aria-label={`Quitar ${nombre} del carrito`}
                       className="mt-3 rounded text-xs text-navy-400 underline underline-offset-2 transition-colors hover:text-navy-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500"
                     >
                       Quitar

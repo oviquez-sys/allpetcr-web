@@ -25,6 +25,41 @@ class ErrorCatalogo extends Error {
   constructor(public status: number) { super(`El catálogo respondió ${status}.`); }
 }
 
+function esProducto(valor: unknown): valor is Producto {
+  if (typeof valor !== "object" || valor === null) return false;
+  const p = valor as Record<string, unknown>;
+  return typeof p.sku === "string" && p.sku.trim().length > 0 && p.sku.length <= 100 &&
+    typeof p.nombre === "string" && p.nombre.trim().length > 0 &&
+    (p.categoria_id === null || Number.isInteger(p.categoria_id)) &&
+    typeof p.presentacion === "string" && typeof p.descripcion === "string" &&
+    typeof p.mascota === "string" && typeof p.imagen === "string" &&
+    typeof p.precio_venta === "number" && Number.isFinite(p.precio_venta) && p.precio_venta > 0 &&
+    typeof p.disponible === "boolean";
+}
+
+function validarProductos(valores: unknown[]): Producto[] {
+  if (!valores.every(esProducto)) throw new Error("El ERP devolvió productos con un formato inválido.");
+  const skus = new Set(valores.map((p) => p.sku));
+  if (skus.size !== valores.length) throw new Error("El ERP devolvió SKU duplicados.");
+  return valores;
+}
+
+function esCategoria(valor: unknown): valor is Categoria {
+  if (typeof valor !== "object" || valor === null) return false;
+  const c = valor as Record<string, unknown>;
+  return Number.isInteger(c.id) && typeof c.nombre === "string" && c.nombre.trim().length > 0 &&
+    (c.padre_id === null || Number.isInteger(c.padre_id)) && Number.isInteger(c.orden);
+}
+
+function validarCategorias(valor: unknown): Categoria[] {
+  if (!Array.isArray(valor) || !valor.every(esCategoria)) {
+    throw new Error("El ERP devolvió categorías con un formato inválido.");
+  }
+  const ids = new Set(valor.map((c) => c.id));
+  if (ids.size !== valor.length) throw new Error("El ERP devolvió categorías duplicadas.");
+  return valor;
+}
+
 async function erpFetch<T>(ruta: string): Promise<T> {
   const url = new URL(ruta, ERP_API_URL).toString();
   if (new URL(url).origin !== new URL(ERP_API_URL!).origin) {
@@ -66,7 +101,7 @@ export const getProductos = cache(async (): Promise<Producto[]> => {
     permitirRespaldoLocal();
     return productosJson as Producto[];
   }
-  return erpFetchTodasLasPaginas<Producto>("/api/catalogo/productos/");
+  return validarProductos(await erpFetchTodasLasPaginas<unknown>("/api/catalogo/productos/"));
 });
 
 export const getCategorias = cache(async (): Promise<Categoria[]> => {
@@ -74,13 +109,15 @@ export const getCategorias = cache(async (): Promise<Categoria[]> => {
     permitirRespaldoLocal();
     return categoriasJson as Categoria[];
   }
-  return erpFetch<Categoria[]>("/api/catalogo/categorias/");
+  return validarCategorias(await erpFetch<unknown>("/api/catalogo/categorias/"));
 });
 
 export const getProductoPorSku = cache(async (sku: string): Promise<Producto | undefined> => {
   if (!ERP_CONFIGURADO) return (await getProductos()).find((p) => p.sku === sku);
   try {
-    return await erpFetch<Producto>(`/api/catalogo/productos/${encodeURIComponent(sku)}/`);
+    const producto = await erpFetch<unknown>(`/api/catalogo/productos/${encodeURIComponent(sku)}/`);
+    if (!esProducto(producto)) throw new Error("El ERP devolvió una ficha con un formato inválido.");
+    return producto;
   } catch (error) {
     if (error instanceof ErrorCatalogo && error.status === 404) return undefined;
     throw error;

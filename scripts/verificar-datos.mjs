@@ -13,13 +13,50 @@
 import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import nextEnv from "@next/env";
 
 const raiz = join(dirname(fileURLToPath(import.meta.url)), "..");
+const { loadEnvConfig } = nextEnv;
+loadEnvConfig(raiz);
 const rojo = (t) => `\x1b[31m${t}\x1b[0m`;
 const amarillo = (t) => `\x1b[33m${t}\x1b[0m`;
 const verde = (t) => `\x1b[32m${t}\x1b[0m`;
 
 const problemas = [];
+
+// 0. Configuración del servidor y del dominio. Los valores se validan sin
+// imprimir secretos ni incorporarlos al informe.
+const entornoEstricto = process.env.NODE_ENV === "production" || process.argv.includes("--estricto");
+if (entornoEstricto && (!process.env.ERP_API_URL || !process.env.ERP_API_TOKEN)) {
+  problemas.push("Producción requiere ERP_API_URL y ERP_API_TOKEN.");
+}
+
+for (const nombre of ["ERP_API_URL", "PRODUCTOS_CDN_URL", "NEXT_PUBLIC_SITE_URL"]) {
+  const valor = process.env[nombre];
+  if (!valor) continue;
+  try {
+    const url = new URL(valor);
+    const esLocal = ["localhost", "127.0.0.1", "::1"].includes(url.hostname);
+    if (entornoEstricto && url.protocol !== "https:" && !esLocal) {
+      problemas.push(`${nombre} debe usar HTTPS fuera del entorno local.`);
+    }
+  } catch {
+    problemas.push(`${nombre} no contiene una URL válida.`);
+  }
+}
+
+const sitioUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://allpetcr-web-6h6iv.ondigitalocean.app";
+const indexable = process.env.NEXT_PUBLIC_SITE_INDEXABLE === "true";
+if (indexable) {
+  try {
+    const host = new URL(sitioUrl).hostname.toLowerCase();
+    if (host !== "allpetcr.com" && host !== "www.allpetcr.com") {
+      problemas.push("Solo el dominio oficial puede compilarse con NEXT_PUBLIC_SITE_INDEXABLE=true.");
+    }
+  } catch {
+    // El error de URL ya se agregó arriba.
+  }
+}
 
 // 1. Datos del negocio sin completar.
 const negocio = readFileSync(join(raiz, "lib/negocio.ts"), "utf8");
@@ -81,10 +118,10 @@ if (rotas.length > 0) {
   );
 }
 
-const enProduccion = process.env.NODE_ENV === "production" || process.argv.includes("--estricto");
+const enProduccion = entornoEstricto;
 
 if (problemas.length === 0) {
-  console.log(verde("✓ Datos del sitio verificados: listo para publicar."));
+  console.log(verde("✓ Datos y configuración base verificados para compilar."));
   process.exit(0);
 }
 

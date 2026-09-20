@@ -11,6 +11,7 @@ export interface LineaEntrada {
 export interface LineaCalculada {
   sku: string;
   nombre: string;
+  presentacion: string;
   cantidad: number;
   precioUnitario: number;
   subtotal: number;
@@ -61,6 +62,7 @@ export function calcularTotalCheckout(
     items.push({
       sku: producto.sku,
       nombre: producto.nombre,
+      presentacion: producto.presentacion,
       cantidad,
       precioUnitario: producto.precio_venta,
       subtotal: producto.precio_venta * cantidad,

@@ -7,7 +7,7 @@ import { negocio } from "@/lib/negocio";
  *
  * Se genera, no se escribe a mano: con 184 productos y creciendo, una lista
  * manual queda desactualizada en la primera semana. Las fichas de producto son
- * páginas estáticas que ningún menú enumera de forma exhaustiva, así que sin
+ * rutas dinámicas que ningún menú enumera de forma exhaustiva, así que sin
  * sitemap Google tendría que descubrirlas a tientas.
  *
  * /carrito y /checkout quedan fuera a propósito: son páginas de sesión, no

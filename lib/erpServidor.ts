@@ -36,11 +36,15 @@ export class ErpRespuestaError extends Error {
 
 async function erpRequest<T>(ruta: string, init: RequestInit): Promise<T> {
   if (!ERP_API_URL || !ERP_API_TOKEN) throw new ErpNoConfiguradoError();
-  const respuesta = await fetch(`${ERP_API_URL}${ruta}`, {
+  const origen = new URL(ERP_API_URL);
+  const url = new URL(ruta, origen);
+  if (url.origin !== origen.origin) throw new Error("Ruta del ERP fuera del origen permitido.");
+  const respuesta = await fetch(url.toString(), {
     ...init,
     headers: {
       Authorization: `Token ${ERP_API_TOKEN}`,
       "Content-Type": "application/json",
+      Accept: "application/json",
       ...init.headers,
     },
     // Estas llamadas son transaccionales (crean o consultan un pedido, un

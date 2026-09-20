@@ -13,6 +13,7 @@ import { extraerDivisionesCR, type DireccionNominatim } from "@/lib/direccionCR"
  * que sale a internet es este servidor, no el navegador del cliente.
  */
 const NOMINATIM_URL = "https://nominatim.openstreetmap.org/reverse";
+const COSTA_RICA = { latMin: 8.0, latMax: 11.3, lngMin: -86.0, lngMax: -82.4 };
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -23,6 +24,10 @@ export async function GET(request: Request) {
   const lngNum = Number(lng);
   if (!lat || !lng || !Number.isFinite(latNum) || !Number.isFinite(lngNum)) {
     return NextResponse.json({ error: "Faltan coordenadas válidas (lat, lng)." }, { status: 400 });
+  }
+  if (latNum < COSTA_RICA.latMin || latNum > COSTA_RICA.latMax ||
+      lngNum < COSTA_RICA.lngMin || lngNum > COSTA_RICA.lngMax) {
+    return NextResponse.json({ error: "La ubicación debe estar en Costa Rica." }, { status: 400 });
   }
 
   const url = `${NOMINATIM_URL}?format=jsonv2&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}&accept-language=es&zoom=18&addressdetails=1`;
@@ -35,6 +40,8 @@ export async function GET(request: Request) {
         // aplicación, no un User-Agent genérico de librería HTTP.
         "User-Agent": "AllPetCR-sitio-web (contacto: ver allpetcr.com/contacto)",
       },
+      next: { revalidate: 86_400 },
+      signal: AbortSignal.timeout(8000),
     });
     if (!respuesta.ok) {
       return NextResponse.json({ error: "No se pudo consultar la ubicación." }, { status: 502 });
@@ -44,5 +51,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "No se pudo consultar la ubicación." }, { status: 502 });
   }
 
-  return NextResponse.json(extraerDivisionesCR(datos));
+  return NextResponse.json(extraerDivisionesCR(datos), {
+    headers: { "Cache-Control": "public, max-age=86400, stale-while-revalidate=604800" },
+  });
 }

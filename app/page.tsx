@@ -220,8 +220,8 @@ export default async function HomePage() {
               y cuidado diario.
             </h1>
             <p className="mt-6 text-[17px] font-light leading-relaxed text-navy-100">
-              Juguetes, arneses, camas e higiene para perros y gatos. Te decimos
-              ayudamos a elegir y podés retirar tu pedido en nuestra tienda de Heredia.
+              Juguetes, arneses, camas e higiene para perros y gatos. Te ayudamos
+              a elegir y podés retirar tu pedido en nuestra tienda de Heredia.
             </p>
 
             <div className="mt-7 flex flex-wrap gap-3">
@@ -310,10 +310,11 @@ export default async function HomePage() {
               </Link>
             </div>
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              {vitrina.map((p) => (
+              {vitrina.map((p, indice) => (
                 <TarjetaProducto
                   key={p.sku}
                   producto={p}
+                  cargaPrioritaria={indice === 0}
                   categoria={
                     p.categoria_id === null ? undefined : nombrePorId.get(p.categoria_id)
                   }
