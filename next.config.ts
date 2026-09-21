@@ -119,6 +119,20 @@ const nextConfig: NextConfig = {
     // esto SOLO se activa fuera de producción — jamás con NODE_ENV=production.
     dangerouslyAllowLocalIP: esDesarrollo,
   },
+  // Dominio oficial (21/09/2026): el sitio vive en www.allpetcr.com. Quien
+  // escriba "allpetcr.com" sin www llega al mismo servidor (registros A de
+  // DigitalOcean en GoDaddy) y acá se le manda con un 301 a la versión con
+  // www, para que Google vea UNA sola dirección y no dos copias del sitio.
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "allpetcr.com" }],
+        destination: "https://www.allpetcr.com/:path*",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {
