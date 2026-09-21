@@ -17,6 +17,7 @@ interface Errores {
   nombre?: string;
   telefono?: string;
   direccion?: string;
+  terminos?: string;
 }
 
 const DIRECCION_VACIA: DireccionEntrega = {
@@ -63,11 +64,15 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
   const [mensajePreparado, setMensajePreparado] = useState("");
   const [copiado, setCopiado] = useState(false);
   const [aceptaCambios, setAceptaCambios] = useState(false);
+  // Aceptación expresa de términos y privacidad (Reglamento 37899-MEIC
+  // art. 190 y Ley 8968 art. 5). Nunca viene marcada de antemano (art. 188).
+  const [aceptaTerminos, setAceptaTerminos] = useState(false);
   const [recordatorioDias, setRecordatorioDias] = useState<number | null>(null);
   const refNombre = useRef<HTMLInputElement>(null);
   const refTelefono = useRef<HTMLInputElement>(null);
   const refPreparado = useRef<HTMLHeadingElement>(null);
   const refAceptaCambios = useRef<HTMLInputElement>(null);
+  const refAceptaTerminos = useRef<HTMLInputElement>(null);
   const pedidoActual = useRef("");
   useEffect(() => { pedidoActual.current = JSON.stringify(lineas); }, [lineas]);
   useEffect(() => { if (enviado) refPreparado.current?.focus(); }, [enviado]);
@@ -93,6 +98,7 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
         e.direccion = "Completá provincia, cantón, distrito y señas. El mapa es opcional.";
       }
     }
+    if (!aceptaTerminos) e.terminos = "Para continuar, aceptá los términos y la política de privacidad.";
     return e;
   }
 
@@ -108,6 +114,7 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
       if (e.nombre) refNombre.current?.focus();
       else if (e.telefono) refTelefono.current?.focus();
       else if (e.direccion) document.getElementById("direccion-provincia")?.focus();
+      else if (e.terminos) refAceptaTerminos.current?.focus();
       return;
     }
     if (problemasBloqueantes.length > 0) {
@@ -457,10 +464,38 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
             />
           </div>
 
+          <div className="mt-8">
+            <label className="flex items-start gap-3 text-sm text-navy-500">
+              <input
+                ref={refAceptaTerminos}
+                type="checkbox"
+                checked={aceptaTerminos}
+                onChange={(e) => {
+                  setAceptaTerminos(e.target.checked);
+                  if (e.target.checked) setErrores((prev) => ({ ...prev, terminos: undefined }));
+                }}
+                aria-invalid={errores.terminos ? "true" : undefined}
+                aria-describedby={errores.terminos ? "err-terminos" : undefined}
+                className="mt-0.5 h-5 w-5 shrink-0 accent-navy-500"
+              />
+              <span>
+                Leí y acepto los{" "}
+                <Link href="/terminos" target="_blank" className="underline underline-offset-2">términos y condiciones</Link>{" "}
+                y la{" "}
+                <Link href="/privacidad" target="_blank" className="underline underline-offset-2">política de privacidad</Link>.
+              </span>
+            </label>
+            {errores.terminos && (
+              <p id="err-terminos" className="mt-2 text-sm text-red-700">
+                {errores.terminos}
+              </p>
+            )}
+          </div>
+
           <button
             type="submit"
             disabled={sinWhatsApp || verificando || problemasBloqueantes.length > 0}
-            className="mt-8 w-full rounded-full bg-navy-500 py-4 text-sm font-medium text-crema-100 transition-colors hover:bg-navy-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-crema-400 disabled:text-navy-300 lg:w-auto lg:px-12"
+            className="mt-6 w-full rounded-full bg-navy-500 py-4 text-sm font-medium text-crema-100 transition-colors hover:bg-navy-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-crema-400 disabled:text-navy-300 lg:w-auto lg:px-12"
           >
             {verificando ? "Verificando precios y existencias…" : "Verificar y preparar pedido"}
           </button>

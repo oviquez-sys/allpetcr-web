@@ -26,10 +26,14 @@ export const negocio = {
   nombre: "AllPet",
   nombreLegal: "AllPetcr",
 
+  /** Nombre registral de la sociedad (Registro Nacional). */
+  razonSocial: "3-102-969361 Sociedad de Responsabilidad Limitada",
+
   /** Cédula jurídica REAL. Proviene de Empresa.identificacion en el ERP. */
   cedulaJuridica: "3-102-969361",
 
-  regimen: "Régimen de Tributación Simplificada",
+  /** Inscrita en Hacienda en el régimen tradicional (IVA 13 % incluido en precios). */
+  regimen: "Régimen tradicional",
 
   /** Solo dígitos, con código de país (506 para Costa Rica).
    *  Ej: "50688887777". Se usa para el enlace de WhatsApp. */
@@ -51,7 +55,7 @@ export const negocio = {
 
   direccion: {
     /** Ej: "200 m norte de la iglesia, Local 3" */
-    linea: "100m oeste de la entrada principal de la UNA, 10m norte",
+    linea: "De la entrada principal de la UNA, 100 m oeste y 15 m norte",
     /** Ej: "San José" */
     canton: "Heredia Central",
     /** Ej: "San José" */
@@ -79,6 +83,46 @@ export const negocio = {
     instagram: "",
   },
 
+  /**
+   * Pago con tarjeta en el sitio (pasarela del Banco Nacional).
+   *
+   * Mientras `activo` sea false, los términos y la política de privacidad
+   * describen la compra por WhatsApp, que es lo que el sitio hace hoy. El día
+   * que la pasarela quede funcionando se cambia a true y ambas páginas pasan
+   * solas a describir el pago en línea. No encenderlo antes: la ley obliga a
+   * que los términos digan lo que el sitio hace de verdad.
+   *
+   * `seguridad` y `certificadora` los exige el Reglamento 37899-MEIC art. 192
+   * (tecnología que protege los datos de pago y quién la certifica). Se
+   * llenan con lo que diga el Banco Nacional al afiliar el comercio; si
+   * `activo` es true y están vacíos, las pruebas fallan y no se publica.
+   */
+  pagoEnLinea: {
+    activo: false,
+    banco: "Banco Nacional de Costa Rica",
+    /** Ej: "Visa y Mastercard, de crédito y débito". */
+    tarjetas: "",
+    /** Ej: "conexión cifrada y autenticación 3-D Secure". */
+    seguridad: "",
+    /** Ej: "PCI Security Standards Council (norma PCI DSS)". */
+    certificadora: "",
+  },
+
+  /**
+   * Enlace público a las reseñas de clientes (ej. el perfil de Google de la
+   * tienda). El Reglamento 37899-MEIC art. 196 pide un medio visible para
+   * opiniones buenas y malas. Obligatorio antes de encender el pago en línea.
+   */
+  resenasUrl: "",
+
+  /** Garantía de aparatos (fuentes, comederos automáticos, lámparas, juguetes
+   *  eléctricos). Ley 7472 art. 43: para bienes duraderos la duración se
+   *  tiene que decir por escrito. */
+  garantiaAparatosMeses: 3,
+
+  /** Días hábiles máximos para responder un reclamo (Reglamento 37899-MEIC art. 195). */
+  diasRespuestaReclamo: 5,
+
   /** Monto mínimo de pedido en colones. 0 = sin mínimo. */
   pedidoMinimo: 0,
 } as const;
@@ -97,6 +141,13 @@ export function camposPendientes(): string[] {
   if (faltante(negocio.direccion.linea)) faltan.push("direccion.linea");
   if (faltante(negocio.direccion.canton)) faltan.push("direccion.canton");
   if (faltante(negocio.horarioTexto)) faltan.push("horarioTexto");
+  const p = negocio.pagoEnLinea;
+  if (p.activo) {
+    if (faltante(p.tarjetas)) faltan.push("pagoEnLinea.tarjetas");
+    if (faltante(p.seguridad)) faltan.push("pagoEnLinea.seguridad");
+    if (faltante(p.certificadora)) faltan.push("pagoEnLinea.certificadora");
+    if (faltante(negocio.resenasUrl)) faltan.push("resenasUrl");
+  }
   return faltan;
 }
 

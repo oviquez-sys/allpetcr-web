@@ -28,6 +28,8 @@ const columnas = [
       { href: "/contacto", label: "Contacto" },
       { href: "/envios", label: "Entregas y cómo comprar" },
       { href: "/devoluciones", label: "Cambios y devoluciones" },
+      { href: "/terminos", label: "Términos y condiciones" },
+      { href: "/privacidad", label: "Política de privacidad" },
     ],
   },
   {
@@ -98,7 +100,7 @@ export default function Footer() {
         <p className="mt-12 border-t border-navy-400/40 pt-6 text-xs text-navy-200">
           © {new Date().getFullYear()} {negocio.nombreLegal}
           {!faltante(negocio.cedulaJuridica) && ` · Cédula jurídica ${negocio.cedulaJuridica}`}
-          {` · ${negocio.regimen}`}
+          {` · ${negocio.razonSocial}`}
         </p>
       </div>
     </footer>

@@ -15,8 +15,8 @@ export default function DevolucionesPage() {
       </h1>
       <p className="mt-6 text-[16.5px] font-light leading-relaxed text-navy-400">
         Si necesitás cambiar un producto, podés escoger otro artículo o solicitar
-        la devolución de tu dinero en efectivo. Escribinos para coordinarlo y te
-        ayudamos a resolverlo.
+        la devolución de tu dinero. Escribinos para coordinarlo y te ayudamos a
+        resolverlo.
       </p>
 
       <div className="mt-10 space-y-8 text-[16px] font-light leading-relaxed text-navy-400">
@@ -33,7 +33,7 @@ export default function DevolucionesPage() {
           <h2 id="opciones" className="font-display text-title text-navy-500">Tus opciones</h2>
           <ul className="mt-3 list-disc space-y-2 pl-5">
             <li>Cambiar el producto por otro disponible.</li>
-            <li>Recibir la devolución del dinero en efectivo.</li>
+            <li>Recibir la devolución del dinero por el mismo medio con que pagaste (efectivo, SINPE Móvil o a la misma tarjeta).</li>
             <li>Si el nuevo artículo tiene otro precio, coordinamos contigo el cobro o la devolución de la diferencia antes de finalizar el cambio.</li>
           </ul>
         </section>
@@ -50,9 +50,13 @@ export default function DevolucionesPage() {
         <section aria-labelledby="envios-cambios">
           <h2 id="envios-cambios" className="font-display text-title text-navy-500">Compras con envío</h2>
           <p className="mt-3">
-            Antes de enviar o trasladar un producto, escribinos para acordar la
-            entrega, el retiro y cualquier costo de transporte. Así evitamos que
-            hagás un traslado innecesario.
+            Antes de enviar o trasladar un producto, escribinos para acordarlo.
+            Podés traerlo a la tienda sin costo; si preferís que lo recojamos, el
+            transporte corre por tu cuenta y te decimos el costo antes. Si el
+            producto llegó dañado, defectuoso o no es el que pediste, el
+            transporte lo pagamos nosotros. Si compraste por el sitio o por
+            WhatsApp, además tenés el{" "}
+            <Link href="/terminos#retracto" className="underline underline-offset-2">derecho de retracto</Link>.
           </p>
         </section>
       </div>
