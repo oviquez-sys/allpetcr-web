@@ -113,7 +113,7 @@ export const negocio = {
    * tienda). El Reglamento 37899-MEIC art. 196 pide un medio visible para
    * opiniones buenas y malas. Obligatorio antes de encender el pago en línea.
    */
-  resenasUrl: "",
+  resenasUrl: "https://www.google.com/maps/place/?q=place_id:ChIJDfSUp8b7oI8R9_m4Mtt6ZE0",
 
   /** Garantía de aparatos (fuentes, comederos automáticos, lámparas, juguetes
    *  eléctricos). Ley 7472 art. 43: para bienes duraderos la duración se
