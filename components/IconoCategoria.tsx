@@ -29,6 +29,17 @@ interface Props {
 }
 
 const trazos: Record<string, React.ReactNode> = {
+  // Alimentos → tazón con croquetas, como el primer icono del rótulo del
+  // local. Mismo grosor y solo trazo que los demás.
+  alimentos: (
+    <>
+      <path d="M3.5 12.5h17a8.5 7 0 0 1-17 0Z" />
+      <circle cx="8.5" cy="9.3" r="1.5" />
+      <circle cx="12.5" cy="8.4" r="1.5" />
+      <circle cx="16" cy="9.6" r="1.5" />
+    </>
+  ),
+
   // Juguetes → pelota con las costuras curvas
   juguetes: (
     <>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { construirNavegacion, idsRama } from "./navegacion";
+import { construirAlimentos, construirNavegacion, idsRama } from "./navegacion";
 import type { Categoria, Producto } from "./types";
 
 const categorias: Categoria[] = [
@@ -19,5 +19,39 @@ describe("navegación del catálogo recibido", () => {
   });
   it("termina al encontrar un ciclo", () => {
     expect(idsRama([{ ...categorias[0], padre_id: 903 }, ...categorias.slice(1)], 901)).toEqual([901, 902, 903]);
+  });
+});
+
+describe("división de alimentos", () => {
+  const cats: Categoria[] = [
+    { id: 10, nombre: "Alimento", padre_id: null, orden: 10 },
+    { id: 11, nombre: "Alimento seco", padre_id: 10, orden: 11 },
+    { id: 12, nombre: "Alimento húmedo", padre_id: 10, orden: 12 },
+    { id: 20, nombre: "Snacks y premios", padre_id: null, orden: 20 },
+    { id: 30, nombre: "Juguetes", padre_id: null, orden: 30 },
+  ];
+  const p = (sku: string, categoria_id: number, mascota: string): Producto =>
+    ({ ...producto, sku, categoria_id, mascota });
+  const productos = [p("a", 11, "Perro"), p("b", 11, "Gato"), p("c", 12, "Gato"), p("d", 20, "Perro"), p("e", 30, "Perro")];
+
+  it("separa cada formato por especie y solo muestra lo que tiene existencia", () => {
+    const s = construirAlimentos(cats, productos)!;
+    expect(s.href).toBe("/catalogo?cats=10,20");
+    expect(s.grupos).toEqual([
+      { label: "Alimento seco para perro", href: "/catalogo?cats=11&para=perro" },
+      { label: "Snacks y premios para perro", href: "/catalogo?cats=20&para=perro" },
+      { label: "Alimento seco para gato", href: "/catalogo?cats=11&para=gato" },
+      { label: "Alimento húmedo para gato", href: "/catalogo?cats=12&para=gato" },
+    ]);
+  });
+
+  it("va primero en el menú y desaparece si no hay alimento", () => {
+    expect(construirNavegacion(cats, productos)[0].id).toBe("alimentos");
+    expect(construirNavegacion(cats, [p("e", 30, "Perro")]).some((s) => s.id === "alimentos")).toBe(false);
+  });
+
+  it("un alimento para perro y gato aparece en las dos especies", () => {
+    const s = construirAlimentos(cats, [p("x", 12, "Perro y gato")])!;
+    expect(s.grupos.map((g) => g.label)).toEqual(["Alimento húmedo para perro", "Alimento húmedo para gato"]);
   });
 });

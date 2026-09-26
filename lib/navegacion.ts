@@ -35,17 +35,60 @@ export function idsRama(categorias: Categoria[], id: number): number[] {
   }
   return [...ids];
 }
+/** Raíces que forman la división de alimentos (26/09/2026). Se reconocen por
+ *  nombre porque son parte del árbol oficial del ERP (`asegurar_categorias`)
+ *  y no cambian; la misma lista vive en `catalogo/divisiones.py`. */
+export const RAICES_ALIMENTO = ["Alimento", "Snacks y premios"];
+
+function porOrden(a: Categoria, b: Categoria): number {
+  return a.orden - b.orden || a.nombre.localeCompare(b.nombre, "es");
+}
+
+/**
+ * Sección "Alimentos" del menú: cada formato separado por especie
+ * ("Alimento seco para perro", "Snacks y premios para gato"…). La especie no
+ * es una categoría —es el campo `mascota` del producto—, así que se combina
+ * acá con `para=`, igual que el resto del menú. Solo aparecen los grupos con
+ * existencia, y la sección entera no aparece si no hay alimento disponible.
+ */
+export function construirAlimentos(categorias: Categoria[], productos: Producto[]): SeccionNav | null {
+  const raices = categorias.filter((c) => c.padre_id === null && RAICES_ALIMENTO.includes(c.nombre)).sort(porOrden);
+  if (!raices.length) return null;
+  // Cada raíz se ofrece por sus subcategorías (seco, húmedo…); una raíz sin
+  // subcategorías (Snacks y premios) se ofrece entera.
+  const hojas = raices.flatMap((r) => {
+    const hijas = categorias.filter((c) => c.padre_id === r.id).sort(porOrden);
+    return hijas.length ? [...hijas, r] : [r];
+  });
+  const grupos: GrupoNav[] = [];
+  for (const e of ESPECIES) {
+    const especie = e.clave === "perro" ? "perro" : "gato";
+    for (const c of hojas) {
+      const esRaizConHijas = c.padre_id === null && categorias.some((h) => h.padre_id === c.id);
+      // Una raíz con hijas solo aparece si hay productos colgados directo de
+      // ella (sin formato asignado); sus hijas ya cubren el resto.
+      const ids = esRaizConHijas ? [c.id] : idsRama(categorias, c.id);
+      const hay = productos.some((p) => p.disponible && p.categoria_id !== null && ids.includes(p.categoria_id) && esParaEspecie(p.mascota, e.clave));
+      if (hay) grupos.push({ label: `${c.nombre} para ${especie}`, href: hrefCatsEspecie([c.id], e.clave) });
+    }
+  }
+  if (!grupos.length) return null;
+  return { id: "alimentos", label: "Alimentos", href: hrefCats(raices.map((r) => r.id)), grupos };
+}
+
 /** Los datos los suministra el servidor desde el ERP; nunca un JSON empaquetado. */
 export function construirNavegacion(categorias: Categoria[], productos: Producto[]): SeccionNav[] {
-  const raices = categorias.filter((c) => c.padre_id === null)
-    .sort((a, b) => a.orden - b.orden || a.nombre.localeCompare(b.nombre, "es"));
-  return ESPECIES.map((e) => ({
+  const raices = categorias.filter((c) => c.padre_id === null).sort(porOrden);
+  const alimentos = construirAlimentos(categorias, productos);
+  // Alimentos va primero: es lo que la gente viene a comprar (mismo criterio
+  // que el orden del árbol en el ERP).
+  return [...(alimentos ? [alimentos] : []), ...ESPECIES.map((e) => ({
     id: e.clave, label: e.label, href: hrefEspecie(e.clave),
     grupos: raices.filter((c) => {
       const rama = idsRama(categorias, c.id);
       return productos.some((p) => p.disponible && p.categoria_id !== null && rama.includes(p.categoria_id) && esParaEspecie(p.mascota, e.clave));
     }).map((c) => ({ label: c.nombre, href: hrefCatsEspecie([c.id], e.clave) })),
-  }));
+  }))];
 }
 export interface PuertaNav {
   clave: ClaveEspecie;

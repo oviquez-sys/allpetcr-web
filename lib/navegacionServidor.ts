@@ -15,6 +15,6 @@ async function cargarNavegacion() {
  */
 export const getNavegacion = unstable_cache(
   cargarNavegacion,
-  ["navegacion-catalogo-v1"],
+  ["navegacion-catalogo-v2"],
   { revalidate: 60 },
 );
