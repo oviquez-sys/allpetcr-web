@@ -62,6 +62,17 @@ body {
   contain-intrinsic-size: auto 420px;
 }
 
+/* Filas deslizables del inicio (components/inicio/CarruselProductos.tsx):
+   la barra de desplazamiento horizontal ensucia una fila de producto y en
+   táctil no hace falta —la tarjeta cortada en el borde ya dice "deslizá"—.
+   El desplazamiento sigue funcionando con dedo, rueda y teclado. */
+.sin-barra {
+  scrollbar-width: none;
+}
+.sin-barra::-webkit-scrollbar {
+  display: none;
+}
+
 /* ══════════════════════════════════════════════════════════════════════════
    AMBIENTE — traducción a pantalla de la fachada del local
    ══════════════════════════════════════════════════════════════════════════

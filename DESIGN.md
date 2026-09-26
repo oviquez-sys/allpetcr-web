@@ -330,3 +330,47 @@ documento. Oscar conoció y aceptó ese contraste al elegir la opción 2 sobre
 la 3 (que sí forzaba el tono de atardecer y se veía peor). Si más adelante
 aparece una foto de la fachada real tomada al atardecer, es la candidata
 natural a reemplazar esta.
+
+## Rediseño del inicio: de "fachada iluminada" a portada editorial — 26/09/2026
+
+Brief de Oscar: que la portada deje de leerse como tienda en línea
+tradicional y se sienta como una marca de lifestyle para mascotas (referencia
+conceptual: Zee.Dog, sin copiarla). Rama `rediseno-home`.
+
+### Qué cambia en el sistema
+
+- **Blanco y crema son el aire; navy y dorado, acentos.** La portada ya no
+  abre y cierra con bandas navy. El navy queda como tinta, como botón
+  primario, en la barra superior de una línea y en el pie (que sigue siendo
+  la banda oscura de cierre). La regla "oscuro → claro → oscuro" deja de
+  aplicar al inicio; las demás páginas no cambiaron.
+- **La foto manda.** Hero a sangre, tres entradas con foto (`BloqueEditorial`),
+  una banda lifestyle. Sin filete dorado ni ícono en círculo sobre las fotos:
+  nombre + conteo + flecha.
+- **Radio de contenedor fotográfico: 12px (`rounded-xl`)**, un paso más
+  sobrio que los 16px de tarjeta. Los botones siguen siendo píldora.
+- **Encabezado de una sola fila** (logo · menú · buscador · carrito). Misma
+  lógica y mismos datos de `lib/navegacion.ts`; "Repetir pedido" y
+  "Contacto" pasan a la barra superior en escritorio.
+
+### Escala editorial (tailwind.config.ts)
+
+| Token | Tamaño | Uso |
+|---|---|---|
+| `text-hero` | clamp 44→80px, 300, lh 1 | El h1 del inicio |
+| `text-seccion` | clamp 28→42px, 300, lh 1.08 | Títulos de sección del inicio |
+| `text-bloque` | clamp 26→34px, 300, lh 1 | Nombre dentro de bloques y actividades |
+
+Siguen siendo Fraunces (titulares) + Inter (UI): no se agregó ninguna familia.
+
+### Lo que NO cambió
+
+Conteos reales en cada entrada, nada de autoplay (la fila de productos es
+scroll nativo con `scroll-snap`), nada de urgencia inventada, AA de
+contraste, objetivos táctiles de 44px, `prefers-reduced-motion`.
+
+### Contenido pendiente (lib/contenidoInicio.ts)
+
+`MARCAS`, `FOTOS_COMUNIDAD` y `FOTO_TIENDA` están vacíos a propósito: no hay
+datos reales todavía y sus secciones no se pintan. La entrada "Alimentos"
+muestra "Foto pendiente" hasta tener foto propia (la suya pasó al hero).
