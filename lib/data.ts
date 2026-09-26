@@ -83,15 +83,70 @@ async function erpFetch<T>(ruta: string): Promise<T> {
   return respuesta.json() as Promise<T>;
 }
 
-/** Sigue `next` hasta traer todas las páginas. El catálogo (~500
- * productos) es chico: pedirlo completo es más simple que enseñarle
- * paginación a cada página del sitio que hoy espera un array completo. */
+const MAX_PAGINAS = 100;
+/** Cuántas páginas se piden a la vez. Suficiente para bajar el tiempo de
+ *  ~3 s a unas pocas vueltas, sin descargar 22 consultas de golpe sobre
+ *  el ERP (que atiende también el mostrador). */
+const PAGINAS_EN_PARALELO = 6;
+
+/** Trae todas las páginas del catálogo. El catálogo (~500 productos) es
+ * chico: pedirlo completo es más simple que enseñarle paginación a cada
+ * página del sitio que hoy espera un array completo.
+ *
+ * RENDIMIENTO (26/09/2026): antes se seguía `next` de a una página por vez.
+ * Con PAGE_SIZE 24 en el ERP y 526 productos eran 22 consultas en fila y
+ * ~3 s antes de que el inicio o el catálogo mandaran el primer byte
+ * (/contacto, que no consulta el catálogo, respondía en 0.4 s). Ahora la
+ * primera página dice cuántos productos hay (`count`) y el resto se pide en
+ * paralelo, en tandas de PAGINAS_EN_PARALELO.
+ *
+ * Las URLs de las demás páginas se arman a partir del `next` que devolvió
+ * el propio ERP (mismo formato, solo cambia `page`), y cada una pasa por
+ * erpFetch, que sigue rechazando cualquier origen que no sea el del ERP.
+ * Si la respuesta no trae `count` o `next` no usa `?page=`, se vuelve al
+ * recorrido de siempre, página por página. */
 async function erpFetchTodasLasPaginas<T>(rutaInicial: string): Promise<T[]> {
+  const primera: RespuestaPaginada<T> = await erpFetch<RespuestaPaginada<T>>(rutaInicial);
+  if (!Array.isArray(primera.results)) throw new Error("Respuesta de catálogo inválida.");
+
+  const tamano = primera.results.length;
+  const urlSiguiente = primera.next ? new URL(primera.next, ERP_API_URL) : null;
+  if (urlSiguiente && urlSiguiente.searchParams.has("page") && Number.isInteger(primera.count) && tamano > 0) {
+    const totalPaginas = Math.ceil(primera.count / tamano);
+    if (totalPaginas > MAX_PAGINAS) throw new Error("Paginación de catálogo inválida.");
+    const rutas: string[] = [];
+    for (let n = 2; n <= totalPaginas; n++) {
+      urlSiguiente.searchParams.set("page", String(n));
+      rutas.push(urlSiguiente.toString());
+    }
+    const paginas: RespuestaPaginada<T>[] = [];
+    for (let i = 0; i < rutas.length; i += PAGINAS_EN_PARALELO) {
+      paginas.push(...(await Promise.all(
+        rutas.slice(i, i + PAGINAS_EN_PARALELO).map((r) => erpFetch<RespuestaPaginada<T>>(r)),
+      )));
+    }
+    const items = [...primera.results];
+    for (const pagina of paginas) {
+      if (!Array.isArray(pagina.results)) throw new Error("Respuesta de catálogo inválida.");
+      items.push(...pagina.results);
+    }
+    // Si entraron productos mientras se pedían las páginas, la última
+    // todavía apunta a una siguiente: se sigue de a una desde ahí.
+    const ultima = paginas.at(-1) ?? primera;
+    if (ultima.next) items.push(...(await erpSeguirPaginas<T>(ultima.next)));
+    return items;
+  }
+
+  return [...primera.results, ...(primera.next ? await erpSeguirPaginas<T>(primera.next) : [])];
+}
+
+/** Recorrido clásico: sigue `next` de a una página. */
+async function erpSeguirPaginas<T>(rutaInicial: string): Promise<T[]> {
   const items: T[] = [];
   let ruta: string | null = rutaInicial;
   const visitadas = new Set<string>();
   while (ruta) {
-    if (visitadas.has(ruta) || visitadas.size >= 100) throw new Error("Paginación de catálogo inválida.");
+    if (visitadas.has(ruta) || visitadas.size >= MAX_PAGINAS) throw new Error("Paginación de catálogo inválida.");
     visitadas.add(ruta);
     const pagina: RespuestaPaginada<T> = await erpFetch<RespuestaPaginada<T>>(ruta);
     if (!Array.isArray(pagina.results)) throw new Error("Respuesta de catálogo inválida.");
