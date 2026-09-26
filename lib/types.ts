@@ -40,4 +40,12 @@ export interface Producto {
    *  exportaciones el stock cambia, y el sitio tiene que poder marcar un
    *  agotado —en el carrito, sobre todo— sin esperar a la siguiente. */
   disponible: boolean;
+  /** Vitrina manual de la portada (26/09/2026, `catalogo.Producto.destacado_home`
+   *  en el ERP). Opcionales: un JSON local viejo, exportado antes de este
+   *  cambio, no los trae — `lib/vitrina.ts` los trata como "no destacado"
+   *  cuando faltan, en vez de romper. */
+  destacado_home?: boolean;
+  /** Lugar dentro de "La vitrina" (menor sale primero). Solo importa junto
+   *  con `destacado_home: true` — ver `lib/vitrina.ts`. */
+  orden_home?: number | null;
 }
