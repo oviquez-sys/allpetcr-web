@@ -86,6 +86,12 @@ const config: Config = {
       // de uso único y forzarlos a esta escala los volvería menos legibles en
       // su contexto real, no más consistentes.
       fontSize: {
+        // Escala editorial del inicio (rediseño 26/09/2026). Fluida con clamp
+        // porque son titulares de campaña: tienen que pesar en 1920px sin
+        // desbordar en 375px. Documentada en DESIGN.md → "Escala editorial".
+        hero: ["clamp(2.75rem, 1.9rem + 3.6vw, 5rem)", { lineHeight: "1", letterSpacing: "-0.02em", fontWeight: "300" }], // 44→80px
+        seccion: ["clamp(1.75rem, 1.4rem + 1.5vw, 2.625rem)", { lineHeight: "1.08", letterSpacing: "-0.01em", fontWeight: "300" }], // 28→42px
+        bloque: ["clamp(1.625rem, 1.35rem + 1.1vw, 2.125rem)", { lineHeight: "1", fontWeight: "300" }], // 26→34px
         headline: ["2rem", { lineHeight: "1.15", fontWeight: "300" }], // 32px
         title: ["0.90625rem", { lineHeight: "1.4" }], // 14.5px
         price: ["1.0625rem", { lineHeight: "1.3", fontWeight: "500" }], // 17px
