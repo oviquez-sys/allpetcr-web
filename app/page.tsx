@@ -97,6 +97,12 @@ export default async function HomePage() {
     .filter((c) => c.total > 0)
     .sort((a, b) => b.total - a.total);
 
+  // Alimento se saca de la lista de texto de abajo porque ahora tiene su
+  // propia puerta con foto, igual que Perro/Gato: dejarlo en los dos lugares
+  // a la vez duplicaba el enlace. (26/09/2026, foto aportada por Oscar.)
+  const alimento = categoriasConConteo.find((c) => c.nombre === "Alimento");
+  const categoriasParaLaLista = categoriasConConteo.filter((c) => c.nombre !== "Alimento");
+
   // LA VITRINA — 12 productos repartidos por categoría en vez de los 12
   // primeros del JSON, que salían todos de "Juguetes" y hacían ver la tienda
   // más chica de lo que es. Determinista: mismo catálogo, misma vitrina.
@@ -243,9 +249,20 @@ export default async function HomePage() {
         <div className="franja-dorada" aria-hidden="true" />
       </section>
 
-      {/* ── DOS PUERTAS ───────────────────────────────────────────────────
-          Elemento firma de la portada. El porqué —y por qué no contradice a
-          lib/navegacion.ts— está en components/PuertaEspecie.tsx. */}
+      {/* ── LAS PUERTAS ───────────────────────────────────────────────────
+          Elemento firma de la portada. El porqué de las dos de especie —y
+          por qué no contradice a lib/navegacion.ts— está en
+          components/PuertaEspecie.tsx.
+
+          TERCERA PUERTA — Alimento (26/09/2026, a pedido de Oscar). No es
+          una especie, es una categoría: se arma aparte de PUERTAS (que sigue
+          siendo solo perro/gato, tipado por ClaveEspecie) y se agrega al
+          mismo grid con el mismo componente, que ya era genérico. El conteo
+          sale de categoriasConConteo, calculado de verdad como el resto —no
+          a mano—, y el enlace va por id (hrefCats), igual que la lista de
+          categorías de abajo. Se muestra solo si hay productos con
+          existencia en Alimento; si algún día se queda sin stock, la puerta
+          desaparece sola en vez de prometer algo que no hay. */}
       <section className="mx-auto max-w-contenido px-6 py-20">
         <h2 className="font-display text-headline text-navy-500">
           ¿Para quién comprás?
@@ -254,7 +271,7 @@ export default async function HomePage() {
           Es la primera pregunta que hacemos en el mostrador. Acá también.
         </p>
 
-        <div className="mt-8 grid gap-5 sm:grid-cols-2">
+        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {PUERTAS.map((p, i) => (
             <PuertaEspecie
               key={p.clave}
@@ -268,6 +285,17 @@ export default async function HomePage() {
               prioridad={i === 0}
             />
           ))}
+          {alimento && (
+            <PuertaEspecie
+              key="alimento"
+              nombre="Alimento"
+              conteo={alimento.total}
+              href={hrefCats([alimento.id])}
+              imagen="/categorias/alimento.jpg"
+              tinte="bg-crema-200"
+              icono="alimentos"
+            />
+          )}
         </div>
 
         {/* La aclaración va debajo y no escondida: sin ella los dos conteos
@@ -277,7 +305,7 @@ export default async function HomePage() {
         </p>
 
         <ul className="mt-7 flex flex-wrap gap-x-7 gap-y-2.5 border-t border-crema-400 pt-5">
-          {categoriasConConteo.map((c) => (
+          {categoriasParaLaLista.map((c) => (
             <li key={c.nombre}>
               <Link
                 href={hrefCats([c.id])}
