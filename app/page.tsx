@@ -163,7 +163,9 @@ export default async function HomePage() {
       {/* ── 1. HERO DE CAMPAÑA ──────────────────────────────────────────────
           Foto a sangre (alimento.jpg: perro y gato con los platos AllPet —
           decisión de Oscar, 26/09/2026, sobre hogar.jpg), un titular, una
-          línea y un solo botón. `priority`: es la candidata a LCP.
+          línea y un solo botón. `preload` + `fetchPriority="high"`: es el
+          elemento LCP. En Next 16 `priority` quedó obsoleto y además no marcaba
+          la prioridad de red; `preload` solo agrega el <link> de precarga.
 
           El texto va abajo a la izquierda sobre un velo que solo oscurece
           esa esquina; las caras de los animales quedan limpias. En móvil
@@ -175,7 +177,8 @@ export default async function HomePage() {
             src="/categorias/alimento.jpg"
             alt="Un golden retriever y un gato atigrado junto a sus platos de comida, al sol en una terraza"
             fill
-            priority
+            preload
+            fetchPriority="high"
             sizes="100vw"
             className="object-cover object-[30%_center] sm:object-center"
           />
@@ -238,7 +241,16 @@ export default async function HomePage() {
               detalle={`${e.total} productos`}
               imagen={e.imagen}
               posicion={e.posicion}
-              sizes={entradas.length === 3 ? "(max-width: 1024px) 50vw, 380px" : "(max-width: 1024px) 50vw, 580px"}
+              // La primera de tres va a lo ancho hasta lg (col-span-2): si
+              // se declara 50vw, el teléfono baja media resolución y se ve
+              // blanda. Detectado en la auditoría de rendimiento, 26/09/2026.
+              sizes={
+                entradas.length !== 3
+                  ? "(max-width: 1024px) 50vw, 580px"
+                  : i === 0
+                    ? "(max-width: 1024px) 100vw, 380px"
+                    : "(max-width: 1024px) 50vw, 380px"
+              }
               className={
                 entradas.length === 3 && i === 0
                   ? "col-span-2 aspect-[4/3] sm:aspect-[16/9] lg:col-span-1 lg:aspect-[4/5]"

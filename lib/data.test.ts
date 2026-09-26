@@ -90,7 +90,7 @@ describe("getProductos / getCategorias", () => {
 
     expect(productos).toEqual([producto("X1", { nombre: "Producto de prueba" })]);
     const [url, init] = fetchMock.mock.calls[0];
-    expect(url).toBe("http://erp-de-prueba/api/catalogo/productos/");
+    expect(url).toBe("http://erp-de-prueba/api/catalogo/productos/?page_size=1000");
     expect(init?.headers).toMatchObject({ Authorization: "Token token-123" });
   });
 

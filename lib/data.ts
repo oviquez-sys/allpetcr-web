@@ -101,13 +101,22 @@ async function erpFetchTodasLasPaginas<T>(rutaInicial: string): Promise<T[]> {
   return items;
 }
 
+/** Tope que acepta el ERP (api/views.py → PaginacionCatalogo.max_page_size).
+ *  Con más productos que esto, el resto llega por `next` igual que antes. */
+const TAMANO_PAGINA_CATALOGO = 1000;
+
 // React cache deduplica por render, sin conservar precios entre visitas.
 export const getProductos = cache(async (): Promise<Producto[]> => {
   if (!ERP_CONFIGURADO) {
     permitirRespaldoLocal();
     return productosJson as Producto[];
   }
-  return validarProductos(await erpFetchTodasLasPaginas<unknown>("/api/catalogo/productos/"));
+  // ?page_size (26/09/2026): el catálogo entero en UNA consulta. Antes eran
+  // 22 páginas de 24 en fila por visita: ~3 s antes del primer byte y 23
+  // consultas contra el límite de tasa del ERP, que tumbaba el sitio con 5
+  // o 6 visitas por minuto. Si el ERP todavía no acepta el parámetro, lo
+  // ignora y devuelve páginas de 24 con `next`: se recorren como siempre.
+  return validarProductos(await erpFetchTodasLasPaginas<unknown>(`/api/catalogo/productos/?page_size=${TAMANO_PAGINA_CATALOGO}`));
 });
 
 export const getCategorias = cache(async (): Promise<Categoria[]> => {
