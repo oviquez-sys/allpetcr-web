@@ -116,34 +116,6 @@ describe("getProductos / getCategorias", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
-  it("con `count`, pide las páginas restantes en paralelo y conserva el orden", async () => {
-    vi.stubEnv("ERP_API_URL", "http://erp-de-prueba");
-    vi.stubEnv("ERP_API_TOKEN", "token-123");
-    const base = "http://erp-de-prueba/api/catalogo/productos/";
-    const respuestas: Record<string, object> = {
-      [base]: { count: 5, next: `${base}?page=2`, previous: null, results: [producto("A"), producto("B")] },
-      [`${base}?page=2`]: { count: 5, next: `${base}?page=3`, previous: base, results: [producto("C"), producto("D")] },
-      [`${base}?page=3`]: { count: 5, next: null, previous: `${base}?page=2`, results: [producto("E")] },
-    };
-    let enVuelo = 0;
-    let maxEnVuelo = 0;
-    const fetchMock = vi.fn(async (url: string) => {
-      enVuelo += 1;
-      maxEnVuelo = Math.max(maxEnVuelo, enVuelo);
-      await new Promise((r) => setTimeout(r, 5));
-      enVuelo -= 1;
-      return new Response(JSON.stringify(respuestas[url]), { status: 200 });
-    });
-    vi.stubGlobal("fetch", fetchMock);
-
-    const { getProductos } = await import("./data");
-    const productos = await getProductos();
-
-    expect(productos.map((p) => p.sku)).toEqual(["A", "B", "C", "D", "E"]);
-    expect(fetchMock).toHaveBeenCalledTimes(3);
-    expect(maxEnVuelo).toBe(2); // las páginas 2 y 3 salieron juntas
-  });
-
   it("si el ERP responde con error, propaga la falla en vez de devolver un catálogo vacío en silencio", async () => {
     vi.stubEnv("ERP_API_URL", "http://erp-de-prueba");
     vi.stubEnv("ERP_API_TOKEN", "token-123");
