@@ -56,8 +56,8 @@ export default function TiendaFisica() {
           <p className="text-label font-medium uppercase text-dorado-700">La tienda</p>
           <h2 className="mt-4 font-display text-seccion text-navy-500">Nuestra tienda en Heredia</h2>
           <p className="mt-5 max-w-md text-[15px] font-light leading-relaxed text-navy-400">
-            Vení a ver los productos en persona y preguntanos antes de elegir.
-            También podés retirar ahí tu pedido en línea.
+            Vení a ver los productos en persona y preguntanos lo que
+            necesités. También podés retirar ahí tu pedido.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
             <Link

@@ -54,8 +54,8 @@ export const metadata = { alternates: { canonical: "/" } };
 
 const pasos = [
   { n: "1", titulo: "Armá tu pedido", texto: "Sin registro y sin tarjeta." },
-  { n: "2", titulo: "Confirmamos por WhatsApp", texto: "Existencias y total, antes de que pagués." },
-  { n: "3", titulo: "Retirás o te lo enviamos", texto: "En la tienda o con entrega en la GAM." },
+  { n: "2", titulo: "Confirmamos por WhatsApp", texto: "Te confirmamos existencias y total antes de que pagués." },
+  { n: "3", titulo: "Retirás o te lo enviamos", texto: "Retiro sin costo en Heredia o entrega en la GAM." },
 ];
 
 /** Fotos de las tres entradas grandes. Criterio (docs/DIRECCION-DE-ARTE.md):
@@ -161,29 +161,30 @@ export default async function HomePage() {
               <p className="text-label font-medium uppercase tracking-[0.16em] text-white/85">
                 Tienda de mascotas · Heredia, Costa Rica
               </p>
-              {/* Un solo h1 por página, y es la promesa, no el nombre de la
-                  marca (el logo ya está en el encabezado). */}
-              <h1 className="mt-4 font-display text-hero">
-                Para su juego, paseo
-                <br className="hidden sm:block" /> y cuidado diario.
-              </h1>
+              {/* Un solo h1 por página, y es la declaración de marca, no el
+                  nombre (el logo ya está en el encabezado). Copy aprobado por
+                  Oscar el 26/09/2026: "Ellos marcan el plan." abre la idea que
+                  retoma "¿Cuál es el plan hoy?" más abajo. Las palabras para
+                  Google (tienda de mascotas, Heredia, perros, gatos) van en el
+                  antetítulo y el subtítulo, no en el h1. */}
+              <h1 className="mt-4 font-display text-hero">Ellos marcan el plan.</h1>
               <p className="mt-5 max-w-md text-base font-light leading-relaxed text-white/90 sm:text-[17px]">
-                Alimento, accesorios e higiene para perros y gatos. Comprá en
-                línea o visitanos en Heredia.
+                Alimento, accesorios e higiene para perros y gatos. En línea o
+                en nuestra tienda de Heredia.
               </p>
               <div className="mt-8 flex flex-wrap items-center gap-x-7 gap-y-4">
                 <Link
                   href="/catalogo"
                   className="inline-flex items-center gap-2.5 rounded-full bg-white px-8 py-4 text-sm font-medium text-navy-500 transition-colors hover:bg-crema-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-navy-900"
                 >
-                  Comprar ahora
+                  Ver productos
                   <Flecha className="h-4 w-4" />
                 </Link>
                 <Link
                   href="#tienda"
                   className="inline-flex min-h-11 items-center rounded text-sm font-medium text-white underline decoration-white/50 underline-offset-[6px] transition-colors hover:decoration-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
                 >
-                  Visitá la tienda
+                  Visitanos en Heredia
                 </Link>
               </div>
             </div>
@@ -242,11 +243,11 @@ export default async function HomePage() {
               <div>
                 <h2 className="font-display text-seccion text-navy-500">En la tienda hoy</h2>
                 <p className="mt-2 text-sm font-light text-navy-400">
-                  Si aparece acá, está en existencia.
+                  Lo que ves, lo tenemos.
                 </p>
               </div>
               <Link href="/catalogo" className={enlaceSecundario}>
-                Ver los {disponibles.length}
+                Ver los {disponibles.length} productos
               </Link>
             </div>
             <CarruselProductos productos={vitrina} nombrePorId={nombrePorId} />
@@ -256,9 +257,9 @@ export default async function HomePage() {
 
       {/* ── 4. BANDA LIFESTYLE ──────────────────────────────────────────── */}
       <BandaLifestyle
-        titulo="Más momentos juntos."
-        texto="Correas, arneses y collares para salir a la calle con todo lo que hace falta."
-        cta="Ver paseo"
+        titulo="La calle es de los dos."
+        texto="Correas, arneses y collares para cada salida."
+        cta="Ver correas y arneses"
         href={idsPaseo.length ? hrefCats(idsPaseo) : "/catalogo"}
         imagen="/categorias/paseo.jpg"
         posicion="center 60%"
@@ -267,7 +268,7 @@ export default async function HomePage() {
       {/* ── 5. COMPRAR POR ACTIVIDAD ────────────────────────────────────── */}
       {actividades.length > 0 && (
         <section className="mx-auto max-w-contenido px-4 py-20 sm:px-6 lg:py-28">
-          <h2 className="font-display text-seccion text-navy-500">¿Qué van a hacer hoy?</h2>
+          <h2 className="font-display text-seccion text-navy-500">¿Cuál es el plan hoy?</h2>
           <p className="mt-2 text-sm font-light text-navy-400">Comprá por actividad.</p>
           <div className="mt-8 lg:mt-10">
             <ComprarPorActividad actividades={actividades} />
@@ -284,7 +285,7 @@ export default async function HomePage() {
           <div>
             <h2 className="font-display text-headline text-navy-500">Cómo comprar</h2>
             <Link href="/envios" className={`mt-1 ${enlaceSecundario}`}>
-              Entregas y detalles
+              Envíos y retiro
             </Link>
           </div>
           <ol className="grid gap-6 sm:grid-cols-3 sm:gap-8">

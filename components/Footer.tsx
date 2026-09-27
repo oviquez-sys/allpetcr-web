@@ -54,8 +54,8 @@ export default function Footer() {
                 sin inventar una variante de marca que no existe. */}
             <Marca variante="horizontal" monocromo className="h-7 w-auto text-white" />
             <p className="mt-4 max-w-xs text-sm font-light leading-relaxed text-navy-100">
-              Productos para perros y gatos en Costa Rica. Tienda física,
-              atención honesta.
+              Tienda de mascotas para perros y gatos. En línea y en Heredia,
+              Costa Rica.
             </p>
 
             {/* NAP (nombre, dirección, teléfono). Es la señal principal del
