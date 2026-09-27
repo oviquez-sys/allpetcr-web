@@ -196,18 +196,27 @@ export default async function HomePage() {
       </section>
 
       {/* ── 2. PARA QUIÉN COMPRÁS ───────────────────────────────────────────
+          CASI A SANGRE (27/09/2026, a pedido de Oscar): dentro del contenedor
+          de 1180 px, en una pantalla ancha las tres fotos quedaban chicas y
+          con dos franjas blancas a los costados. Ahora la grilla ocupa todo
+          el ancho —con un margen fino y separación mínima entre fotos, como
+          el hero— y el título se alinea con el borde de las fotos.
+          Los bloques crecen a lo ancho, NO a lo alto: las fotos son
+          horizontales, y un bloque más alto las recortaría (efecto zoom).
+          Tope de 2000 px para que en monitores enormes no se vuelvan murales.
+
           En móvil no es la grilla de escritorio apilada: la primera pieza va
           a lo ancho y las otras dos comparten fila, así las tres entran en
           poco más de una pantalla. Con solo dos (sin alimento en stock),
           van lado a lado. */}
-      <section className="mx-auto max-w-contenido px-4 pb-20 pt-16 sm:px-6 lg:pb-28 lg:pt-24">
-        <div className="flex items-end justify-between gap-6">
+      <section className="pb-12 pt-12 lg:pb-16 lg:pt-16">
+        <div className="mx-auto flex max-w-[2000px] items-end justify-between gap-6 px-4 sm:px-6">
           <h2 className="font-display text-seccion text-navy-500">¿Para quién comprás?</h2>
           <Link href="/catalogo" className={`hidden sm:inline-flex ${enlaceSecundario}`}>
             Ver todo el catálogo
           </Link>
         </div>
-        <div className={`mt-8 grid grid-cols-2 gap-2.5 sm:gap-4 lg:mt-10 ${entradas.length === 3 ? "lg:grid-cols-3" : ""}`}>
+        <div className={`mx-auto mt-8 grid max-w-[2000px] grid-cols-2 gap-2 px-2 sm:gap-3 sm:px-3 lg:mt-10 ${entradas.length === 3 ? "lg:grid-cols-3" : ""}`}>
           {entradas.map((e, i) => (
             <BloqueEditorial
               key={e.clave}
@@ -221,15 +230,17 @@ export default async function HomePage() {
               // blanda. Detectado en la auditoría de rendimiento, 26/09/2026.
               sizes={
                 entradas.length !== 3
-                  ? "(max-width: 1024px) 50vw, 580px"
+                  ? "50vw"
                   : i === 0
-                    ? "(max-width: 1024px) 100vw, 380px"
-                    : "(max-width: 1024px) 50vw, 380px"
+                    ? "(max-width: 1024px) 100vw, 34vw"
+                    : "(max-width: 1024px) 50vw, 34vw"
               }
               className={
                 entradas.length === 3 && i === 0
                   ? "col-span-2 aspect-[4/3] sm:aspect-[16/9] lg:col-span-1 lg:aspect-[4/3]"
-                  : "aspect-square lg:aspect-[4/3]"
+                  : entradas.length === 3
+                    ? "aspect-square lg:aspect-[4/3]"
+                    : "aspect-square lg:aspect-[16/10]"
               }
             />
           ))}

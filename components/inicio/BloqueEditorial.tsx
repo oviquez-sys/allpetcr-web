@@ -73,7 +73,7 @@ export default function BloqueEditorial({
 
       <div className={`relative flex items-end justify-between gap-4 p-5 sm:p-7 ${imagen ? "text-white" : "text-navy-500"}`}>
         <div>
-          <h3 className="font-display text-bloque">{titulo}</h3>
+          <h3 className="font-display text-bloque lg:text-seccion">{titulo}</h3>
           {detalle && (
             <p className={`mt-2 text-xs font-medium tracking-wide ${imagen ? "text-white/85" : "text-navy-400"}`}>
               {detalle}
