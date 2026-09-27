@@ -205,10 +205,10 @@ export default async function HomePage() {
           horizontales, y un bloque más alto las recortaría (efecto zoom).
           Tope de 2000 px para que en monitores enormes no se vuelvan murales.
 
-          En móvil no es la grilla de escritorio apilada: la primera pieza va
-          a lo ancho y las otras dos comparten fila, así las tres entran en
-          poco más de una pantalla. Con solo dos (sin alimento en stock),
-          van lado a lado. */}
+          En el celular van una debajo de otra, a lo ancho y horizontales
+          (27/09/2026): dos bloques de 176 px lado a lado recortaban la foto
+          y el título chocaba con la flecha. En tablet, la primera a lo ancho
+          y las otras dos lado a lado; en escritorio, las tres en fila. */}
       <section className="pb-12 pt-12 lg:pb-16 lg:pt-16">
         <div className="mx-auto flex max-w-[2000px] items-end justify-between gap-6 px-4 sm:px-6">
           <h2 className="font-display text-seccion text-navy-500">¿Para quién comprás?</h2>
@@ -216,7 +216,7 @@ export default async function HomePage() {
             Ver todo el catálogo
           </Link>
         </div>
-        <div className={`mx-auto mt-8 grid max-w-[2000px] grid-cols-2 gap-2 px-2 sm:gap-3 sm:px-3 lg:mt-10 ${entradas.length === 3 ? "lg:grid-cols-3" : ""}`}>
+        <div className={`mx-auto mt-8 grid max-w-[2000px] grid-cols-1 gap-2 px-2 sm:grid-cols-2 sm:gap-3 sm:px-3 lg:mt-10 ${entradas.length === 3 ? "lg:grid-cols-3" : ""}`}>
           {entradas.map((e, i) => (
             <BloqueEditorial
               key={e.clave}
@@ -225,22 +225,24 @@ export default async function HomePage() {
               detalle={`${e.total} productos`}
               imagen={e.imagen}
               posicion={e.posicion}
-              // La primera de tres va a lo ancho hasta lg (col-span-2): si
-              // se declara 50vw, el teléfono baja media resolución y se ve
-              // blanda. Detectado en la auditoría de rendimiento, 26/09/2026.
+              // En el celular todas van a lo ancho (100vw); en tablet la
+              // primera de tres ocupa dos columnas. Declarar menos de lo que
+              // ocupa hace que el teléfono baje media resolución y se vea
+              // blanda (auditoría de rendimiento, 26/09/2026).
               sizes={
                 entradas.length !== 3
-                  ? "50vw"
+                  ? "(max-width: 640px) 100vw, 50vw"
                   : i === 0
                     ? "(max-width: 1024px) 100vw, 34vw"
-                    : "(max-width: 1024px) 50vw, 34vw"
+                    : "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 34vw"
               }
               className={
+                // Horizontales, con la forma de las fotos (3:2), para que se
+                // vean casi completas: un bloque cuadrado o vertical recorta
+                // los costados y se ve "con zoom" (pedido de Oscar, 27/09).
                 entradas.length === 3 && i === 0
-                  ? "col-span-2 aspect-[4/3] sm:aspect-[16/9] lg:col-span-1 lg:aspect-[4/3]"
-                  : entradas.length === 3
-                    ? "aspect-square lg:aspect-[4/3]"
-                    : "aspect-square lg:aspect-[16/10]"
+                  ? "aspect-[3/2] sm:col-span-2 lg:col-span-1"
+                  : "aspect-[3/2] sm:aspect-[4/3] lg:aspect-[3/2]"
               }
             />
           ))}
