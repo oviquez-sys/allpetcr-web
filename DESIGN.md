@@ -372,5 +372,7 @@ contraste, objetivos táctiles de 44px, `prefers-reduced-motion`.
 ### Contenido pendiente (lib/contenidoInicio.ts)
 
 `MARCAS`, `FOTOS_COMUNIDAD` y `FOTO_TIENDA` están vacíos a propósito: no hay
-datos reales todavía y sus secciones no se pintan. La entrada "Alimentos"
-muestra "Foto pendiente" hasta tener foto propia (la suya pasó al hero).
+datos reales todavía y sus secciones no se pintan. Fotos del inicio: el hero
+usa `hero.jpg` (perro y gato) y la entrada "Alimentos" usa `alimento.jpg`
+(bolsas, latas y platos). Son archivos distintos a propósito: reemplazar la
+foto de una sección no puede cambiar la de otra.

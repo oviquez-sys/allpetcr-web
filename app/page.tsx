@@ -60,9 +60,8 @@ const pasos = [
 
 /** Fotos de las tres entradas grandes. Criterio (docs/DIRECCION-DE-ARTE.md):
  *  el animal relajado o jugando, nunca sometido a un procedimiento.
- *  Alimentos queda sin foto propia porque la suya (alimento.jpg) pasó al
- *  hero —decisión de Oscar, 26/09/2026— y repetirla dos pantallas más abajo
- *  se nota. El bloque muestra "Foto pendiente" a la vista hasta que haya una. */
+ *  Alimentos usa alimento.jpg (bolsas, latas y platos), aportada por Oscar
+ *  el 26/09/2026. La foto del hero es otra: hero.jpg. */
 const FOTOS_ESPECIE: Record<string, { imagen: string; posicion: string }> = {
   perro: { imagen: "/categorias/juguetes.jpg", posicion: "68% 40%" },
   gato: { imagen: "/categorias/gato.jpg", posicion: "40% 55%" },
@@ -98,7 +97,7 @@ export default async function HomePage() {
     // Alimentos solo aparece si hay alimento con existencia: una entrada que
     // lleva a una lista vacía promete algo que no hay.
     ...(totalAlimento > 0
-      ? [{ clave: "alimento", titulo: "Alimentos", href: hrefCats(idsAlimento), total: totalAlimento, imagen: undefined, posicion: undefined }]
+      ? [{ clave: "alimento", titulo: "Alimentos", href: hrefCats(idsAlimento), total: totalAlimento, imagen: "/categorias/alimento.jpg", posicion: "50% 60%" }]
       : []),
   ].filter((e) => e.total > 0);
 
@@ -125,7 +124,7 @@ export default async function HomePage() {
   return (
     <>
       {/* ── 1. HERO DE CAMPAÑA ──────────────────────────────────────────────
-          Foto a sangre (alimento.jpg: perro y gato con los platos AllPet —
+          Foto a sangre (hero.jpg: perro y gato con los platos AllPet —
           decisión de Oscar, 26/09/2026, sobre hogar.jpg), un titular, una
           línea y un solo botón. `preload` + `fetchPriority="high"`: es el
           elemento LCP. En Next 16 `priority` quedó obsoleto y además no marcaba
@@ -138,7 +137,7 @@ export default async function HomePage() {
       <section className="relative isolate overflow-hidden bg-navy-900">
         <div className="relative h-[76svh] max-h-[760px] min-h-[520px] lg:h-[calc(100svh-104px)] lg:max-h-[820px] lg:min-h-[600px]">
           <Image
-            src="/categorias/alimento.jpg"
+            src="/categorias/hero.jpg"
             alt="Un golden retriever y un gato atigrado junto a sus platos de comida, al sol en una terraza"
             fill
             preload
