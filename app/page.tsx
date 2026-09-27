@@ -60,8 +60,11 @@ const pasos = [
 
 /** Fotos de las tres entradas grandes. Criterio (docs/DIRECCION-DE-ARTE.md):
  *  el animal relajado o jugando, nunca sometido a un procedimiento.
- *  Alimentos usa alimento.jpg (bolsas, latas y platos), aportada por Oscar
- *  el 26/09/2026. La foto del hero es otra: hero.jpg. */
+ *  Alimentos usa alimentos.jpg (bolsas de alimento con sus platos), aportada
+ *  por Oscar el 26/09/2026. Archivo con nombre nuevo a propósito: Cloudflare
+ *  guarda 30 días las imágenes optimizadas por URL, y reemplazar
+ *  alimento.jpg con el mismo nombre dejaría a parte de los visitantes viendo
+ *  la anterior. La foto del hero es otra: hero.jpg. */
 const FOTOS_ESPECIE: Record<string, { imagen: string; posicion: string }> = {
   perro: { imagen: "/categorias/juguetes.jpg", posicion: "68% 40%" },
   gato: { imagen: "/categorias/gato.jpg", posicion: "40% 55%" },
@@ -97,7 +100,7 @@ export default async function HomePage() {
     // Alimentos solo aparece si hay alimento con existencia: una entrada que
     // lleva a una lista vacía promete algo que no hay.
     ...(totalAlimento > 0
-      ? [{ clave: "alimento", titulo: "Alimentos", href: hrefCats(idsAlimento), total: totalAlimento, imagen: "/categorias/alimento.jpg", posicion: "50% 60%" }]
+      ? [{ clave: "alimento", titulo: "Alimentos", href: hrefCats(idsAlimento), total: totalAlimento, imagen: "/categorias/alimentos.jpg", posicion: "50% 60%" }]
       : []),
   ].filter((e) => e.total > 0);
 
