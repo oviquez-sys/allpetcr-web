@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import TarjetaProducto from "@/components/TarjetaProducto";
 import BotonAgregar from "@/components/BotonAgregar";
 import BotonAvisoDisponibilidad from "@/components/BotonAvisoDisponibilidad";
+import FichaAlimento from "@/components/ficha/FichaAlimento";
 import { getCategorias, getProductoPorSku, getProductos } from "@/lib/data";
 import { formatoColones, presentacionVisible, tinteDeSku } from "@/lib/formato";
 import { negocio, urlWhatsApp, faltante } from "@/lib/negocio";
@@ -23,8 +24,11 @@ export async function generateMetadata({
   // no una plantilla repetida en 184 páginas, que es lo que Google trata como
   // contenido duplicado. La plantilla queda como respaldo para los productos
   // a los que todavía no se les escribió descripción.
-  const descripcion = producto.descripcion
-    ? `${producto.descripcion} ${formatoColones(producto.precio_venta)}. ` +
+  // En alimentos sin descripción propia, la de la ficha (investigada contra
+  // el fabricante) es mejor que la plantilla.
+  const propia = producto.descripcion || producto.ficha_alimento?.descripcion_corta || "";
+  const descripcion = propia
+    ? `${propia} ${formatoColones(producto.precio_venta)}. ` +
       "Retiro en tienda sin costo en Heredia."
     : `${producto.nombre}${presentacionVisible(producto.presentacion) ? ` · ${presentacionVisible(producto.presentacion)}` : ""} — ` +
       `${formatoColones(producto.precio_venta)}. Disponible en AllPet Costa Rica, ` +
@@ -75,6 +79,9 @@ export default async function ProductoPage({
   ].slice(0, 4);
 
   const url = `${negocio.sitioUrl}/producto/${encodeURIComponent(producto.sku)}`;
+  const ficha = producto.ficha_alimento ?? null;
+  const descripcionVisible = producto.descripcion || ficha?.descripcion_corta || "";
+  const marca = ficha?.marca || producto.marca || "";
 
   // Product: permite que Google muestre precio y disponibilidad en los
   // resultados. Es lo que diferencia un resultado con datos de uno de texto.
@@ -83,7 +90,11 @@ export default async function ProductoPage({
     "@type": "Product",
     name: producto.nombre,
     sku: producto.sku,
-    ...(producto.descripcion ? { description: producto.descripcion } : {}),
+    ...(descripcionVisible ? { description: descripcionVisible } : {}),
+    // La marca es dato del fabricante (ficha) o del ERP. El GTIN NO se marca
+    // todavía: los alimentos tienen en el ERP un código de barras INTERNO, no
+    // el EAN del fabricante, y marcar uno interno como GTIN es dato falso.
+    ...(marca ? { brand: { "@type": "Brand", name: marca } } : {}),
     // Absoluta: Google necesita resolver la imagen sin depender de la página
     // desde la que se lee el marcado.
     ...(producto.imagen ? { image: new URL(producto.imagen, negocio.sitioUrl).href } : {}),
@@ -227,9 +238,9 @@ export default async function ProductoPage({
               antes que "¿cuánto cuesta?". El texto sale del ERP
               (Producto.descripcion), así que corregirlo no exige desplegar
               el sitio. */}
-          {producto.descripcion && (
+          {descripcionVisible && (
             <p className="mt-5 max-w-prose text-[15px] font-light leading-relaxed text-navy-400">
-              {producto.descripcion}
+              {descripcionVisible}
             </p>
           )}
 
@@ -313,6 +324,11 @@ export default async function ProductoPage({
           </dl>
         </div>
       </article>
+
+      {/* Ficha de alimento (26/09/2026): beneficios, "ideal para" y la
+          información técnica plegada. Solo en alimentos con ficha publicada
+          en el ERP; el resto de los productos no cambia. */}
+      {ficha && <FichaAlimento ficha={ficha} presentacion={presentacionVisible(producto.presentacion)} />}
 
       {relacionados.length > 0 && (
         <section className="mx-auto max-w-contenido px-6 pb-20">

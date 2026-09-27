@@ -48,4 +48,61 @@ export interface Producto {
   /** Lugar dentro de "La vitrina" (menor sale primero). Solo importa junto
    *  con `destacado_home: true` — ver `lib/vitrina.ts`. */
   orden_home?: number | null;
+  /** Marca y contenido neto (vienen del ERP). El peso es la base del precio
+   *  por kilo del futuro comparador: ver `precioPorKg` en lib/alimentos.ts. */
+  marca?: string;
+  peso_valor?: number | string | null;
+  peso_unidad?: string;
+  /** Solo en el detalle de producto (GET /productos/<sku>/) y solo si el
+   *  producto es un alimento con ficha publicada. Nunca en la lista. */
+  ficha_alimento?: FichaAlimento | null;
+}
+
+/** Etiqueta del vocabulario controlado del ERP (catalogo/alimentos.py): la
+ *  clave sirve para filtros e íconos; la etiqueta es el texto visible. */
+export interface Etiqueta {
+  clave: string;
+  etiqueta: string;
+}
+
+export interface Nutriente extends Etiqueta {
+  /** "mín." / "máx." / "" — tal como lo declara el fabricante. */
+  calificador: string;
+  valor: string;
+  unidad: string;
+}
+
+export interface GuiaAlimentacion {
+  titulo?: string;
+  columnas?: string[];
+  filas?: string[][];
+  nota?: string;
+}
+
+/** Información oficial de una FÓRMULA de alimento (26/09/2026). La comparten
+ *  todas las presentaciones de la misma fórmula. La investigó y verificó el
+ *  ERP contra el fabricante; el sitio solo la muestra. Todo puede venir
+ *  vacío: un campo vacío es un dato que el fabricante no publicó. */
+export interface FichaAlimento {
+  clave: string;
+  marca: string;
+  linea: string;
+  nombre: string;
+  especie: Etiqueta;
+  tipo: Etiqueta;
+  etapas: Etiqueta[];
+  tamanos_raza: Etiqueta[];
+  necesidades: Etiqueta[];
+  proteina_principal: string;
+  sabor: string;
+  descripcion_corta: string;
+  descripcion: string;
+  beneficios: (Etiqueta & { texto: string })[];
+  ingredientes: string;
+  aditivos: string;
+  analisis: Nutriente[];
+  kcal_kg: number | null;
+  kcal_unidad: number | null;
+  unidad_kcal: string;
+  guia_alimentacion: GuiaAlimentacion;
 }
