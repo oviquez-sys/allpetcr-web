@@ -130,25 +130,33 @@ export default async function HomePage() {
           elemento LCP. En Next 16 `priority` quedó obsoleto y además no marcaba
           la prioridad de red; `preload` solo agrega el <link> de precarga.
 
-          El texto va abajo a la izquierda sobre un velo que solo oscurece
-          esa esquina; las caras de los animales quedan limpias. En móvil
-          la foto se recorta hacia el perro (object-position) en vez de
-          encogerse a una tira de 200px. */}
-      <section className="relative isolate overflow-hidden bg-navy-900">
-        <div className="relative h-[76svh] max-h-[760px] min-h-[520px] lg:h-[calc(100svh-104px)] lg:max-h-[820px] lg:min-h-[600px]">
-          <Image
-            src="/categorias/hero.jpg"
-            alt="Un golden retriever y un gato atigrado junto a sus platos de comida, al sol en una terraza"
-            fill
-            preload
-            fetchPriority="high"
-            sizes="100vw"
-            className="object-cover object-[30%_center] sm:object-center"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-navy-900/80 via-navy-900/20 to-transparent" aria-hidden="true" />
-          <div className="absolute inset-0 hidden bg-gradient-to-r from-navy-900/55 via-transparent to-transparent lg:block" aria-hidden="true" />
+          ESCRITORIO (lg+): el texto va abajo a la izquierda sobre un velo que
+          solo oscurece esa esquina; las caras de los animales quedan limpias.
 
-          <div className="relative mx-auto flex h-full max-w-contenido items-end px-4 pb-12 sm:px-6 sm:pb-16 lg:pb-20">
+          CELULAR Y TABLET VERTICAL (< lg), ajuste del 26/09/2026 a pedido de
+          Oscar: con la foto de fondo a pantalla completa, una pantalla vertical
+          solo deja ver un tercio del ancho de una foto apaisada y el gato
+          quedaba afuera. Ahí la foto va arriba, completa (4:3 en celular, 16:9
+          en tablet: entran los dos), y el texto abajo sobre el mismo navy, con
+          un degradado que funde la foto con el fondo. */}
+      <section className="relative isolate overflow-hidden bg-navy-900">
+        <div className="relative lg:h-[calc(100svh-104px)] lg:max-h-[820px] lg:min-h-[600px]">
+          <div className="relative aspect-[4/3] sm:aspect-[16/9] lg:absolute lg:inset-0 lg:aspect-auto">
+            <Image
+              src="/categorias/hero.jpg"
+              alt="Un golden retriever y un gato atigrado junto a sus platos de comida, al sol en una terraza"
+              fill
+              preload
+              fetchPriority="high"
+              sizes="100vw"
+              className="object-cover object-[50%_40%] lg:object-center"
+            />
+            <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-navy-900 to-transparent lg:hidden" aria-hidden="true" />
+            <div className="absolute inset-0 hidden bg-gradient-to-t from-navy-900/80 via-navy-900/20 to-transparent lg:block" aria-hidden="true" />
+            <div className="absolute inset-0 hidden bg-gradient-to-r from-navy-900/55 via-transparent to-transparent lg:block" aria-hidden="true" />
+          </div>
+
+          <div className="relative mx-auto flex max-w-contenido px-4 pb-12 pt-2 sm:px-6 sm:pb-16 lg:h-full lg:items-end lg:pb-20 lg:pt-0">
             <div className="max-w-3xl text-white">
               <p className="text-label font-medium uppercase tracking-[0.16em] text-white/85">
                 Tienda de mascotas · Heredia, Costa Rica
