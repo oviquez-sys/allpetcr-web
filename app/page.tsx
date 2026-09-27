@@ -228,10 +228,8 @@ export default async function HomePage() {
               }
               className={
                 entradas.length === 3 && i === 0
-                  ? "col-span-2 aspect-[4/3] sm:aspect-[16/9] lg:col-span-1 lg:aspect-[4/5]"
-                  : entradas.length === 3
-                    ? "aspect-[4/5]"
-                    : "aspect-[4/5] lg:aspect-[5/4]"
+                  ? "col-span-2 aspect-[4/3] sm:aspect-[16/9] lg:col-span-1 lg:aspect-[4/3]"
+                  : "aspect-square lg:aspect-[4/3]"
               }
             />
           ))}
