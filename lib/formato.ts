@@ -94,7 +94,9 @@ export function presentacionVisible(presentacion: string | undefined): string {
  */
 const TOPE_PALABRAS = 3;
 
-const TALLA_AL_FINAL = /\s+talla\s+\S+\s*$/i;
+// "talla 68.5 cm" también cuenta como talla (26/09/2026): los collares
+// isabelinos se venden por contorno y ese número es lo único que los distingue.
+const TALLA_AL_FINAL = /\s+talla\s+\S+(?:\s*(?:cm|mm))?\s*$/i;
 
 const MEDIDA_AL_FINAL =
   /\s+\d+(?:[.,]\d+)?(?:\s*[x×]\s*\d+(?:[.,]\d+)?){0,2}\s*(cm|mm|m|kg|g|ml|l)\.?\s*$/i;
@@ -126,8 +128,18 @@ const MULETILLAS_FINALES = new Set([
   "por",
 ]);
 
+// ── EXCEPCIÓN: CONSUMIBLES (26/09/2026)
+// El tope de 3 palabras se pensó para accesorios, donde lo que sobra es la
+// medida ("70 cm") o la forma. En alimento y snacks es al revés: marca,
+// línea, sabor y peso son justo lo que distingue un producto de otro
+// ("Balance Ad Cat Chicken 10 kg" se cortaba en "Balance Ad Cat", igual que
+// la versión de salmón o la bolsa de 1,5 kg). Un nombre que termina en peso
+// o volumen es de un consumible y se muestra completo.
+const PESO_O_VOLUMEN_AL_FINAL = /\s\d+(?:[.,]\d+)?\s*(kg|g|gr|ml|l|lb|lbs|oz)\.?\s*$/i;
+
 export function nombreResumido(nombre: string): string {
   const original = nombre.trim();
+  if (PESO_O_VOLUMEN_AL_FINAL.test(original)) return original.replace(/\s+/g, " ");
 
   const coincideTalla = original.match(TALLA_AL_FINAL);
   const sufijoTalla = coincideTalla ? coincideTalla[0].replace(/\s+/g, " ") : "";
