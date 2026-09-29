@@ -28,6 +28,18 @@
 // como el carácter literal para que no dependa de cómo el editor lo guarde.
 const QUITAR_DIACRITICOS = /[̀-ͯ]/g;
 
+// El ERP arma el nombre de un producto pegando marca + nombre de factura +
+// presentación ("Balance Ad Cat Chicken" + "10 kg"), y la presentación
+// siempre lleva un espacio entre el número y la unidad. Escribir "10kg"
+// pegado —lo más natural al teclear rápido— no es una subcadena de "10 kg",
+// así que la búsqueda no encontraba ningún alimento por peso (28/09/2026,
+// pedido de Oscar). Sacar ese espacio acá, en normalizar(), hace que "10kg"
+// y "10 kg" pasen a ser el mismo texto sin importar cuál de los dos se
+// escribió — funciona para el nombre del producto Y para lo que la persona
+// tipeó, porque los dos pasan por esta misma función.
+const UNIDADES_DE_PESO = ["kg", "g", "lb", "oz", "ml", "l"];
+const ESPACIO_ENTRE_NUMERO_Y_UNIDAD = new RegExp(`(\\d)\\s+(${UNIDADES_DE_PESO.join("|")})\\b`, "gi");
+
 export function normalizar(texto: string | null | undefined): string {
   // Defensivo a propósito: esto ya rompió una vez en el navegador porque
   // la API mandaba un campo undefined (ver api/serializers.py del ERP,
@@ -39,7 +51,8 @@ export function normalizar(texto: string | null | undefined): string {
     .normalize("NFD")
     .replace(QUITAR_DIACRITICOS, "")
     .toLowerCase()
-    .trim();
+    .trim()
+    .replace(ESPACIO_ENTRE_NUMERO_Y_UNIDAD, "$1$2");
 }
 
 /** Distancia de Levenshtein clásica (programación dinámica, O(n·m)). */

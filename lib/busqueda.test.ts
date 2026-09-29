@@ -76,4 +76,32 @@ describe("coincideAproximado", () => {
     // por variación de 0 tolerada; sigue exigiendo coincidencia real.
     expect(coincideAproximado("Cama para Perro", "de")).toBe(false);
   });
+
+  describe("número pegado a la unidad de peso (28/09/2026, pedido de Oscar)", () => {
+    // El ERP arma el nombre pegando marca + nombre de factura + presentación,
+    // y la presentación siempre trae un espacio ("Balance Ad Cat Chicken" +
+    // "10 kg"). "10kg" escrito de corrido no encontraba nada.
+    it("'10kg' sin espacio encuentra el nombre real, que lo lleva con espacio", () => {
+      expect(coincideAproximado("Balance Ad Cat Chicken 10 kg", "10kg")).toBe(true);
+    });
+
+    it("funciona con varias unidades de peso", () => {
+      expect(coincideAproximado("Alimento Húmedo 85 g", "85g")).toBe(true);
+      expect(coincideAproximado("PureVita Cordero 4 lb", "4lb")).toBe(true);
+      expect(coincideAproximado("Shampoo Antipulgas 500 ml", "500ml")).toBe(true);
+    });
+
+    it("también al revés: '10 kg' con espacio encuentra un nombre que lo trae pegado", () => {
+      expect(coincideAproximado("Bolsa 10kg Oferta", "10 kg")).toBe(true);
+    });
+
+    it("combinado con otra palabra, dentro del AND de siempre", () => {
+      expect(coincideAproximado("Balance Ad Cat Chicken 10 kg", "balance 10kg")).toBe(true);
+      expect(coincideAproximado("Balance Ad Cat Chicken 10 kg", "nutri 10kg")).toBe(false);
+    });
+
+    it("no confunde un número sin unidad con uno que sí la lleva", () => {
+      expect(coincideAproximado("Correa Retráctil 5m", "5kg")).toBe(false);
+    });
+  });
 });
