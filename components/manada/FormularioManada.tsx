@@ -6,6 +6,7 @@ import { useRef, useState } from "react";
 interface Props {
   fuente: string;
   googleActivo: boolean;
+  correoActivo: boolean;
 }
 
 type Estado =
@@ -29,10 +30,20 @@ const campo =
  * La casilla de privacidad es obligatoria para las dos; la de promociones es
  * opcional y nace sin marcar (la ley pide consentimiento expreso, no supuesto).
  */
-export default function FormularioManada({ fuente, googleActivo }: Props) {
+export default function FormularioManada({ fuente, googleActivo, correoActivo }: Props) {
   const formulario = useRef<HTMLFormElement>(null);
   const [conCorreo, setConCorreo] = useState(!googleActivo);
   const [estado, setEstado] = useState<Estado>({ tipo: "inicial" });
+
+  // Ni Google ni correo disponibles: mejor decirlo que mostrar un
+  // formulario que no va a entregar nada.
+  if (!googleActivo && !correoActivo) {
+    return (
+      <p className="rounded-card border border-crema-400 bg-white p-6 text-center text-[15px] font-light text-navy-400">
+        El registro se habilita en unos días. Mientras tanto, pedí tu regalo de bienvenida en la caja.
+      </p>
+    );
+  }
 
   async function unirmeConCorreo() {
     const f = formulario.current;
@@ -153,7 +164,7 @@ export default function FormularioManada({ fuente, googleActivo }: Props) {
         </button>
       )}
 
-      {googleActivo && (
+      {googleActivo && correoActivo && (
         <p className="text-center text-sm text-navy-400">
           {conCorreo ? (
             <button type="button" onClick={() => { setConCorreo(false); setEstado({ tipo: "inicial" }); }}

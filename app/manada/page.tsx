@@ -14,6 +14,9 @@ interface Regalia {
   porcentaje?: string;
   texto?: string;
   dias_vigencia?: number;
+  /** false cuando el ERP no tiene servicio de correo: el registro por correo
+   * no puede entregar el código, así que se esconde y queda solo Google. */
+  correo_activo?: boolean;
 }
 
 // Mensajes para cuando algo falla a la vuelta de Google. Escritos para quien
@@ -87,7 +90,11 @@ export default async function ManadaPage({
               {ERRORES[error]}
             </p>
           )}
-          <FormularioManada fuente={limpiarFuente(o)} googleActivo={googleConfigurado()} />
+          <FormularioManada
+            fuente={limpiarFuente(o)}
+            googleActivo={googleConfigurado()}
+            correoActivo={regalia?.correo_activo !== false}
+          />
           <ul className="mt-10 space-y-3 text-sm font-light text-navy-400">
             <li className="flex gap-3">
               <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-dorado-500" aria-hidden="true" />
