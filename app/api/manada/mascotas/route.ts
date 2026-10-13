@@ -2,9 +2,11 @@ import { NextResponse } from "next/server";
 import { erpPost, ErpRespuestaError } from "@/lib/erpServidor";
 import { ipDe, permitido } from "@/lib/manada";
 
-const MAX_CUERPO_BYTES = 8_192;
+// Hasta 5 mascotas con foto. El formulario achica cada foto a ~150 KB antes
+// de mandarla; 4 MB deja margen sin abrir la puerta a archivos enormes.
+const MAX_CUERPO_BYTES = 4 * 1024 * 1024;
 
-/** "Contanos de tu mascota": una sola vez por cliente (lo controla el ERP
+/** "Tu peludo también es parte de la manada": una sola vez por cliente (lo controla el ERP
  * con la llave de un solo uso que va en `token`). */
 export async function POST(request: Request) {
   let datos: { token?: unknown; mascotas?: unknown };

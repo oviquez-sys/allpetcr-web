@@ -64,13 +64,13 @@ export default async function BienvenidaPage() {
 
         {b.token_mascotas && (
           <div className="mt-10 rounded-card bg-white p-6 text-left ring-1 ring-crema-400">
-            <p className="font-display text-bloque text-navy-500">¿Nos contás de tu mascota?</p>
+            <p className="font-display text-bloque text-navy-500">Tu peludo también es parte de la manada</p>
             <p className="mt-2 text-[14px] font-light leading-relaxed text-navy-400">
-              Nombre, raza, edad y peso. Así te recomendamos lo que de verdad le sirve. Toma un minuto y es opcional.
+              Contanos quién es y subí su foto, para conocerlo por su nombre cuando venga a la tienda. Toma un minuto.
             </p>
             <Link href="/manada/mascota"
-              className="mt-5 inline-flex rounded-full bg-navy-500 px-6 py-3 text-sm font-medium text-crema-100 transition-colors hover:bg-navy-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:ring-offset-2">
-              Contanos de tu mascota
+              className="mt-5 inline-flex items-center gap-2 rounded-full bg-navy-500 px-6 py-3 text-sm font-medium text-crema-100 transition-colors hover:bg-navy-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:ring-offset-2">
+              <span aria-hidden="true">🐾</span> Sumalo a la manada
             </Link>
           </div>
         )}

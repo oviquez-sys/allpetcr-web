@@ -86,8 +86,10 @@ export default function PrivacidadPage() {
             desde /manada, guardamos tu nombre, tu correo y, si lo das, tu WhatsApp. Si entrás con Google,
             Google nos confirma tu nombre, tu correo y un identificador de tu cuenta; nunca vemos tu
             contraseña. Lo usamos para darte el cupón de bienvenida, reconocerte en la caja y saber qué
-            compraste con él. Si nos contás de tu mascota (nombre, especie, raza, edad, peso y notas), lo
-            usamos para recomendarte productos que le sirvan. Solo te mandamos promociones si marcaste la
+            compraste con él. Si nos contás de tu mascota (nombre, especie, raza, edad, peso, notas y, si querés, su
+            foto), lo usamos para conocerla y recomendarte productos que le sirvan. La foto se guarda
+            privada, sin la ubicación ni los demás datos que la cámara esconde en el archivo, y no la
+            publicamos sin pedirte permiso. Solo te mandamos promociones si marcaste la
             casilla para recibirlas, y podés pedir que dejemos de hacerlo cuando quieras.
           </li>
           <li>
