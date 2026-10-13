@@ -1,0 +1,84 @@
+import Link from "next/link";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { COOKIE_BIENVENIDA, verificar, type Bienvenida } from "@/lib/manada";
+
+export const metadata = {
+  title: "Bienvenido a la manada",
+  // Página personal: muestra el código de quien la abre. Nada que indexar.
+  robots: { index: false, follow: false },
+};
+
+function fecha(iso?: string | null) {
+  if (!iso) return "";
+  const [a, m, d] = iso.split("-");
+  return `${d}/${m}/${a}`;
+}
+
+export default async function BienvenidaPage() {
+  const b = verificar<Bienvenida>((await cookies()).get(COOKIE_BIENVENIDA)?.value);
+  if (!b) redirect("/manada");
+  const nombre = b.nombre?.split(" ")[0] ?? "";
+  const disponible = b.codigo && b.estado === "DISPONIBLE";
+
+  return (
+    <section className="bg-crema-100">
+      <div className="mx-auto max-w-md px-6 py-14 text-center">
+        <p className="text-label uppercase text-dorado-700">
+          {b.nuevo === false ? "Ya eras parte de la manada" : "¡Bienvenido a la manada!"}
+        </p>
+        <h1 className="mt-3 font-display text-headline text-navy-500">
+          {nombre ? `Hola, ${nombre}` : "¡Hola!"}
+        </h1>
+
+        {disponible ? (
+          <>
+            <div className="mt-8 rounded-card border-2 border-dashed border-dorado-500 bg-white px-6 py-8">
+              <p className="text-label uppercase text-dorado-700">Tu código</p>
+              <p className="mt-3 select-all font-mono text-[2.25rem] font-semibold tracking-[0.12em] text-navy-500">
+                {b.codigo}
+              </p>
+              <p className="mt-2 text-[15px] text-navy-500">{b.descripcion}</p>
+              {b.vence_en && <p className="mt-1 text-sm text-navy-300">Válido hasta el {fecha(b.vence_en)}</p>}
+            </div>
+            <p className="mt-6 text-[15px] font-light leading-relaxed text-navy-400">
+              Mostrá este código en la caja cuando hagás tu compra. Es de un solo uso.
+              {b.correo_enviado !== false && " También te lo mandamos al correo."}
+            </p>
+            <p className="mt-2 text-[13px] text-navy-300">Tip: tomale una captura de pantalla.</p>
+          </>
+        ) : b.estado === "USADO" ? (
+          <p className="mt-6 text-[15px] font-light leading-relaxed text-navy-400">
+            Tu cupón de bienvenida ya se usó. ¡Gracias por comprar con nosotros! Te avisaremos de las
+            próximas promociones si nos diste permiso.
+          </p>
+        ) : b.estado === "VENCIDO" ? (
+          <p className="mt-6 text-[15px] font-light leading-relaxed text-navy-400">
+            Tu cupón de bienvenida venció el {fecha(b.vence_en)}. Escribinos y vemos qué podemos hacer.
+          </p>
+        ) : (
+          <p className="mt-6 text-[15px] font-light leading-relaxed text-navy-400">
+            Ya quedaste registrado. Te vamos a contar primero de lo nuevo para tu mascota.
+          </p>
+        )}
+
+        {b.token_mascotas && (
+          <div className="mt-10 rounded-card bg-white p-6 text-left ring-1 ring-crema-400">
+            <p className="font-display text-bloque text-navy-500">¿Nos contás de tu mascota?</p>
+            <p className="mt-2 text-[14px] font-light leading-relaxed text-navy-400">
+              Nombre, raza, edad y peso. Así te recomendamos lo que de verdad le sirve. Toma un minuto y es opcional.
+            </p>
+            <Link href="/manada/mascota"
+              className="mt-5 inline-flex rounded-full bg-navy-500 px-6 py-3 text-sm font-medium text-crema-100 transition-colors hover:bg-navy-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:ring-offset-2">
+              Contanos de tu mascota
+            </Link>
+          </div>
+        )}
+
+        <Link href="/catalogo" className="mt-10 inline-block text-sm text-navy-400 underline underline-offset-2 hover:text-navy-500">
+          Ver el catálogo
+        </Link>
+      </div>
+    </section>
+  );
+}

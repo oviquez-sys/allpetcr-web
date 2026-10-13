@@ -20,7 +20,9 @@ import { PaginaLegal, Seccion, Lista, enlaceLegal } from "@/components/PaginaLeg
 // - Servidores en DigitalOcean, Nueva York.
 // El pago con tarjeta ya está descrito: aparece solo cuando
 // `negocio.pagoEnLinea.activo` es true. Si se agrega analítica o cuentas de
-// cliente, esta página se actualiza ANTES de publicar ese cambio. Borrador para revisión de un
+// cliente, esta página se actualiza ANTES de publicar ese cambio.
+// 13/10/2026: se agregó la manada (registro con Google o correo, cupón de
+// bienvenida, mascotas, promociones solo con casilla aparte). Borrador para revisión de un
 // abogado; no reemplaza asesoría legal.
 export const metadata = {
   title: "Política de privacidad",
@@ -28,7 +30,7 @@ export const metadata = {
   alternates: { canonical: "/privacidad" },
 };
 
-const VIGENCIA = "21 de setiembre de 2026";
+const VIGENCIA = "13 de octubre de 2026";
 
 export default function PrivacidadPage() {
   const direccion = direccionCompleta();
@@ -79,6 +81,15 @@ export default function PrivacidadPage() {
             <strong>Aviso de disponibilidad (opcional):</strong> si pedís que te avisemos cuando vuelva un
             producto, guardamos tu correo y el producto, solo para mandarte ese aviso.
           </li>
+          <li id="manada" className="scroll-mt-24">
+            <strong>La manada AllPetcr.com (opcional):</strong> si te unís desde el código QR de la tienda o
+            desde /manada, guardamos tu nombre, tu correo y, si lo das, tu WhatsApp. Si entrás con Google,
+            Google nos confirma tu nombre, tu correo y un identificador de tu cuenta; nunca vemos tu
+            contraseña. Lo usamos para darte el cupón de bienvenida, reconocerte en la caja y saber qué
+            compraste con él. Si nos contás de tu mascota (nombre, especie, raza, edad, peso y notas), lo
+            usamos para recomendarte productos que le sirvan. Solo te mandamos promociones si marcaste la
+            casilla para recibirlas, y podés pedir que dejemos de hacerlo cuando quieras.
+          </li>
           <li>
             <strong>Comprobante de compra:</strong> si pedís factura a tu nombre, necesitamos los datos
             que exige Hacienda (nombre o razón social, cédula y correo).
@@ -123,6 +134,14 @@ export default function PrivacidadPage() {
             </li>
           )}
           <li>
+            <strong>Google:</strong> solo si elegís «Continuar con Google» para unirte a la manada. Google
+            te identifica en su propia página y nos confirma tu nombre y tu correo.
+          </li>
+          <li>
+            <strong>Nuestro proveedor de envío de correos:</strong> recibe tu correo y el mensaje que te
+            mandamos (por ejemplo, tu código de la manada o tu comprobante), solo para entregarlo.
+          </li>
+          <li>
             <strong>OpenStreetMap:</strong> solo si usás el mapa, recibe las coordenadas (sin tu nombre)
             para devolvernos la dirección aproximada.
           </li>
@@ -149,6 +168,10 @@ export default function PrivacidadPage() {
           </li>
           <li>Correo del aviso de disponibilidad: hasta enviarte el aviso, o hasta que nos pidas borrarlo.</li>
           <li>Conversaciones de WhatsApp: mientras sean útiles para atender tu pedido o un reclamo.</li>
+          <li>
+            Datos de la manada y de tu mascota: mientras seas parte de la manada. Si nos pedís salir, los
+            borramos, salvo lo que esté ligado a una compra y la ley nos obligue a conservar.
+          </li>
         </Lista>
       </Seccion>
 

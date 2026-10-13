@@ -86,7 +86,10 @@ const csp = [
   "frame-src https://www.google.com https://maps.google.com",
   "frame-ancestors 'none'",
   "base-uri 'self'",
-  "form-action 'self'",
+  // accounts.google.com: el botón «Continuar con Google» de /manada es un
+  // formulario que el servidor redirige a Google. Chrome aplica form-action
+  // también a esa redirección; sin esta entrada el navegador la bloquea.
+  "form-action 'self' https://accounts.google.com",
   "object-src 'none'",
   "upgrade-insecure-requests",
 ].join("; ");
