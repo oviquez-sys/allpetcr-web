@@ -34,7 +34,10 @@ const columnas = [
   },
   {
     titulo: "Nosotros",
-    enlaces: [{ href: "/sobre-nosotros", label: "Sobre AllPet" }],
+    enlaces: [
+      { href: "/sobre-nosotros", label: "Sobre AllPet" },
+      { href: "/manada?o=web-pie", label: "🐾 Unite a la manada" },
+    ],
   },
 ];
 

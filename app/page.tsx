@@ -7,6 +7,8 @@ import ComprarPorActividad from "@/components/inicio/ComprarPorActividad";
 import TiendaFisica from "@/components/inicio/TiendaFisica";
 import Marcas from "@/components/inicio/Marcas";
 import Comunidad from "@/components/inicio/Comunidad";
+import BandaManada from "@/components/manada/BandaManada";
+import { regaliaVigente } from "@/lib/regaliaPublica";
 import { ESPECIES, esParaEspecie, hrefEspecie, hrefCats, idsRama, RAICES_ALIMENTO } from "@/lib/navegacion";
 import { ACTIVIDADES } from "@/lib/contenidoInicio";
 import { armarVitrina } from "@/lib/vitrina";
@@ -20,6 +22,7 @@ export const metadata = { alternates: { canonical: "/" } };
  *   1. Hero de campaña        una foto, una frase, un botón
  *   2. Perros · Gatos · Alim.  ¿para quién comprás? (tres piezas con foto)
  *   3. En la tienda hoy        producto real, con existencia
+ *   3b. La manada (14/10/2026) invitación con el regalo de bienvenida
  *   4. Banda lifestyle         la pausa: para qué se compra
  *   5. Comprar por actividad   pasear, jugar, comer… → categorías reales
  *   6. Cómo comprar            la mecánica sin pago en línea, en una franja
@@ -71,7 +74,7 @@ const FOTOS_ESPECIE: Record<string, { imagen: string; posicion: string }> = {
 };
 
 export default async function HomePage() {
-  const [productos, categorias] = await Promise.all([getProductos(), getCategorias()]);
+  const [productos, categorias, regalia] = await Promise.all([getProductos(), getCategorias(), regaliaVigente()]);
 
   const disponibles = productos.filter((p) => p.disponible);
   const nombrePorId = new Map(categorias.map((c) => [c.id, c.nombre]));
@@ -268,6 +271,11 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+
+      {/* ── 3b. LA MANADA ───────────────────────────────────────────────────
+          Después de ver producto y antes de la pausa: quien llegó hasta acá
+          ya se interesó, y es el momento de ofrecerle el regalo. */}
+      <BandaManada porcentaje={regalia?.activa && regalia.porcentaje ? regalia.porcentaje : null} />
 
       {/* ── 4. BANDA LIFESTYLE ──────────────────────────────────────────── */}
       <BandaLifestyle

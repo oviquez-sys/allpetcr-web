@@ -21,6 +21,14 @@ import { sitioUrl } from "@/lib/sitio";
 
 export const COOKIE_OAUTH = "manada_oauth";
 export const COOKIE_BIENVENIDA = "manada_bienvenida";
+/** Marca de "ya es de la manada" para dejar de mostrarle las invitaciones.
+ * Visible al navegador a propósito (no httpOnly): no tiene nada secreto, solo
+ * esconde avisos, y los avisos se deciden en el navegador. */
+export const COOKIE_MIEMBRO = "manada_miembro";
+export const opcionesMiembro = {
+  httpOnly: false, secure: process.env.NODE_ENV === "production", sameSite: "lax" as const,
+  path: "/", maxAge: 365 * 86400,
+};
 
 const GOOGLE_AUTORIZAR = "https://accounts.google.com/o/oauth2/v2/auth";
 const GOOGLE_TOKEN = "https://oauth2.googleapis.com/token";

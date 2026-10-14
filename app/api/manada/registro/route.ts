@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { erpPost, ErpNoConfiguradoError, ErpRespuestaError } from "@/lib/erpServidor";
 import {
-  COOKIE_BIENVENIDA, aBienvenida, firmar, ipDe, limpiarFuente, limpiarTelefono, opcionesCookie, permitido,
+  COOKIE_BIENVENIDA, COOKIE_MIEMBRO, aBienvenida, opcionesMiembro, firmar, ipDe, limpiarFuente, limpiarTelefono, opcionesCookie, permitido,
   type RespuestaRegistroErp,
 } from "@/lib/manada";
 
@@ -71,12 +71,15 @@ export async function POST(request: Request) {
 
   if (!r.cupon?.codigo) {
     // Ya era de la manada (o no hay regalía activa): sin código ajeno en pantalla.
-    return NextResponse.json({
+    const ya = NextResponse.json({
       ok: true, yaEraMiembro: r.ya_era_miembro === true, cuponUsado: r.cupon?.estado === "USADO",
       sinRegalia: !r.cupon,
     });
+    ya.cookies.set(COOKIE_MIEMBRO, "1", opcionesMiembro);
+    return ya;
   }
   const respuesta = NextResponse.json({ ok: true, ir: "/manada/bienvenida" });
+  respuesta.cookies.set(COOKIE_MIEMBRO, "1", opcionesMiembro);
   respuesta.cookies.set(COOKIE_BIENVENIDA, firmar({ ...aBienvenida(r) }, 7 * 86400),
     opcionesCookie(7 * 86400, "/manada"));
   return respuesta;

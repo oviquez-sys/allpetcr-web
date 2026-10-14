@@ -63,7 +63,8 @@ describe("POST /api/manada/registro", () => {
     const r = await POST(pedido(valido, "2.2.2.2"));
     const cuerpo = await r.json();
     expect(cuerpo.yaEraMiembro).toBe(true);
-    expect(r.headers.get("set-cookie")).toBeNull();
+    expect(r.headers.get("set-cookie") ?? "").not.toContain("manada_bienvenida");
+    expect(r.headers.get("set-cookie") ?? "").toContain("manada_miembro=1");
   });
 
   it("frena el mismo número después de 3 intentos por hora", async () => {

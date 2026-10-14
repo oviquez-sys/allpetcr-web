@@ -28,7 +28,7 @@ const navegacion = construirNavegacion(categorias, productos);
 const raiz = join(__dirname, "..");
 const RUTAS_VALIDAS = [
   "/", "/catalogo", "/contacto", "/sobre-nosotros", "/carrito", "/checkout",
-  "/recompra", "/envios",
+  "/recompra", "/envios", "/manada",
 ];
 
 const idsValidos = new Set(categorias.map((c) => c.id));

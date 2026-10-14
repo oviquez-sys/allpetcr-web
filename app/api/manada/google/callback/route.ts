@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { erpPost } from "@/lib/erpServidor";
 import {
-  COOKIE_BIENVENIDA, COOKIE_OAUTH, aBienvenida, canjearCodigoGoogle, firmar, opcionesCookie,
+  COOKIE_BIENVENIDA, COOKIE_MIEMBRO, COOKIE_OAUTH, opcionesMiembro, aBienvenida, canjearCodigoGoogle, firmar, opcionesCookie,
   verificar, type RespuestaRegistroErp,
 } from "@/lib/manada";
 import { sitioUrl } from "@/lib/sitio";
@@ -64,5 +64,6 @@ export async function GET(request: NextRequest) {
   // código sigue a mano. También le llegó por correo.
   respuesta.cookies.set(COOKIE_BIENVENIDA, firmar({ ...aBienvenida(registro) }, 7 * 86400),
     opcionesCookie(7 * 86400, "/manada"));
+  respuesta.cookies.set(COOKIE_MIEMBRO, "1", opcionesMiembro);
   return respuesta;
 }

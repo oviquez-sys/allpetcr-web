@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import AvisoBarra from "@/components/manada/AvisoBarra";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useCarrito } from "@/lib/carrito";
@@ -55,7 +56,7 @@ function IconoBuscar({ className = "" }: { className?: string }) {
   );
 }
 
-export default function NavBar({ navegacion }: { navegacion: SeccionNav[] }) {
+export default function NavBar({ navegacion, fraseManada = null }: { navegacion: SeccionNav[]; fraseManada?: string | null }) {
   const { unidades, listo } = useCarrito();
   const [abierto, setAbierto] = useState(false);
   const [megaAbierto, setMegaAbierto] = useState<string | null>(null);
@@ -155,9 +156,13 @@ export default function NavBar({ navegacion }: { navegacion: SeccionNav[] }) {
           dentro del menú desplegable. */}
       <div className="bg-navy-500 text-[12px] font-light text-crema-200">
         <div className="mx-auto flex max-w-contenido items-center justify-center gap-6 px-6 py-1.5 lg:justify-between">
+          {/* La invitación a la manada ocupa esta línea (14/10/2026); a quien
+              ya se unió le vuelve a salir la de siempre. */}
           <p>
-            Tienda en Heredia · Retiro sin costo
-            <span className="hidden sm:inline"> · Envíos en la GAM</span>
+            <AvisoBarra frase={fraseManada} normal={<>
+              Tienda en Heredia · Retiro sin costo
+              <span className="hidden sm:inline"> · Envíos en la GAM</span>
+            </>} />
           </p>
           <ul className="hidden items-center gap-5 lg:flex">
             {whatsapp && (
@@ -379,6 +384,11 @@ export default function NavBar({ navegacion }: { navegacion: SeccionNav[] }) {
                 <Link href="/catalogo" className={enlaceMovil}>
                   Todo el catálogo
                 </Link>
+                <Link href="/manada?o=web-menu" className={enlaceMovil}>
+                  🐾 La manada{fraseManada ? ` · ${fraseManada}` : ""}
+                </Link>
+              </li>
+              <li>
                 <Link href="/recompra" className={enlaceMovil}>
                   Repetir pedido
                 </Link>

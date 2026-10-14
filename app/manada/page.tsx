@@ -1,46 +1,26 @@
 import FormularioManada from "@/components/manada/FormularioManada";
-import { erpGet } from "@/lib/erpServidor";
+import { regaliaVigente } from "@/lib/regaliaPublica";
 import { googleConfigurado, limpiarFuente } from "@/lib/manada";
 
 export const metadata = {
   title: "Unite a la manada",
   description:
-    "Registrate en la manada AllPetcr.com con un clic y recibí un regalo de bienvenida para tu primera compra en la tienda.",
+    "Registrate en la manada AllPetcr.com en 30 segundos y recibí un regalo de bienvenida para tu primera compra en la tienda.",
   alternates: { canonical: "/manada" },
 };
-
-interface Regalia {
-  activa: boolean;
-  porcentaje?: string;
-  texto?: string;
-  dias_vigencia?: number;
-  /** false cuando el ERP no tiene servicio de correo: el registro por correo
-   * no puede entregar el código, así que se esconde y queda solo Google. */
-  correo_activo?: boolean;
-}
 
 // Mensajes para cuando algo falla a la vuelta de Google. Escritos para quien
 // está parado en la tienda con el celular: qué pasó y qué hacer, sin jerga.
 const ERRORES: Record<string, string> = {
-  cancelado: "Cancelaste el ingreso con Google. Podés intentarlo de nuevo o registrarte con tu correo.",
+  cancelado: "Cancelaste el ingreso con Google. Podés intentarlo de nuevo o llenar tus datos abajo.",
   "sesion-vencida": "Pasó mucho tiempo o se abrió en otra pestaña. Tocá «Continuar con Google» otra vez.",
-  google: "Google no confirmó tu cuenta. Probá de nuevo o registrate con tu correo.",
-  sistema: "No pudimos registrarte en este momento. Probá de nuevo en un rato, o registrate con tu correo.",
-  "google-no-disponible": "El ingreso con Google todavía no está activo. Registrate con tu correo: es igual de rápido.",
+  google: "Google no confirmó tu cuenta. Probá de nuevo o llená tus datos abajo.",
+  sistema: "No pudimos registrarte en este momento. Probá de nuevo en un rato, o llená tus datos abajo.",
+  "google-no-disponible": "El ingreso con Google no está disponible ahora. Llená tus datos abajo: es igual de rápido.",
   "falta-consentimiento": "Para unirte tenés que aceptar la política de privacidad.",
   "demasiados-intentos": "Demasiados intentos seguidos. Esperá unos minutos y probá de nuevo.",
   datos: "Algo salió mal con el formulario. Probá de nuevo.",
 };
-
-async function regaliaVigente(): Promise<Regalia | null> {
-  try {
-    return await erpGet<Regalia>("/api/manada/regalia/");
-  } catch {
-    // Sin ERP la página igual funciona: solo no promete un porcentaje que no
-    // puede confirmar.
-    return null;
-  }
-}
 
 export default async function ManadaPage({
   searchParams,

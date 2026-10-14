@@ -9,6 +9,7 @@ import { negocio, faltante } from "@/lib/negocio";
 import { construirNavegacion } from "@/lib/navegacion";
 import { getNavegacion } from "@/lib/navegacionServidor";
 import { sitioIndexable } from "@/lib/sitio";
+import { frasePorcentaje, regaliaVigente } from "@/lib/regaliaPublica";
 
 const titulo = "AllPet Costa Rica | Productos para perros y gatos";
 const descripcion =
@@ -102,7 +103,7 @@ export default async function RootLayout({
             Saltar al contenido
           </a>
           <AvisoConfiguracion />
-          <NavBar navegacion={navegacion} />
+          <NavBar navegacion={navegacion} fraseManada={frasePorcentaje(await regaliaVigente())} />
           <AvisoRecompra />
           <main id="contenido" className="min-h-screen">
             {children}
