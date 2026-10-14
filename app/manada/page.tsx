@@ -54,23 +54,23 @@ export default async function ManadaPage({
   return (
     <>
       <section className="superficie-navy text-crema-100">
-        <div className="mx-auto max-w-xl px-6 pb-14 pt-14 text-center sm:pt-20">
+        <div className="mx-auto max-w-xl px-6 pb-8 pt-8 text-center sm:pb-14 sm:pt-20">
           <p className="text-label uppercase text-dorado-300">La manada AllPetcr.com</p>
           <h1 className="mt-3 font-display text-hero">Unite a la manada</h1>
           {conRegalia ? (
-            <p className="mx-auto mt-5 max-w-md text-lg font-light text-crema-200">
-              Registrate con un clic y llevate{" "}
-              <strong className="font-medium text-crema-100">{regalia.texto}</strong>.
+            <p className="mx-auto mt-3 max-w-md text-lg font-light text-crema-200 sm:mt-5">
+              Registrate en 30 segundos y llevate{" "}
+              <strong className="font-medium text-crema-100">{regalia.texto?.replace(/(\d)\s%/g, "$1\u00a0%")}</strong>.
             </p>
           ) : (
             <p className="mx-auto mt-5 max-w-md text-lg font-light text-crema-200">
-              Registrate con un clic y enterate primero de lo nuevo para tu perro o tu gato.
+              Registrate en 30 segundos y enterate primero de lo nuevo para tu perro o tu gato.
             </p>
           )}
           {conRegalia && regalia.porcentaje && (
             <div
               aria-hidden="true"
-              className="mx-auto mt-8 inline-flex items-baseline gap-1 rounded-card border border-dorado-500/40 px-8 py-4"
+              className="mx-auto mt-5 inline-flex items-baseline gap-1 rounded-card border border-dorado-500/40 px-6 py-3 sm:mt-8 sm:px-8 sm:py-4"
             >
               <span className="font-display text-[3.5rem] leading-none text-dorado-300">{regalia.porcentaje}</span>
               <span className="font-display text-2xl text-dorado-300">%</span>
@@ -84,21 +84,17 @@ export default async function ManadaPage({
       </section>
 
       <section id="registro" className="scroll-mt-20 bg-crema-100">
-        <div className="mx-auto max-w-md px-6 py-12">
+        <div className="mx-auto max-w-md px-4 py-10 sm:px-6 sm:py-12">
           {error && ERRORES[error] && (
             <p role="alert" className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
               {ERRORES[error]}
             </p>
           )}
-          <FormularioManada
-            fuente={limpiarFuente(o)}
-            googleActivo={googleConfigurado()}
-            correoActivo={regalia?.correo_activo !== false}
-          />
+          <FormularioManada fuente={limpiarFuente(o)} googleActivo={googleConfigurado()} />
           <ul className="mt-10 space-y-3 text-sm font-light text-navy-400">
             <li className="flex gap-3">
               <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-dorado-500" aria-hidden="true" />
-              Mostrás tu código en la caja y el descuento se aplica a toda la compra.
+              En la caja mostrás tu código, o simplemente decís tu número de WhatsApp.
             </li>
             <li className="flex gap-3">
               <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-dorado-500" aria-hidden="true" />
@@ -107,7 +103,7 @@ export default async function ManadaPage({
             </li>
             <li className="flex gap-3">
               <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-dorado-500" aria-hidden="true" />
-              No te vamos a llenar el correo: solo te escribimos si nos das permiso.
+              No te vamos a llenar de mensajes: solo te escribimos si nos das permiso.
             </li>
           </ul>
         </div>

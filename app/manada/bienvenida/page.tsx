@@ -18,7 +18,9 @@ function fecha(iso?: string | null) {
 export default async function BienvenidaPage() {
   const b = verificar<Bienvenida>((await cookies()).get(COOKIE_BIENVENIDA)?.value);
   if (!b) redirect("/manada");
-  const nombre = b.nombre?.split(" ")[0] ?? "";
+  // "Doña Rosa Jiménez" → "Doña Rosa", no "Doña" a secas.
+  const partes = (b.nombre ?? "").split(" ").filter(Boolean);
+  const nombre = /^(don|doña|dona|sr\.?|sra\.?|srta\.?)$/i.test(partes[0] ?? "") ? partes.slice(0, 2).join(" ") : (partes[0] ?? "");
   const disponible = b.codigo && b.estado === "DISPONIBLE";
 
   return (
@@ -45,7 +47,9 @@ export default async function BienvenidaPage() {
               Mostrá este código en la caja cuando hagás tu compra. Es de un solo uso.
               {b.correo_enviado !== false && " También te lo mandamos al correo."}
             </p>
-            <p className="mt-2 text-[13px] text-navy-300">Tip: tomale una captura de pantalla.</p>
+            <p className="mt-2 text-[14px] text-navy-400">
+              ¿Se te olvida el código? En la caja basta con decir tu número de WhatsApp.
+            </p>
           </>
         ) : b.estado === "USADO" ? (
           <p className="mt-6 text-[15px] font-light leading-relaxed text-navy-400">

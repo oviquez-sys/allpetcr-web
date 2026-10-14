@@ -189,6 +189,7 @@ export interface Bienvenida {
 export interface RespuestaRegistroErp {
   nombre: string;
   cliente_nuevo: boolean;
+  ya_era_miembro?: boolean;
   correo_enviado: boolean;
   mascotas_pendientes: boolean;
   cupon: null | {

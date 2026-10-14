@@ -83,7 +83,8 @@ export default function PrivacidadPage() {
           </li>
           <li id="manada" className="scroll-mt-24">
             <strong>La manada AllPetcr.com (opcional):</strong> si te unís desde el código QR de la tienda o
-            desde /manada, guardamos tu nombre, tu correo y, si lo das, tu WhatsApp. Si entrás con Google,
+            desde /manada, o le pedís a la caja que te una, guardamos tu nombre, tu WhatsApp y, si lo
+            das, tu correo. Si entrás con Google,
             Google nos confirma tu nombre, tu correo y un identificador de tu cuenta; nunca vemos tu
             contraseña. Lo usamos para darte el cupón de bienvenida, reconocerte en la caja y saber qué
             compraste con él. Si nos contás de tu mascota (nombre, especie, raza, edad, peso, notas y, si querés, su
