@@ -94,7 +94,7 @@ export default function FormularioManada({ fuente, googleActivo }: Props) {
             ? "Tu regalo de bienvenida ya lo usaste. ¡Gracias por volver!"
             : estado.sinRegalia
               ? "Te vamos a contar primero de lo nuevo para tu peludo."
-              : <>Tu regalo te espera: en la caja <strong className="font-medium text-navy-500">decí tu número de WhatsApp</strong> y listo.</>}
+              : <>Tu regalo te espera para tu primera compra: en la caja <strong className="font-medium text-navy-500">decí tu número de WhatsApp</strong>, o escribilo en «Código de La manada» al pedir en la web.</>}
         </p>
       </div>
     );
@@ -116,9 +116,9 @@ export default function FormularioManada({ fuente, googleActivo }: Props) {
               Continuar con Google
             </button>
           </form>
-          <p className="mt-2 text-center text-[13px] text-navy-300">Un toque y listo, sin escribir nada.</p>
+          <p className="mt-2 text-center text-[13px] text-navy-400">Un toque y listo, sin escribir nada.</p>
 
-          <div className="my-6 flex items-center gap-3 text-[14px] text-navy-300" aria-hidden="true">
+          <div className="my-6 flex items-center gap-3 text-[14px] text-navy-400" aria-hidden="true">
             <span className="h-px flex-1 bg-crema-400" />
             o con tus datos
             <span className="h-px flex-1 bg-crema-400" />
@@ -139,7 +139,7 @@ export default function FormularioManada({ fuente, googleActivo }: Props) {
         </div>
         <div>
           <label htmlFor="manada-email" className={rotulo}>
-            Tu correo <span className="font-normal text-navy-300">(si querés)</span>
+            Tu correo <span className="font-normal text-navy-400">(si querés)</span>
           </label>
           <input id="manada-email" value={email} onChange={(e) => setEmail(e.target.value)}
             type="email" inputMode="email" autoComplete="email" autoCapitalize="none" maxLength={254}
@@ -162,10 +162,13 @@ export default function FormularioManada({ fuente, googleActivo }: Props) {
         </button>
       </form>
 
-      <p className="mt-4 text-center text-[13px] leading-relaxed text-navy-300">
-        Al unirte aceptás nuestra{" "}
-        <Link href="/privacidad#manada" target="_blank" className="underline underline-offset-2">política de privacidad</Link>.
-        No compartimos tus datos.
+      {/* Antes decía «No compartimos tus datos», que contradecía la sección 4
+          de la política de privacidad (auditoría F7-03). */}
+      <p className="mt-4 text-center text-[13px] leading-relaxed text-navy-400">
+        Usamos tus datos para gestionar tu registro y tu cupón. No los vendemos ni los usamos para publicidad de
+        terceros: solo los compartimos con los proveedores necesarios para darte el servicio. Al unirte aceptás
+        nuestra{" "}
+        <Link href="/privacidad#manada" target="_blank" className="font-medium text-navy-500 underline underline-offset-2">política de privacidad</Link>.
       </p>
     </div>
   );

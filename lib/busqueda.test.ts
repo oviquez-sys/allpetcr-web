@@ -104,4 +104,26 @@ describe("coincideAproximado", () => {
       expect(coincideAproximado("Correa Retráctil 5m", "5kg")).toBe(false);
     });
   });
+
+  describe("equivalencias (auditoría F3-01, 16/10/2026)", () => {
+    it("'comida cachorro' encuentra alimentos que dicen 'alimento' y 'puppy'", () => {
+      expect(coincideAproximado("ProSeries Puppy Pollo 3 kg Alimento", "comida cachorro")).toBe(true);
+      expect(coincideAproximado("Alimento completo para cachorros", "comida cachorro")).toBe(true);
+    });
+
+    it("no trae accesorios solo por mencionar cachorros", () => {
+      expect(coincideAproximado("Cama acolchada para cachorro", "comida cachorro")).toBe(false);
+    });
+
+    it("las equivalencias cortas valen solo como palabra completa", () => {
+      expect(coincideAproximado("Balance Ad Cat Chicken 10 kg", "alimento gato")).toBe(false);
+      expect(coincideAproximado("Balance Alimento Ad Cat Chicken 10 kg", "alimento gato")).toBe(true);
+      expect(coincideAproximado("Rascador catalogo", "gato")).toBe(false);
+    });
+
+    it("las búsquedas de siempre no cambian", () => {
+      expect(coincideAproximado("Collar Isabelino 30 cm", "coyar")).toBe(true);
+      expect(coincideAproximado("Shampoo para Perro", "gato")).toBe(false);
+    });
+  });
 });

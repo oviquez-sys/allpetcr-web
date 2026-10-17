@@ -23,6 +23,7 @@ export default function BandaManada({ porcentaje }: { porcentaje: string | null 
               <span className="font-display text-3xl text-dorado-300">%</span>
             </div>
             <p className="mt-1 text-[13px] font-light text-crema-200">en tu primera compra</p>
+            <p className="mt-0.5 text-[12px] font-light text-crema-200">En la tienda, por WhatsApp o en la web</p>
           </div>
         ) : (
           <span aria-hidden="true" className="justify-self-center text-6xl lg:justify-self-start">🐾</span>

@@ -13,6 +13,7 @@ import { ESPECIES, esParaEspecie, hrefEspecie, hrefCats, idsRama, RAICES_ALIMENT
 import { ACTIVIDADES } from "@/lib/contenidoInicio";
 import { armarVitrina } from "@/lib/vitrina";
 import { getCategorias, getProductos } from "@/lib/data";
+import { urlWhatsApp } from "@/lib/negocio";
 export const metadata = { alternates: { canonical: "/" } };
 
 /**
@@ -124,6 +125,10 @@ export default async function HomePage() {
   // tercera fila convertía la portada en el catálogo.
   const vitrina = armarVitrina(disponibles, 8);
 
+  // Acceso a WhatsApp desde la primera pantalla: en el celular, el del
+  // encabezado queda dentro del menú (auditoría F13-04).
+  const consultaWa = urlWhatsApp("Hola, les escribo desde allpetcr.com");
+
   const enlaceSecundario =
     "inline-flex min-h-11 shrink-0 items-center gap-2 rounded text-sm font-medium text-navy-500 underline decoration-crema-500 underline-offset-[6px] transition-colors hover:decoration-navy-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500";
 
@@ -178,6 +183,14 @@ export default async function HomePage() {
                 Alimento, accesorios e higiene para perros y gatos. En línea o
                 en nuestra tienda de Heredia.
               </p>
+              {/* Cómo se compra, en la primera pantalla (auditoría F1-01 y
+                  F12-01): quien llega desde Instagram no debe bajar seis
+                  bloques para enterarse de que no hay pago en línea. */}
+              <p className="mt-3 max-w-md text-[15px] font-medium leading-relaxed text-white sm:text-base">
+                Armá tu pedido y confirmalo por WhatsApp. Te confirmamos
+                existencias y total antes de que pagués. Retiro sin costo en
+                Heredia.
+              </p>
               <div className="mt-8 flex flex-wrap items-center gap-x-7 gap-y-4">
                 <Link
                   href="/catalogo"
@@ -186,6 +199,16 @@ export default async function HomePage() {
                   Ver productos
                   <Flecha className="h-4 w-4" />
                 </Link>
+                {consultaWa && (
+                  <a
+                    href={consultaWa}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-11 items-center rounded text-sm font-medium text-white underline decoration-white/50 underline-offset-[6px] transition-colors hover:decoration-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                  >
+                    Consultar por WhatsApp
+                  </a>
+                )}
                 <Link
                   href="#tienda"
                   className="inline-flex min-h-11 items-center rounded text-sm font-medium text-white underline decoration-white/50 underline-offset-[6px] transition-colors hover:decoration-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"

@@ -56,7 +56,14 @@ export interface Producto {
   /** Solo en el detalle de producto (GET /productos/<sku>/) y solo si el
    *  producto es un alimento con ficha publicada. Nunca en la lista. */
   ficha_alimento?: FichaAlimento | null;
+  /** Lo calcula el sitio, no el ERP (lib/publicacion.ts): si no es null, el
+   *  producto se muestra pero se vende solo con consulta previa por WhatsApp. */
+  solo_consulta?: MotivoConsulta | null;
 }
+
+/** "salud": antiparasitario sin la información de la etiqueta.
+ *  "talla": prenda con varias tallas y sin selector. */
+export type MotivoConsulta = "salud" | "talla";
 
 /** Etiqueta del vocabulario controlado del ERP (catalogo/alimentos.py): la
  *  clave sirve para filtros e íconos; la etiqueta es el texto visible. */

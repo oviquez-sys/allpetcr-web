@@ -3,6 +3,9 @@ import { negocio } from "@/lib/negocio";
 export const metadata = {
   // Sin sufijo manual: app/layout.tsx ya agrega " | AllPet" vía su template.
   title: "Sobre nosotros",
+  description:
+    "AllPet es una tienda de productos para perros y gatos en Heredia Central. Conocé la tienda, " +
+    "su horario y cómo comprar en línea con confirmación por WhatsApp.",
   alternates: { canonical: "/sobre-nosotros" },
 };
 

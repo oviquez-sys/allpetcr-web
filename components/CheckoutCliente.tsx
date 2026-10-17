@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useCarrito, resolverCarrito } from "@/lib/carrito";
+import { useCarrito, resolverCarrito, sePuedePedir } from "@/lib/carrito";
 import DireccionEntregaCliente, { type DireccionEntrega } from "@/components/DireccionEntregaCliente";
 import { formatoColones } from "@/lib/formato";
 import { negocio, urlWhatsApp, faltante } from "@/lib/negocio";
@@ -10,6 +10,8 @@ import { guardarUltimoPedido, programarRecordatorio } from "@/lib/recompra";
 import type { Producto } from "@/lib/types";
 import type { ResultadoCheckout } from "@/lib/checkoutServidor";
 import { crearTextoPedido } from "@/lib/pedidoWhatsApp";
+import { guardarBorrador, leerBorrador } from "@/lib/borradorCheckout";
+import { leerOrigen } from "@/lib/origenCampana";
 
 type Entrega = "retiro" | "coordinar";
 
@@ -37,7 +39,14 @@ const DIRECCION_VACIA: DireccionEntrega = {
  * El pedido se arma como texto legible: quien lo reciba en la tienda tiene que
  * poder leerlo sin descifrar códigos.
  */
-export default function CheckoutCliente({ productos }: { productos: Producto[] }) {
+export default function CheckoutCliente({
+  productos,
+  porcentajeManada = null,
+}: {
+  productos: Producto[];
+  /** Porcentaje de la regalía de La manada vigente en el ERP, o null. */
+  porcentajeManada?: string | null;
+}) {
   const { lineas, listo } = useCarrito();
   const [catalogo, setCatalogo] = useState(productos);
   const { items, hayProblemas } = useMemo(
@@ -45,11 +54,11 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
     [lineas, catalogo],
   );
 
-  const comprables = items.filter((i) => i.producto && i.producto.disponible);
+  const comprables = items.filter((i) => sePuedePedir(i.producto));
   const totalComprable = comprables.reduce((s, i) => s + i.subtotal, 0);
   const cambiosPrecio = items.filter((i) => i.precioCambio && i.producto);
   const problemasBloqueantes = items.filter(
-    (i) => i.descatalogado || (i.producto && !i.producto.disponible),
+    (i) => i.descatalogado || (i.producto && !sePuedePedir(i.producto)),
   );
 
   const [nombre, setNombre] = useState("");
@@ -57,6 +66,7 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
   const [entrega, setEntrega] = useState<Entrega>("retiro");
   const [direccion, setDireccion] = useState<DireccionEntrega>(DIRECCION_VACIA);
   const [nota, setNota] = useState("");
+  const [codigoManada, setCodigoManada] = useState("");
   const [errores, setErrores] = useState<Errores>({});
   const [enviado, setEnviado] = useState(false);
   const [verificando, setVerificando] = useState(false);
@@ -73,6 +83,26 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
   const refPreparado = useRef<HTMLHeadingElement>(null);
   const refAceptaCambios = useRef<HTMLInputElement>(null);
   const refAceptaTerminos = useRef<HTMLInputElement>(null);
+  // Borrador del formulario (lib/borradorCheckout.ts): se recupera al montar
+  // y se guarda en cada cambio, para que Atrás/Adelante no borre lo escrito.
+  const [borradorLeido, setBorradorLeido] = useState(false);
+  useEffect(() => {
+    const b = leerBorrador();
+    if (b) {
+      /* eslint-disable react-hooks/set-state-in-effect -- restauración única desde sessionStorage al montar */
+      setNombre(b.nombre);
+      setTelefono(b.telefono);
+      setEntrega(b.entrega);
+      setDireccion(b.direccion);
+      setNota(b.nota);
+      setCodigoManada(b.codigoManada);
+    }
+    setBorradorLeido(true);
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, []);
+  useEffect(() => {
+    if (borradorLeido) guardarBorrador({ nombre, telefono, entrega, direccion, nota, codigoManada });
+  }, [borradorLeido, nombre, telefono, entrega, direccion, nota, codigoManada]);
   const pedidoActual = useRef("");
   useEffect(() => { pedidoActual.current = JSON.stringify(lineas); }, [lineas]);
   useEffect(() => { if (enviado) refPreparado.current?.focus(); }, [enviado]);
@@ -159,7 +189,7 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
         return;
       }
       setMensajePreparado(crearTextoPedido(resultado, {
-        nombre, telefono, entrega, direccion, nota,
+        nombre, telefono, entrega, direccion, nota, codigoManada, origen: leerOrigen(),
       }));
     // Guardamos solo una copia local del pedido preparado. Al volver a pedir,
     // se resuelve otra vez contra el catálogo actual: este historial nunca
@@ -219,8 +249,8 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
           <section className="mt-8 rounded-card border border-crema-400 bg-white p-5 text-left">
             <h2 className="text-sm font-medium text-navy-500">¿Cuándo querés volver a pedir?</h2>
             <p className="mt-1.5 text-xs font-light leading-relaxed text-navy-400">
-              Te lo mostraremos al volver a este navegador. No enviamos notificaciones ni
-              compartimos tus datos.
+              Te lo mostraremos al volver a este navegador. El recordatorio queda solo en
+              este navegador: no enviamos notificaciones.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               {[15, 30, 45].map((dias) => (
@@ -313,6 +343,12 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
             ))}
             {items.filter((i) => i.producto && !i.producto.disponible).map((i) => (
               <li key={i.sku}>{i.producto!.nombre} ({i.sku}): sin existencias.</li>
+            ))}
+            {items.filter((i) => i.producto?.disponible && i.producto.solo_consulta).map((i) => (
+              <li key={i.sku}>
+                {i.producto!.nombre} ({i.sku}): se pide solo después de consultarnos por WhatsApp
+                {i.producto!.solo_consulta === "talla" ? " qué talla hay disponible" : " cómo usarlo"}.
+              </li>
             ))}
             {cambiosPrecio.map((i) => (
               <li key={i.sku}>
@@ -450,6 +486,28 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
           </fieldset>
 
           <div className="mt-9">
+            <label htmlFor="codigo-manada" className="block text-sm text-navy-500">
+              ¿Tenés un código de La manada? <span className="text-navy-400">(opcional)</span>
+            </label>
+            <input
+              id="codigo-manada"
+              type="text"
+              autoComplete="off"
+              autoCapitalize="characters"
+              maxLength={40}
+              value={codigoManada}
+              onChange={(e) => setCodigoManada(e.target.value)}
+              aria-describedby="ayuda-codigo-manada"
+              className={`${claseCampo} border-crema-400`}
+            />
+            <p id="ayuda-codigo-manada" className="mt-1.5 text-[12.5px] leading-relaxed text-navy-400">
+              Escribí tu código o el WhatsApp con que te registraste.
+              {porcentajeManada ? ` El ${porcentajeManada} % aplica a tu primera compra.` : ""}{" "}
+              Lo validamos y te confirmamos el total con el descuento por WhatsApp antes de que pagués.
+            </p>
+          </div>
+
+          <div className="mt-9">
             <label htmlFor="nota" className="block text-sm text-navy-500">
               Nota para el pedido <span className="text-navy-400">(opcional)</span>
             </label>
@@ -528,6 +586,11 @@ export default function CheckoutCliente({ productos }: { productos: Producto[] }
                 {formatoColones(totalComprable)}
               </span>
             </div>
+            <p className="mt-3 text-[12.5px] font-light leading-relaxed text-navy-400">
+              Este es el subtotal de los productos. Si elegís envío, te confirmamos por WhatsApp la
+              cobertura, el costo y el plazo. Antes de que aceptés la compra te enviamos el resumen
+              completo: productos, envío, descuentos y total final.
+            </p>
             <Link
               href="/carrito"
               className="mt-5 block rounded text-center text-xs text-navy-400 underline underline-offset-2 hover:text-navy-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500"

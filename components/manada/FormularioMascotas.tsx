@@ -183,7 +183,7 @@ export default function FormularioMascotas({ token }: { token: string }) {
             ))}
           </div>
           <div>
-            <label htmlFor={`m${i}-raza`} className={rotulo}>Raza <span className="text-navy-300">(o «zaguate»)</span></label>
+            <label htmlFor={`m${i}-raza`} className={rotulo}>Raza <span className="text-navy-400">(o «zaguate»)</span></label>
             <input id={`m${i}-raza`} value={m.raza} maxLength={80} className={campo}
               onChange={(e) => cambiar(i, "raza", e.target.value)} />
           </div>
@@ -212,7 +212,7 @@ export default function FormularioMascotas({ token }: { token: string }) {
           </div>
           <div>
             <label htmlFor={`m${i}-notas`} className={rotulo}>
-              ¿Algo más? <span className="text-navy-300">(qué come, alergias…)</span>
+              ¿Algo más? <span className="text-navy-400">(qué come, alergias…)</span>
             </label>
             <input id={`m${i}-notas`} value={m.notas} maxLength={200} className={campo}
               onChange={(e) => cambiar(i, "notas", e.target.value)} />
@@ -233,7 +233,7 @@ export default function FormularioMascotas({ token }: { token: string }) {
         className="w-full rounded-full bg-navy-500 px-6 py-3.5 text-[15px] font-medium text-crema-100 transition-colors hover:bg-navy-600 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:ring-offset-2">
         {enviando ? "Guardando…" : mascotas.length > 1 ? "🐾 Sumarlos a la manada" : "🐾 Sumarlo a la manada"}
       </button>
-      <p className="text-center text-[13px] text-navy-300">Se envía una sola vez: revisá antes de tocar el botón.</p>
+      <p className="text-center text-[13px] text-navy-400">Se envía una sola vez: revisá antes de tocar el botón.</p>
     </form>
   );
 }

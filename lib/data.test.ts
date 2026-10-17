@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import productosJson from "@/data/productos.json";
 import categoriasJson from "@/data/categorias.json";
 import type { Producto } from "./types";
+import { prepararParaPublicar } from "./publicacion";
 
 function producto(sku: string, cambios: Partial<Producto> = {}): Producto {
   return {
@@ -67,8 +68,20 @@ describe("getProductos / getCategorias", () => {
     vi.stubEnv("ERP_API_URL", "");
     vi.stubEnv("ERP_API_TOKEN", "");
     const { getProductos, getCategorias } = await import("./data");
-    await expect(getProductos()).resolves.toEqual(productosJson);
+    // Con las reglas de publicación aplicadas (lib/publicacion.ts): el JSON
+    // de respaldo trae el "Juguete" con nota interna, que no se publica.
+    await expect(getProductos()).resolves.toEqual(prepararParaPublicar(productosJson as Producto[]));
     await expect(getCategorias()).resolves.toEqual(categoriasJson);
+  });
+
+  it("no publica una ficha retirada ni aunque se pida por su SKU", async () => {
+    vi.stubEnv("ERP_API_URL", "http://erp-de-prueba");
+    vi.stubEnv("ERP_API_TOKEN", "token-prueba");
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify(
+      producto("147295", { nombre: "Juguete", descripcion: "Revisar en tienda antes de publicar." }),
+    ))));
+    const { getProductoPorSku } = await import("./data");
+    await expect(getProductoPorSku("147295")).resolves.toBeUndefined();
   });
 
   it("con ERP configurado, pide el catálogo en vivo con el token", async () => {

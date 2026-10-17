@@ -102,6 +102,29 @@ function similares(a: string, b: string): boolean {
   return similitud >= SIMILITUD_MINIMA;
 }
 
+/**
+ * Equivalencias (auditoría F3-01, 16/10/2026): "comida cachorro" devolvía un
+ * solo producto mientras "cachorro" devolvía once, porque los alimentos dicen
+ * "alimento" o "Puppy", no "comida". Cada grupo son palabras que el cliente
+ * usa para lo mismo. Lista corta y a mano a propósito: es corregir casos
+ * concretos, no reescribir el buscador. Las de 3 letras ("cat", "dog") solo
+ * valen como palabra completa, para que "cat" no encuentre "catalogo".
+ */
+const EQUIVALENCIAS: string[][] = [
+  ["comida", "alimento", "concentrado", "croqueta", "food"],
+  ["cachorro", "puppy", "junior"],
+  ["gatito", "kitten"],
+  ["adulto", "adult"],
+  ["perro", "dog"],
+  ["gato", "cat"],
+  ["golosina", "snack", "premio", "treat"],
+];
+
+function equivalentes(palabra: string): string[] {
+  const grupo = EQUIVALENCIAS.find((g) => g.some((e) => palabra === e || (e.length >= LARGO_MINIMO_DIFUSO && palabra.startsWith(e))));
+  return grupo ? [palabra, ...grupo.filter((e) => e !== palabra)] : [palabra];
+}
+
 function palabras(texto: string | null | undefined): string[] {
   return normalizar(texto).split(/\s+/).filter(Boolean);
 }
@@ -119,6 +142,8 @@ export function coincideAproximado(texto: string | null | undefined, termino: st
 
   return palabrasTermino.every((pt) => {
     if (palabrasTexto.some((px) => px.includes(pt))) return true; // substring por palabra
+    const otras = equivalentes(pt).slice(1);
+    if (otras.some((e) => palabrasTexto.some((px) => (e.length < LARGO_MINIMO_DIFUSO ? px === e : px.includes(e))))) return true;
     return palabrasTexto.some((px) => similares(pt, px));
   });
 }

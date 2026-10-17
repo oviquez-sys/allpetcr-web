@@ -34,4 +34,24 @@ describe("crearTextoPedido", () => {
     expect(texto).toContain("Señas: Casa azul");
     expect(texto).not.toContain("google.com/maps");
   });
+
+  it("incluye el código de La manada para que la tienda lo valide", () => {
+    const texto = crearTextoPedido(resultado, {
+      nombre: "Ana", telefono: "88887777", entrega: "retiro", codigoManada: " MANADA-123 ",
+    });
+    expect(texto).toContain("Código La manada: MANADA-123 (validar descuento de primera compra)");
+    expect(texto).toContain("total final");
+  });
+
+  it("indica la campaña de origen solo si la hubo", () => {
+    const con = crearTextoPedido(resultado, { nombre: "Ana", telefono: "88887777", entrega: "retiro", origen: "instagram / lanzamiento_20261019" });
+    expect(con).toContain("Origen: instagram / lanzamiento_20261019");
+    const sin = crearTextoPedido(resultado, { nombre: "Ana", telefono: "88887777", entrega: "retiro" });
+    expect(sin).not.toContain("Origen:");
+  });
+
+  it("no menciona La manada si no se escribió un código", () => {
+    const texto = crearTextoPedido(resultado, { nombre: "Ana", telefono: "88887777", entrega: "retiro", codigoManada: "  " });
+    expect(texto).not.toContain("La manada");
+  });
 });

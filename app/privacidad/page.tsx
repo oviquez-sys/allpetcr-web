@@ -30,7 +30,9 @@ export const metadata = {
   alternates: { canonical: "/privacidad" },
 };
 
-const VIGENCIA = "13 de octubre de 2026";
+// 16/10/2026: auditoría de prelanzamiento (borrador del checkout, código de La
+// manada, proveedor de correo identificado). Si se publica otro día, poner esa fecha.
+const VIGENCIA = "16 de octubre de 2026";
 
 export default function PrivacidadPage() {
   const direccion = direccionCompleta();
@@ -59,7 +61,9 @@ export default function PrivacidadPage() {
         <Lista>
           <li>
             <strong>Al preparar un pedido:</strong> tu nombre, teléfono, la forma de entrega y, si pedís
-            envío, la dirección y una nota. Sirven para confirmar el pedido, coordinar la entrega y
+            envío, la dirección; además, si los escribís, una nota y tu código de La manada. Si llegaste
+            desde un enlace de una campaña nuestra (por ejemplo, el de Instagram), el mensaje dice el nombre
+            de esa campaña, para saber qué publicidad funciona; lo ves en el texto antes de enviarlo. Sirven para confirmar el pedido, coordinar la entrega y
             emitir tu comprobante.{" "}
             {enLinea
               ? "Si pagás en el sitio, también te pedimos un correo para enviarte el comprobante."
@@ -112,6 +116,12 @@ export default function PrivacidadPage() {
           Podés borrar ambas cosas cuando quieras, borrando los datos del sitio en tu navegador.
         </p>
         <p>
+          Mientras completás el formulario para confirmar un pedido, lo que vas escribiendo se guarda en esa
+          misma pestaña del navegador, para que no se pierda si vas atrás y volvés. También queda ahí el
+          nombre de la campaña por la que entraste, si fue por un enlace nuestro. Todo se borra solo al cerrar
+          la pestaña y nunca incluye la aceptación de estos términos.
+        </p>
+        <p>
           No usamos cookies de publicidad ni herramientas de analítica. El mapa de nuestra página de{" "}
           <Link href="/contacto" className={enlaceLegal}>contacto</Link> lo muestra Google Maps, que puede
           usar sus propias cookies según su política.
@@ -141,8 +151,8 @@ export default function PrivacidadPage() {
             te identifica en su propia página y nos confirma tu nombre y tu correo.
           </li>
           <li>
-            <strong>Nuestro proveedor de envío de correos:</strong> recibe tu correo y el mensaje que te
-            mandamos (por ejemplo, tu código de la manada o tu comprobante), solo para entregarlo.
+            <strong>Resend (nuestro proveedor de envío de correos):</strong> recibe tu correo y el mensaje
+            que te mandamos (por ejemplo, tu código de la manada o tu comprobante), solo para entregarlo.
           </li>
           <li>
             <strong>OpenStreetMap:</strong> solo si usás el mapa, recibe las coordenadas (sin tu nombre)

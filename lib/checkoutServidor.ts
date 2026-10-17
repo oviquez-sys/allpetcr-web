@@ -51,6 +51,15 @@ export function calcularTotalCheckout(
       problemas.push(`${producto.sku}: sin existencias.`);
       continue;
     }
+    // Ver lib/publicacion.ts: se muestra, pero no se pide sin consultar antes.
+    if (producto.solo_consulta === "salud") {
+      problemas.push(`${producto.nombre}: se vende con asesoría. Consultanos por WhatsApp antes de pedirlo.`);
+      continue;
+    }
+    if (producto.solo_consulta === "talla") {
+      problemas.push(`${producto.nombre}: consultanos por WhatsApp qué talla hay disponible antes de pedirlo.`);
+      continue;
+    }
     if (!Number.isFinite(producto.precio_venta) || producto.precio_venta <= 0) {
       problemas.push(`${producto.sku}: precio no disponible.`);
       continue;

@@ -4,6 +4,7 @@ import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import AvisoConfiguracion from "@/components/AvisoConfiguracion";
 import AvisoRecompra from "@/components/AvisoRecompra";
+import RecordarOrigen from "@/components/RecordarOrigen";
 import { ProveedorCarrito } from "@/lib/carrito";
 import { negocio, faltante } from "@/lib/negocio";
 import { construirNavegacion } from "@/lib/navegacion";
@@ -12,6 +13,17 @@ import { sitioIndexable } from "@/lib/sitio";
 import { frasePorcentaje, regaliaVigente } from "@/lib/regaliaPublica";
 
 const titulo = "AllPet Costa Rica | Productos para perros y gatos";
+/** Imagen al compartir el sitio (auditoría F8-01): foto de la portada con el
+ *  logo, 1200×630, el tamaño que piden WhatsApp, Facebook e Instagram. Si se
+ *  reemplaza, usar un nombre de archivo nuevo: las redes guardan la anterior
+ *  en caché por URL. */
+const imagenCompartir = {
+  url: "/compartir/allpet-portada-1200x630.jpg",
+  width: 1200,
+  height: 630,
+  alt: "AllPet: un perro y un gato junto a sus platos de comida, con el logo de AllPetcr.com",
+};
+
 const descripcion =
   "Alimento, accesorios e higiene para perros y gatos en Costa Rica. " +
   "Tienda física, asesoría honesta y precios claros. Retiro en tienda sin costo.";
@@ -30,8 +42,9 @@ export const metadata: Metadata = {
     siteName: "AllPet",
     title: titulo,
     description: descripcion,
+    images: [imagenCompartir],
   },
-  twitter: { card: "summary_large_image", title: titulo, description: descripcion },
+  twitter: { card: "summary_large_image", title: titulo, description: descripcion, images: [imagenCompartir] },
   robots: { index: sitioIndexable, follow: sitioIndexable },
   formatDetection: { telephone: true },
 };
@@ -103,6 +116,7 @@ export default async function RootLayout({
             Saltar al contenido
           </a>
           <AvisoConfiguracion />
+          <RecordarOrigen />
           <NavBar navegacion={navegacion} fraseManada={frasePorcentaje(await regaliaVigente())} />
           <AvisoRecompra />
           <main id="contenido" className="min-h-screen">

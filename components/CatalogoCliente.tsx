@@ -91,6 +91,16 @@ export default function CatalogoCliente({
     return m;
   }, [categorias]);
 
+  /** Nombre de la subcategoría y de su categoría raíz, para la búsqueda. */
+  const categoriasDe = useMemo(() => {
+    const padre = new Map(categorias.map((c) => [c.id, c.padre_id]));
+    return (id: number | null): string => {
+      if (id === null) return "";
+      const raiz = padre.get(id);
+      return [nombrePorCategoria.get(id), raiz != null ? nombrePorCategoria.get(raiz) : ""].filter(Boolean).join(" ");
+    };
+  }, [categorias, nombrePorCategoria]);
+
   // Jerarquía de 2 niveles: Alimento y Snacks son hijas de Perros/Gatos
   // (padre_id). Elegir una categoría raíz en el filtro debe incluir también
   // los productos de sus subcategorías, no solo los que tienen ese id exacto.
@@ -145,7 +155,12 @@ export default function CatalogoCliente({
         const enNombre = coincideAproximado(p.nombre, term);
         const enPres = coincideAproximado(presentacionVisible(p.presentacion), term);
         const enDesc = coincideAproximado(p.descripcion, term);
-        if (!enNombre && !enSku && !enPres && !enDesc) return false;
+        // Todo junto, con la categoría (auditoría F3-01): "comida cachorro"
+        // tiene "cachorro" en el nombre ("Puppy") y "comida" en la categoría
+        // de alimento; ningún campo por separado tenía las dos palabras.
+        const enTodo = !enNombre && !enPres && !enDesc &&
+          coincideAproximado(`${p.nombre} ${presentacionVisible(p.presentacion)} ${p.descripcion} ${categoriasDe(p.categoria_id)}`, term);
+        if (!enNombre && !enSku && !enPres && !enDesc && !enTodo) return false;
       }
       return true;
     });
@@ -160,7 +175,7 @@ export default function CatalogoCliente({
       lista.sort((a, b) => Number(b.disponible) - Number(a.disponible));
     }
     return lista;
-  }, [productos, busquedaDiferida, catsElegidas, especie, soloDisponibles, orden, idsConHijos]);
+  }, [productos, busquedaDiferida, catsElegidas, especie, soloDisponibles, orden, idsConHijos, categoriasDe]);
 
   // Catálogo por bloques de 24, no los 184 de una sola pasada — hallazgo de
   // la auditoría: sin corte, recorrer el catálogo completo (~28.000px) no

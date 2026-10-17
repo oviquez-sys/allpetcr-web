@@ -14,6 +14,11 @@ export interface DatosPedidoWhatsApp {
     lng: number | null;
   };
   nota?: string;
+  /** Código de La manada (o el WhatsApp con que se registró). La tienda lo
+   *  valida antes de confirmar el total: el sitio no aplica el descuento. */
+  codigoManada?: string;
+  /** Campaña por la que entró (lib/origenCampana.ts), si la hubo. */
+  origen?: string;
 }
 
 /** Genera el mensaje solo con las líneas que el servidor acaba de verificar. */
@@ -34,7 +39,7 @@ export function crearTextoPedido(
   lineas.push(
     "",
     `*Subtotal de productos: ${formatoColones(resultado.total)}*`,
-    "Envío y condiciones de pago por confirmar con la tienda.",
+    "Envío, descuentos, total final y pago: por confirmar con la tienda antes de pagar.",
     "",
     `Nombre: ${datos.nombre.trim()}`,
     `Teléfono: ${datos.telefono.trim()}`,
@@ -56,6 +61,10 @@ export function crearTextoPedido(
     }
   }
 
+  if (datos.codigoManada?.trim()) {
+    lineas.push(`Código La manada: ${datos.codigoManada.trim()} (validar descuento de primera compra)`);
+  }
   if (datos.nota?.trim()) lineas.push(`Nota: ${datos.nota.trim()}`);
+  if (datos.origen?.trim()) lineas.push(`Origen: ${datos.origen.trim()}`);
   return lineas.join("\n");
 }

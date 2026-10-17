@@ -30,7 +30,9 @@ export const metadata = {
   alternates: { canonical: "/terminos" },
 };
 
-const VIGENCIA = "21 de setiembre de 2026";
+// 16/10/2026: auditoría de prelanzamiento (envío y total final por WhatsApp,
+// beneficio de La manada, plazo mínimo de garantía). Si se publica otro día, poner esa fecha.
+const VIGENCIA = "16 de octubre de 2026";
 
 export default function TerminosPage() {
   const direccion = direccionCompleta();
@@ -79,13 +81,22 @@ export default function TerminosPage() {
             comprobante muestra el desglose del impuesto.
           </li>
           <li>
-            El envío no está incluido en el precio del producto. Si pedís entrega a domicilio, el costo del
-            envío aparece en el resumen de tu compra, junto con el total, antes de que{" "}
-            {enLinea ? "pagués" : "confirmés"}.
+            El envío no está incluido en el precio del producto.{" "}
+            {enLinea
+              ? "Si pedís entrega a domicilio, el costo del envío aparece en el resumen de tu compra, junto con el total, antes de que pagués."
+              : "El resumen del sitio muestra solo el subtotal de los productos. Si elegís envío, te confirmamos por WhatsApp la cobertura, el costo y el plazo de entrega. Antes de que aceptés la compra te enviamos un resumen completo con los productos, el envío, cualquier otro cargo o descuento y el total final. Preparar o enviar la solicitud no confirma la compra ni reserva productos."}
+          </li>
+          <li id="manada">
+            <strong>Beneficio de bienvenida de La manada:</strong> el descuento que se anuncia al registrarte
+            aplica una sola vez por persona, en tu primera compra, ya sea en la tienda, por WhatsApp o en este
+            sitio. No vence, salvo que al registrarte se te indique una fecha. En la tienda mostrás tu código o
+            decís tu WhatsApp; en un pedido en línea lo escribís en «Código de La manada» o en tu mensaje, y te
+            confirmamos el total con el descuento antes de que pagués. Más detalles en{" "}
+            <Link href="/manada" className={enlaceLegal}>La manada</Link>.
           </li>
           <li>
-            Los precios pueden cambiar, pero el que vale para vos es el que aceptaste en el resumen de tu
-            compra.
+            Los precios pueden cambiar, pero el que vale para vos es el que aceptaste en el resumen final de
+            tu compra{enLinea ? "" : " que te enviamos por WhatsApp"}.
           </li>
           <li>
             Si un precio publicado tiene un error evidente (por ejemplo, un cero de menos), te avisamos antes de
@@ -171,8 +182,9 @@ export default function TerminosPage() {
             <strong>Retiro en tienda:</strong> sin costo, cuando te confirmemos que el pedido está listo.
           </li>
           <li>
-            <strong>Entrega a domicilio:</strong> el costo y el plazo de entrega te los decimos en el resumen,
-            antes de {enLinea ? "pagar" : "confirmar"}. Más detalles en{" "}
+            <strong>Entrega a domicilio:</strong> el costo y el plazo de entrega te los{" "}
+            {enLinea ? "mostramos en el resumen, antes de pagar" : "confirmamos por WhatsApp, en el resumen completo que recibís antes de aceptar la compra"}.
+            Más detalles en{" "}
             <Link href="/envios" className={enlaceLegal}>Entregas y cómo comprar</Link>.
           </li>
           <li>
@@ -234,7 +246,9 @@ export default function TerminosPage() {
           <strong>Garantía:</strong> todos los productos tienen la garantía que establece la Ley 7472. Si un
           producto sale defectuoso, llegó dañado o no es el que compraste, lo cambiamos por otro igual, te damos
           otro de valor equivalente o te devolvemos el dinero, según prefieras y según haya existencias. En
-          estos casos, el transporte corre por nuestra cuenta.
+          estos casos, el transporte corre por nuestra cuenta. La garantía legal tiene un plazo mínimo de
+          treinta (30) días hábiles desde la entrega; si ofrecemos un plazo mayor, ese plazo prevalece. Estas
+          condiciones no reducen los derechos que te reconoce la legislación de Costa Rica.
         </p>
         <p>
           Los aparatos (fuentes de agua, comederos automáticos, lámparas y juguetes eléctricos o de batería)

@@ -175,6 +175,8 @@ export function ProveedorCarrito({ children }: { children: React.ReactNode }) {
   }, []);
 
   const agregar = useCallback((producto: Producto, cantidad = 1) => {
+    // Se vende con consulta previa (lib/publicacion.ts): nunca al carrito.
+    if (producto.solo_consulta) return;
     const prev = instantanea();
     const existente = prev.find((l) => l.sku === producto.sku);
     guardar(
@@ -238,6 +240,12 @@ export function useCarrito(): CarritoContexto {
   return ctx;
 }
 
+/** ¿Se puede pedir desde el carrito? Con existencia y sin consulta previa
+ *  obligatoria (antiparasitarios sin etiqueta, ropa sin talla elegible). */
+export function sePuedePedir(producto: Producto | null): boolean {
+  return producto !== null && producto.disponible && !producto.solo_consulta;
+}
+
 /**
  * Cruza el carrito guardado con el catálogo vigente.
  * El precio que manda SIEMPRE es el del catálogo, nunca el guardado.
@@ -258,7 +266,7 @@ export function resolverCarrito(
     // entregar es el peor error posible en un carrito: el cliente paga, llega
     // a la tienda y no está. El artículo se mantiene visible y marcado para
     // que decida el cliente, pero fuera del total.
-    const comprable = producto !== null && producto.disponible;
+    const comprable = sePuedePedir(producto);
     return {
       sku: l.sku,
       cantidad: l.cantidad,
@@ -266,12 +274,12 @@ export function resolverCarrito(
       descatalogado,
       precioCambio,
       precioAnterior: l.precioGuardado,
-      subtotal: comprable ? producto.precio_venta * l.cantidad : 0,
+      subtotal: comprable && producto ? producto.precio_venta * l.cantidad : 0,
     };
   });
   const total = items.reduce((s, i) => s + i.subtotal, 0);
   const hayProblemas = items.some(
-    (i) => i.descatalogado || i.precioCambio || (i.producto && !i.producto.disponible),
+    (i) => i.descatalogado || i.precioCambio || (i.producto && !sePuedePedir(i.producto)),
   );
   return { items, total, hayProblemas };
 }

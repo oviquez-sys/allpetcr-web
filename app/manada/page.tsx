@@ -5,7 +5,7 @@ import { googleConfigurado, limpiarFuente } from "@/lib/manada";
 export const metadata = {
   title: "Unite a la manada",
   description:
-    "Registrate en la manada AllPetcr.com en 30 segundos y recibí un regalo de bienvenida para tu primera compra en la tienda.",
+    "Registrate en la manada AllPetcr.com en 30 segundos y recibí un regalo de bienvenida para tu primera compra, en la tienda, por WhatsApp o en la web.",
   alternates: { canonical: "/manada" },
 };
 
@@ -40,7 +40,8 @@ export default async function ManadaPage({
           {conRegalia ? (
             <p className="mx-auto mt-3 max-w-md text-lg font-light text-crema-200 sm:mt-5">
               Registrate en 30 segundos y llevate{" "}
-              <strong className="font-medium text-crema-100">{regalia.texto?.replace(/(\d)\s%/g, "$1\u00a0%")}</strong>.
+              <strong className="font-medium text-crema-100">{regalia.texto?.replace(/(\d)\s%/g, "$1\u00a0%")}</strong>,
+              en la tienda, por WhatsApp o en la web.
             </p>
           ) : (
             <p className="mx-auto mt-5 max-w-md text-lg font-light text-crema-200">
@@ -71,16 +72,45 @@ export default async function ManadaPage({
             </p>
           )}
           <FormularioManada fuente={limpiarFuente(o)} googleActivo={googleConfigurado()} />
-          <ul className="mt-10 space-y-3 text-sm font-light text-navy-400">
-            <li className="flex gap-3">
-              <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-dorado-500" aria-hidden="true" />
-              En la caja mostrás tu código, o simplemente decís tu número de WhatsApp.
-            </li>
-            <li className="flex gap-3">
-              <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-dorado-500" aria-hidden="true" />
-              Es de un solo uso por persona.
-              {regalia?.dias_vigencia ? ` Vale por ${regalia.dias_vigencia} días desde que te registrás.` : ""}
-            </li>
+          {/* Condiciones del beneficio junto al beneficio (auditoría F7-01,
+              F6-02 y F12-03): dónde se usa, cuántas veces y si vence. Las
+              decidieron los dueños el 16/10/2026: primera compra, en la
+              tienda, por WhatsApp o en la web, y sin vencimiento (si la
+              regalía del ERP tiene días de vigencia, se dicen aquí). */}
+          {conRegalia && (
+            <h2 className="mt-10 text-sm font-medium uppercase tracking-wider text-navy-500">
+              Cómo usar tu {regalia.porcentaje ? `${regalia.porcentaje} %` : "regalo"}
+            </h2>
+          )}
+          <ul className={`${conRegalia ? "mt-4" : "mt-10"} space-y-3 text-sm font-light text-navy-400`}>
+            {conRegalia && (
+              <>
+                <li className="flex gap-3">
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-dorado-500" aria-hidden="true" />
+                  <span>
+                    <strong className="font-medium text-navy-500">En la tienda:</strong> mostrás tu código en la caja,
+                    o simplemente decís tu número de WhatsApp.
+                  </span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-dorado-500" aria-hidden="true" />
+                  <span>
+                    <strong className="font-medium text-navy-500">En la web o por WhatsApp:</strong> escribí tu código
+                    (o tu WhatsApp) en «Código de La manada» al confirmar el pedido, o en tu mensaje. Lo validamos y
+                    te confirmamos el total con el descuento antes de que pagués.
+                  </span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-dorado-500" aria-hidden="true" />
+                  <span>
+                    Aplica solo a tu primera compra y es de un solo uso por persona.
+                    {regalia.dias_vigencia
+                      ? ` Vale por ${regalia.dias_vigencia} días desde que te registrás.`
+                      : " No vence."}
+                  </span>
+                </li>
+              </>
+            )}
             <li className="flex gap-3">
               <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-dorado-500" aria-hidden="true" />
               No te vamos a llenar de mensajes: solo te escribimos si nos das permiso.

@@ -3,6 +3,7 @@ import { cache } from "react";
 import type { Categoria, Producto } from "./types";
 import productosJson from "@/data/productos.json";
 import categoriasJson from "@/data/categorias.json";
+import { estaRetirado, marcarConsulta, prepararParaPublicar } from "./publicacion";
 
 // Catálogo en vivo en producción; JSON solo para desarrollo sin ERP.
 const ERP_API_URL = process.env.ERP_API_URL;
@@ -106,7 +107,14 @@ async function erpFetchTodasLasPaginas<T>(rutaInicial: string): Promise<T[]> {
 const TAMANO_PAGINA_CATALOGO = 1000;
 
 // React cache deduplica por render, sin conservar precios entre visitas.
+// Las reglas de publicación (lib/publicacion.ts) se aplican aquí, en la única
+// puerta a los datos: así ninguna página, el sitemap ni el checkout pueden
+// saltárselas por olvido.
 export const getProductos = cache(async (): Promise<Producto[]> => {
+  return prepararParaPublicar(await getProductosSinFiltrar());
+});
+
+const getProductosSinFiltrar = cache(async (): Promise<Producto[]> => {
   if (!ERP_CONFIGURADO) {
     permitirRespaldoLocal();
     return productosJson as Producto[];
@@ -132,7 +140,9 @@ export const getProductoPorSku = cache(async (sku: string): Promise<Producto | u
   try {
     const producto = await erpFetch<unknown>(`/api/catalogo/productos/${encodeURIComponent(sku)}/`);
     if (!esProducto(producto)) throw new Error("El ERP devolvió una ficha con un formato inválido.");
-    return producto;
+    // Una ficha retirada responde 404, igual que una que no existe.
+    if (estaRetirado(producto)) return undefined;
+    return marcarConsulta(producto);
   } catch (error) {
     if (error instanceof ErrorCatalogo && error.status === 404) return undefined;
     throw error;

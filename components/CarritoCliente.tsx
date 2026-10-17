@@ -3,8 +3,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useMemo, useState } from "react";
-import { useCarrito, resolverCarrito } from "@/lib/carrito";
+import { useCarrito, resolverCarrito, sePuedePedir } from "@/lib/carrito";
 import { formatoColones, presentacionVisible, tinteDeSku } from "@/lib/formato";
+import { TEXTO_CONSULTA } from "@/lib/publicacion";
 import type { Producto } from "@/lib/types";
 
 function Cantidad({
@@ -103,7 +104,7 @@ export default function CarritoCliente({ productos }: { productos: Producto[] })
     );
   }
 
-  const comprables = items.filter((i) => i.producto && i.producto.disponible);
+  const comprables = items.filter((i) => sePuedePedir(i.producto));
   const puedeSeguir = comprables.length > 0;
 
   return (
@@ -131,7 +132,7 @@ export default function CarritoCliente({ productos }: { productos: Producto[] })
           {items.map((item) => {
             const p = item.producto;
             const nombre = p?.nombre ?? item.sku;
-            const agotado = p !== null && !p.disponible;
+            const agotado = p !== null && !sePuedePedir(p);
             return (
               <li
                 key={item.sku}
@@ -185,7 +186,9 @@ export default function CarritoCliente({ productos }: { productos: Producto[] })
                     )}
                     {agotado && (
                       <p className="mt-2 text-xs font-medium text-dorado-800">
-                        Sin existencias por el momento. No se incluye en el total.
+                        {p.solo_consulta
+                          ? `${TEXTO_CONSULTA[p.solo_consulta].boton} antes de pedirlo, desde su ficha. No se incluye en el total.`
+                          : "Sin existencias por el momento. No se incluye en el total."}
                       </p>
                     )}
                     {item.precioCambio && p && (

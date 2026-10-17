@@ -8,6 +8,7 @@ import FichaAlimento from "@/components/ficha/FichaAlimento";
 import { getCategorias, getProductoPorSku, getProductos } from "@/lib/data";
 import { formatoColones, presentacionVisible, tinteDeSku } from "@/lib/formato";
 import { negocio, urlWhatsApp, faltante } from "@/lib/negocio";
+import { recomendable, TEXTO_CONSULTA } from "@/lib/publicacion";
 
 // El precio y la disponibilidad se consultan durante cada visita.
 export const dynamic = "force-dynamic";
@@ -71,8 +72,11 @@ export default async function ProductoPage({
   // dispuesto a comprar — es el peor momento para hacerle perder el tiempo.
   // Si no alcanzan cuatro disponibles se completa con el resto de la
   // categoría antes que dejar la fila coja.
+  // Nunca de la otra especie, y en salud nunca de especie sin identificar
+  // (auditoría F4-02): recomendar el collar de gato desde el de perro sugiere
+  // que son intercambiables, y eso no está comprobado.
   const mismaCategoria = productos.filter(
-    (p) => p.sku !== producto.sku && p.categoria_id === producto.categoria_id,
+    (p) => p.sku !== producto.sku && p.categoria_id === producto.categoria_id && recomendable(producto, p),
   );
   const relacionados = [
     ...mismaCategoria.filter((p) => p.disponible),
@@ -143,9 +147,10 @@ export default async function ProductoPage({
   // atiende WhatsApp a adivinar cuál de los productos con nombre parecido es.
   // Es una consulta, no un pedido ni una reserva: stock y total se confirman
   // siempre por el canal habitual.
+  const consulta = producto.solo_consulta ? TEXTO_CONSULTA[producto.solo_consulta] : null;
   const consultaWa = urlWhatsApp(
     [
-      "Hola, quiero consultar por este producto:",
+      consulta?.mensaje ?? "Hola, quiero consultar por este producto:",
       `Producto: ${producto.nombre}`,
       `Código: ${producto.sku}`,
       `Precio mostrado: ${formatoColones(producto.precio_venta)}`,
@@ -272,15 +277,34 @@ export default async function ProductoPage({
             )}
           </p>
 
+          {/* Venta con consulta previa (lib/publicacion.ts): el motivo se
+              dice en la ficha, no se descubre en el checkout. */}
+          {consulta && producto.disponible && (
+            <p className="mt-6 max-w-prose rounded-card border border-dorado-300 bg-dorado-50 px-4 py-3 text-sm leading-relaxed text-dorado-900">
+              {consulta.aviso}
+            </p>
+          )}
+
           <div className="mt-8 flex flex-wrap gap-3">
             {/* Un agotado no se compra: el botón de aviso REEMPLAZA al de
                 comprar, no convive con uno deshabilitado al lado. */}
-            {producto.disponible ? (
+            {consulta && producto.disponible ? (
+              consultaWa ? (
+                <a
+                  href={consultaWa}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-full bg-navy-500 px-8 py-3.5 text-sm font-medium text-crema-100 transition-colors hover:bg-navy-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:ring-offset-2"
+                >
+                  {consulta.boton}
+                </a>
+              ) : null
+            ) : producto.disponible ? (
               <BotonAgregar producto={producto} />
             ) : (
               <BotonAvisoDisponibilidad producto={producto} />
             )}
-            {!faltante(negocio.whatsapp) && consultaWa && (
+            {!(consulta && producto.disponible) && !faltante(negocio.whatsapp) && consultaWa && (
               <a
                 href={consultaWa}
                 target="_blank"
@@ -293,9 +317,9 @@ export default async function ProductoPage({
           </div>
 
           <p className="mt-4 text-xs font-light leading-relaxed text-navy-400">
-            Agregá al carrito y confirmá el pedido por WhatsApp. No se cobra
-            nada en línea: te confirmamos existencias y total antes de preparar
-            todo.
+            {consulta && producto.disponible
+              ? "No se cobra nada en línea: te confirmamos existencias y total por WhatsApp antes de que pagués."
+              : "Agregá al carrito y confirmá el pedido por WhatsApp. No se cobra nada en línea: te confirmamos existencias y total antes de que pagués."}
           </p>
 
           <dl className="mt-10 divide-y divide-crema-400 border-t border-crema-400 text-sm">

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useMemo, useState } from "react";
-import { useCarrito, resolverCarrito } from "@/lib/carrito";
+import { useCarrito, resolverCarrito, sePuedePedir } from "@/lib/carrito";
 import { formatoColones, presentacionVisible, tinteDeSku } from "@/lib/formato";
 import {
   useRecompra,
@@ -40,10 +40,10 @@ export default function RecompraCliente({ productos }: { productos: Producto[] }
     [disponible, estado, productos],
   );
 
-  const comprables = items.filter((i) => i.producto && i.producto.disponible);
+  const comprables = items.filter((i) => sePuedePedir(i.producto));
   const total = comprables.reduce((s, i) => s + i.subtotal, 0);
   const hayProblemas = items.some(
-    (i) => i.descatalogado || i.precioCambio || (i.producto && !i.producto.disponible),
+    (i) => i.descatalogado || i.precioCambio || (i.producto && !sePuedePedir(i.producto)),
   );
 
   function repetirTodo() {
@@ -143,7 +143,7 @@ export default function RecompraCliente({ productos }: { productos: Producto[] }
           {items.map((item) => {
             const p = item.producto;
             const nombre = p?.nombre ?? item.sku;
-            const agotado = p !== null && !p.disponible;
+            const agotado = p !== null && !sePuedePedir(p);
             return (
               <li
                 key={item.sku}

@@ -41,14 +41,17 @@ export default async function BienvenidaPage() {
                 {b.codigo}
               </p>
               <p className="mt-2 text-[15px] text-navy-500">{b.descripcion}</p>
-              {b.vence_en && <p className="mt-1 text-sm text-navy-300">Válido hasta el {fecha(b.vence_en)}</p>}
+              <p className="mt-1 text-sm text-navy-400">
+                {b.vence_en ? `Válido hasta el ${fecha(b.vence_en)}` : "Para tu primera compra · No vence"}
+              </p>
             </div>
             <p className="mt-6 text-[15px] font-light leading-relaxed text-navy-400">
-              Mostrá este código en la caja cuando hagás tu compra. Es de un solo uso.
+              Usalo en tu primera compra: mostralo en la caja, o escribilo en «Código de La manada» al
+              confirmar un pedido en la web o en tu mensaje de WhatsApp. Es de un solo uso.
               {b.correo_enviado !== false && " También te lo mandamos al correo."}
             </p>
             <p className="mt-2 text-[14px] text-navy-400">
-              ¿Se te olvida el código? En la caja basta con decir tu número de WhatsApp.
+              ¿Se te olvida el código? Basta con decir o escribir tu número de WhatsApp.
             </p>
           </>
         ) : b.estado === "USADO" ? (

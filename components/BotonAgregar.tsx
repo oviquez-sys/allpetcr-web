@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useCarrito } from "@/lib/carrito";
+import { TEXTO_CONSULTA } from "@/lib/publicacion";
 import type { Producto } from "@/lib/types";
 
 interface Props {
@@ -39,6 +41,21 @@ export default function BotonAgregar({ producto, tamano = "grande", className = 
 
   const agotado = !producto.disponible;
   const idAyuda = `disp-${producto.sku}`;
+
+  // Se vende con consulta previa (lib/publicacion.ts). En la tarjeta lleva a
+  // la ficha, que explica por qué y abre WhatsApp; la ficha grande no usa
+  // este botón para esos productos.
+  if (producto.solo_consulta && !agotado) {
+    if (tamano !== "chico") return null;
+    return (
+      <Link
+        href={`/producto/${encodeURIComponent(producto.sku)}`}
+        className={`flex h-11 w-full items-center justify-center rounded-full border border-navy-500 text-[13px] font-medium text-navy-500 transition-colors duration-150 ease-out hover:bg-navy-500 hover:text-crema-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:ring-offset-2 motion-reduce:transition-none ${className}`}
+      >
+        {TEXTO_CONSULTA[producto.solo_consulta].botonCorto}
+      </Link>
+    );
+  }
 
   if (tamano === "chico") {
     return (

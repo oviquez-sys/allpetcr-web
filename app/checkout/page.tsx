@@ -1,5 +1,6 @@
 import CheckoutCliente from "@/components/CheckoutCliente";
 import { getProductos } from "@/lib/data";
+import { regaliaVigente } from "@/lib/regaliaPublica";
 
 export const metadata = {
   title: "Confirmar pedido",
@@ -8,6 +9,7 @@ export const metadata = {
 };
 
 export default async function CheckoutPage() {
-  const productos = await getProductos();
-  return <CheckoutCliente productos={productos} />;
+  const [productos, regalia] = await Promise.all([getProductos(), regaliaVigente()]);
+  const porcentaje = regalia?.activa && regalia.porcentaje ? regalia.porcentaje : null;
+  return <CheckoutCliente productos={productos} porcentajeManada={porcentaje} />;
 }
