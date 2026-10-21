@@ -97,6 +97,10 @@ const SIMILITUD_MINIMA = 0.65;
 
 function similares(a: string, b: string): boolean {
   if (a.length < LARGO_MINIMO_DIFUSO || b.length < LARGO_MINIMO_DIFUSO) return false;
+  // Misma primera letra (20/10/2026): casi nadie se equivoca en la primera
+  // letra ("coyar" → "collar"), y sin esta regla "pato" (alimento de pato)
+  // traía todo lo de "gato" — una letra de diferencia, 75 % de parecido.
+  if (a[0] !== b[0]) return false;
   const largoMax = Math.max(a.length, b.length);
   const similitud = (largoMax - distanciaLevenshtein(a, b)) / largoMax;
   return similitud >= SIMILITUD_MINIMA;
@@ -127,6 +131,63 @@ function equivalentes(palabra: string): string[] {
 
 function palabras(texto: string | null | undefined): string[] {
   return normalizar(texto).split(/\s+/).filter(Boolean);
+}
+
+/**
+ * Buscador "inteligente" (20/10/2026, pedido de Oscar): "comida perro
+ * cachorro" tiene que mostrar todos los alimentos de cachorro.
+ *
+ * Cada producto llega del ERP con `etiquetas`: las palabras que la gente usa
+ * para encontrarlo (sinónimos en español e inglés, la mascota, la etapa y el
+ * tamaño de raza de su ficha técnica…). La lista de sinónimos vive en UN
+ * solo lugar, el ERP (catalogo/palabras_clave.py); acá solo se busca.
+ *
+ * Reglas (las mismas del ERP):
+ * - se ignoran palabras vacías ("comida PARA perro"),
+ * - "cachorros" también busca "cachorro",
+ * - cada palabra tiene que aparecer al INICIO de una palabra del producto
+ *   (nombre, presentación, descripción, categoría o etiquetas): "pato" no
+ *   encuentra "zapatos",
+ * - la tolerancia a errores de escritura ("coyar" → "collar") se aplica solo
+ *   contra el NOMBRE: contra las etiquetas daría "pato" ≈ "gato".
+ */
+export const PALABRAS_VACIAS = new Set([
+  "para", "de", "del", "con", "el", "la", "los", "las", "y", "en", "un", "una",
+  "unos", "unas", "mi", "su", "al", "que", "por", "o", "a",
+]);
+
+function tokens(texto: string | null | undefined): string[] {
+  return normalizar(texto).replace(/[^a-z0-9]+/g, " ").split(" ").filter(Boolean);
+}
+
+function variantes(palabra: string): string[] {
+  const v = [palabra];
+  if (palabra.length > 4 && palabra.endsWith("es") && !palabra.endsWith("ses")) v.push(palabra.slice(0, -2));
+  if (palabra.length > 3 && palabra.endsWith("s")) v.push(palabra.slice(0, -1));
+  return v;
+}
+
+export interface CamposBusqueda {
+  nombre: string;
+  presentacion?: string;
+  descripcion?: string;
+  categorias?: string;
+  etiquetas?: string;
+}
+
+export function coincideProducto(campos: CamposBusqueda, termino: string): boolean {
+  const buscadas = tokens(termino).filter((w) => !PALABRAS_VACIAS.has(w));
+  if (buscadas.length === 0) return true;
+  const todas = tokens(
+    `${campos.nombre} ${campos.presentacion ?? ""} ${campos.descripcion ?? ""} ${campos.categorias ?? ""} ${campos.etiquetas ?? ""}`,
+  );
+  const delNombre = tokens(campos.nombre);
+  return buscadas.every((pt) => {
+    if (variantes(pt).some((v) => todas.some((px) => px.startsWith(v)))) return true;
+    const otras = equivalentes(pt).slice(1);
+    if (otras.some((e) => todas.some((px) => (e.length < LARGO_MINIMO_DIFUSO ? px === e : px.startsWith(e))))) return true;
+    return delNombre.some((px) => similares(pt, px));
+  });
 }
 
 /** True si CADA palabra del término aparece —exacta o aproximada— en el

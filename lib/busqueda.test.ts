@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { coincideAproximado, distanciaLevenshtein, normalizar } from "./busqueda";
+import { coincideAproximado, coincideProducto, distanciaLevenshtein, normalizar } from "./busqueda";
 
 describe("normalizar", () => {
   it("pasa a minúsculas y saca tildes", () => {
@@ -125,5 +125,28 @@ describe("coincideAproximado", () => {
       expect(coincideAproximado("Collar Isabelino 30 cm", "coyar")).toBe(true);
       expect(coincideAproximado("Shampoo para Perro", "gato")).toBe(false);
     });
+  });
+});
+
+describe("coincideProducto (buscador inteligente, 20/10/2026)", () => {
+  const puppy = {
+    nombre: "Balance Puppy 2 kg",
+    categorias: "Alimento Alimento seco",
+    etiquetas: "comida alimento concentrado croqueta perro dog cachorro puppy junior",
+  };
+  it("comida para perro cachorro encuentra un Puppy", () => {
+    expect(coincideProducto(puppy, "comida para perro cachorro")).toBe(true);
+    expect(coincideProducto(puppy, "Cachorros")).toBe(true);
+  });
+  it("no confunde palabras que empiezan distinto", () => {
+    expect(coincideProducto({ nombre: "Zapatos de malla" }, "pato")).toBe(false);
+    expect(coincideProducto({ nombre: "Peluche gato", etiquetas: "gato cat felino" }, "pato")).toBe(false);
+  });
+  it("sigue tolerando errores en el nombre y pesos pegados", () => {
+    expect(coincideProducto({ nombre: "Collar de nylon" }, "coyar")).toBe(true);
+    expect(coincideProducto({ nombre: "Balance Adulto 10 kg" }, "balance 10kg")).toBe(true);
+  });
+  it("sin término no filtra", () => {
+    expect(coincideProducto(puppy, "  de  ")).toBe(true);
   });
 });

@@ -3,7 +3,7 @@
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import TarjetaProducto from "@/components/TarjetaProducto";
 import { ESPECIES, esParaEspecie, idsRama, type ClaveEspecie } from "@/lib/navegacion";
-import { coincideAproximado } from "@/lib/busqueda";
+import { coincideProducto } from "@/lib/busqueda";
 import { presentacionVisible } from "@/lib/formato";
 import type { Categoria, Producto } from "@/lib/types";
 
@@ -145,22 +145,29 @@ export default function CatalogoCliente({
         // casi lo mismo" como con una palabra (75341 no es "casi" 75342).
         // Se busca exacto por substring, nunca aproximado.
         const enSku = p.sku.toLowerCase().includes(term);
-        // Nombre, presentación y descripción sí toleran errores de
-        // escritura (ítem 32): "coyar" encuentra "collar". Solo la
+        // El nombre tolera errores de escritura (ítem 32): "coyar"
+        // encuentra "collar". De la presentación entra solo la
         // presentación que el cliente puede ver: buscar "paquete" devolvía
         // 141 de 184 productos por un dato que no está en pantalla. La
         // descripción entra porque es donde están el material, la talla y
         // el uso ("arnés acolchado", "para cachorro"), que es como la
         // gente busca de verdad.
-        const enNombre = coincideAproximado(p.nombre, term);
-        const enPres = coincideAproximado(presentacionVisible(p.presentacion), term);
-        const enDesc = coincideAproximado(p.descripcion, term);
-        // Todo junto, con la categoría (auditoría F3-01): "comida cachorro"
-        // tiene "cachorro" en el nombre ("Puppy") y "comida" en la categoría
-        // de alimento; ningún campo por separado tenía las dos palabras.
-        const enTodo = !enNombre && !enPres && !enDesc &&
-          coincideAproximado(`${p.nombre} ${presentacionVisible(p.presentacion)} ${p.descripcion} ${categoriasDe(p.categoria_id)}`, term);
-        if (!enNombre && !enSku && !enPres && !enDesc && !enTodo) return false;
+        //
+        // Buscador "inteligente" (20/10/2026): cada palabra en el nombre, la
+        // presentación, la descripción, la categoría o las `etiquetas` que
+        // manda el ERP (sinónimos, mascota, etapa y tamaño de la ficha).
+        // "comida perro cachorro" encuentra los "Puppy". Ver lib/busqueda.ts.
+        const coincide = coincideProducto(
+          {
+            nombre: p.nombre,
+            presentacion: presentacionVisible(p.presentacion),
+            descripcion: p.descripcion,
+            categorias: categoriasDe(p.categoria_id),
+            etiquetas: p.etiquetas,
+          },
+          term,
+        );
+        if (!enSku && !coincide) return false;
       }
       return true;
     });

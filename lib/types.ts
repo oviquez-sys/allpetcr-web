@@ -40,6 +40,10 @@ export interface Producto {
    *  exportaciones el stock cambia, y el sitio tiene que poder marcar un
    *  agotado —en el carrito, sobre todo— sin esperar a la siguiente. */
   disponible: boolean;
+  /** Palabras de búsqueda que arma el ERP (20/10/2026, catalogo/palabras_clave.py):
+   *  sinónimos, mascota, etapa y tamaño de la ficha. Opcional: un JSON viejo
+   *  no las trae y el buscador funciona igual, solo menos "inteligente". */
+  etiquetas?: string;
   /** Vitrina manual de la portada (26/09/2026, `catalogo.Producto.destacado_home`
    *  en el ERP). Opcionales: un JSON local viejo, exportado antes de este
    *  cambio, no los trae — `lib/vitrina.ts` los trata como "no destacado"
