@@ -12,7 +12,8 @@ import { regaliaVigente } from "@/lib/regaliaPublica";
 import { ESPECIES, esParaEspecie, hrefEspecie, hrefCats, idsRama, RAICES_ALIMENTO } from "@/lib/navegacion";
 import { ACTIVIDADES } from "@/lib/contenidoInicio";
 import { armarVitrina } from "@/lib/vitrina";
-import { getCategorias, getProductos } from "@/lib/data";
+import { connection } from "next/server";
+import { getCategoriasPublico, getProductosPublico } from "@/lib/data";
 import { urlWhatsApp } from "@/lib/negocio";
 export const metadata = { alternates: { canonical: "/" } };
 
@@ -75,7 +76,10 @@ const FOTOS_ESPECIE: Record<string, { imagen: string; posicion: string }> = {
 };
 
 export default async function HomePage() {
-  const [productos, categorias, regalia] = await Promise.all([getProductos(), getCategorias(), regaliaVigente()]);
+  // Se arma en cada visita (nunca en la compilación, que no tiene ERP), pero
+  // con la copia compartida del catálogo: ver "DOS PUERTAS" en lib/data.ts.
+  await connection();
+  const [productos, categorias, regalia] = await Promise.all([getProductosPublico(), getCategoriasPublico(), regaliaVigente()]);
 
   const disponibles = productos.filter((p) => p.disponible);
   const nombrePorId = new Map(categorias.map((c) => [c.id, c.nombre]));

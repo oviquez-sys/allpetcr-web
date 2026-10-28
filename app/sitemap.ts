@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
-import { getProductos } from "@/lib/data";
+import { getProductosPublico as getProductos } from "@/lib/data";
+import { connection } from "next/server";
 import { negocio } from "@/lib/negocio";
 
 /**
@@ -14,6 +15,8 @@ import { negocio } from "@/lib/negocio";
  * contenido indexable.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // En cada pedido, nunca en la compilación (que no tiene ERP).
+  await connection();
   const base = negocio.sitioUrl;
   const productos = await getProductos();
 

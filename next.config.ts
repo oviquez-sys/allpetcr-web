@@ -101,7 +101,12 @@ const nextConfig: NextConfig = {
     // Los formatos modernos reducen mucho el peso de las fotos de catálogo,
     // que es el punto donde más se degrada el móvil.
     remotePatterns: patronesDeImagenExternas(),
-    formats: ["image/avif", "image/webp"],
+    // Solo WebP (27/10/2026). AVIF pesa algo menos, pero generarlo cuesta
+    // mucho más procesador: medido en producción, cada foto grande de la
+    // portada tardaba ~3 s la primera vez en este servidor chico, y mientras
+    // tanto se veía un bloque vacío. WebP se genera varias veces más rápido
+    // y lo leen todos los navegadores actuales.
+    formats: ["image/webp"],
     // Sin esto, Next cachea cada variante optimizada (tamaño × formato) solo
     // 60 segundos (su valor por defecto) — pensado para imágenes que cambian
     // seguido, no para fotos de producto que son casi siempre las mismas

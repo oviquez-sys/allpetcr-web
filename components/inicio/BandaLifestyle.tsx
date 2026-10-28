@@ -24,7 +24,7 @@ interface Props {
 export default function BandaLifestyle({ titulo, texto, cta, href, imagen, posicion = "center" }: Props) {
   return (
     <section className="relative isolate overflow-hidden">
-      <div className="relative h-[68svh] max-h-[640px] min-h-[420px] lg:h-[72vh] lg:max-h-[720px]">
+      <div className="relative bg-navy-800 h-[68svh] max-h-[640px] min-h-[420px] lg:h-[72vh] lg:max-h-[720px]">
         <Image
           src={imagen}
           alt=""

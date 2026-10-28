@@ -5,13 +5,15 @@ import TarjetaProducto from "@/components/TarjetaProducto";
 import BotonAgregar from "@/components/BotonAgregar";
 import BotonAvisoDisponibilidad from "@/components/BotonAvisoDisponibilidad";
 import FichaAlimento from "@/components/ficha/FichaAlimento";
-import { getCategorias, getProductoPorSku, getProductos } from "@/lib/data";
+import { connection } from "next/server";
+import { getCategoriasPublico, getProductoPorSkuPublico, getProductosPublico } from "@/lib/data";
 import { formatoColones, presentacionVisible, tinteDeSku } from "@/lib/formato";
 import { negocio, urlWhatsApp, faltante } from "@/lib/negocio";
 import { recomendable, TEXTO_CONSULTA } from "@/lib/publicacion";
 
-// El precio y la disponibilidad se consultan durante cada visita.
-export const dynamic = "force-dynamic";
+// La ficha se arma en cada visita con la copia de hasta 60 s del catálogo
+// (ver "DOS PUERTAS" en lib/data.ts). El precio que se compromete lo vuelven
+// a revisar en vivo el carrito y el checkout.
 
 export async function generateMetadata({
   params,
@@ -19,7 +21,8 @@ export async function generateMetadata({
   params: Promise<{ sku: string }>;
 }) {
   const { sku } = await params;
-  const producto = await getProductoPorSku(decodeURIComponent(sku));
+  await connection();
+  const producto = await getProductoPorSkuPublico(decodeURIComponent(sku));
   if (!producto) return { title: "Producto no encontrado" };
   // Se prefiere la descripción real del ERP: es texto propio del producto y
   // no una plantilla repetida en 184 páginas, que es lo que Google trata como
@@ -54,13 +57,14 @@ export default async function ProductoPage({
 }: {
   params: Promise<{ sku: string }>;
 }) {
+  await connection();
   const { sku } = await params;
   const skuLimpio = decodeURIComponent(sku);
 
   const [producto, productos, categorias] = await Promise.all([
-    getProductoPorSku(skuLimpio),
-    getProductos(),
-    getCategorias(),
+    getProductoPorSkuPublico(skuLimpio),
+    getProductosPublico(),
+    getCategoriasPublico(),
   ]);
 
   if (!producto) notFound();

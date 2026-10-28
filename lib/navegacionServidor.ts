@@ -1,10 +1,10 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
-import { getCategorias, getProductos } from "./data";
+import { getCategoriasPublico, getProductosPublico } from "./data";
 import { construirNavegacion } from "./navegacion";
 
 async function cargarNavegacion() {
-  const [categorias, productos] = await Promise.all([getCategorias(), getProductos()]);
+  const [categorias, productos] = await Promise.all([getCategoriasPublico(), getProductosPublico()]);
   return construirNavegacion(categorias, productos);
 }
 

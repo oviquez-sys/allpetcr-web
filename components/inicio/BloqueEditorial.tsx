@@ -49,7 +49,7 @@ export default function BloqueEditorial({
   return (
     <Link
       href={href}
-      className={`group relative flex flex-col justify-end overflow-hidden rounded-xl bg-crema-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:ring-offset-2 ${className}`}
+      className={`group relative flex flex-col justify-end overflow-hidden rounded-xl ${imagen ? "bg-navy-800" : "bg-crema-200"} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:ring-offset-2 ${className}`}
     >
       {imagen ? (
         <>

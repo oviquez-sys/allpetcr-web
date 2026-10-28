@@ -1,4 +1,5 @@
-import type { MotivoConsulta, Producto } from "./types";
+import type { Categoria, MotivoConsulta, Producto } from "./types";
+import { nombreLegible } from "./nombreLegible";
 
 /**
  * REGLAS DE PUBLICACIÓN — auditoría de prelanzamiento del 16/10/2026
@@ -83,7 +84,40 @@ export function motivoConsulta(p: Producto): MotivoConsulta | null {
 /** Aplica las reglas a todo lo que llega del ERP: quita las retiradas y
  *  marca las que se venden solo con consulta. */
 export function prepararParaPublicar(productos: Producto[]): Producto[] {
-  return productos.filter((p) => !estaRetirado(p)).map(marcarConsulta);
+  return productos.filter((p) => !estaRetirado(p)).map(prepararFicha);
+}
+
+/** Una ficha lista para mostrarse: consulta marcada y nombre legible
+ *  (sin MAYÚSCULAS de factura, ver lib/nombreLegible.ts). */
+export function prepararFicha(p: Producto): Producto {
+  const conConsulta = marcarConsulta(p);
+  const nombre = nombreLegible(conConsulta.nombre, conConsulta.marca);
+  return nombre === conConsulta.nombre ? conConsulta : { ...conConsulta, nombre };
+}
+
+/** Las categorías nuevas también pueden llegar en mayúsculas ("ADORNOS"). */
+export function prepararCategorias(categorias: Categoria[]): Categoria[] {
+  return categorias.map((c) => {
+    const nombre = nombreLegible(c.nombre);
+    return nombre === c.nombre ? c : { ...c, nombre };
+  });
+}
+
+/**
+ * Qué tan lista está una ficha para mostrarse arriba del catálogo
+ * (27/10/2026). El orden por defecto ("Disponibles primero") dejaba el orden
+ * del ERP, que pone lo último cargado de primero: productos recién entrados
+ * desde una factura, sin foto ni descripción, eran lo primero que veía un
+ * cliente. Con esto suben las fichas completas y bajan las que faltan
+ * terminar. No esconde nada: todo sigue en el catálogo y en el buscador.
+ */
+export function puntajeFicha(p: Producto): number {
+  let puntos = 0;
+  if (p.imagen) puntos += 4;
+  if ((p.descripcion ?? "").trim().length >= 40) puntos += 2;
+  if ((p.marca ?? "").trim()) puntos += 1;
+  if (!p.solo_consulta) puntos += 1;
+  return puntos;
 }
 
 /** Solo agrega `solo_consulta` cuando aplica: el resto de los productos

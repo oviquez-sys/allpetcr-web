@@ -72,7 +72,7 @@ export default function PuertaEspecie({
   return (
     <Link
       href={href}
-      className="group relative flex aspect-[16/10] flex-col justify-end overflow-hidden rounded-card transition-transform duration-300 hover:-translate-y-[3px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy-500 sm:aspect-[16/11]"
+      className="group relative flex aspect-[16/10] flex-col bg-navy-800 justify-end overflow-hidden rounded-card transition-transform duration-300 hover:-translate-y-[3px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy-500 sm:aspect-[16/11]"
     >
       {imagen ? (
         <>

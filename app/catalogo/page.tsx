@@ -1,6 +1,6 @@
 import CatalogoCliente from "@/components/CatalogoCliente";
 import { ESPECIES, type ClaveEspecie } from "@/lib/navegacion";
-import { getCategorias, getProductos } from "@/lib/data";
+import { getCategoriasPublico, getProductosPublico } from "@/lib/data";
 
 export const metadata = {
   // Sin sufijo manual: app/layout.tsx ya agrega " | AllPet" vía su template.
@@ -37,8 +37,8 @@ export default async function CatalogoPage({
   searchParams: Promise<{ q?: string; c?: string; cats?: string; para?: string; orden?: string; disponibles?: string }>;
 }) {
   const [productos, categorias, params] = await Promise.all([
-    getProductos(),
-    getCategorias(),
+    getProductosPublico(),
+    getCategoriasPublico(),
     searchParams,
   ]);
 

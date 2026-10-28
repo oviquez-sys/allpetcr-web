@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { especieDe, estaRetirado, motivoConsulta, prepararParaPublicar, recomendable } from "./publicacion";
+import { especieDe, estaRetirado, motivoConsulta, prepararParaPublicar, puntajeFicha, recomendable } from "./publicacion";
 import { calcularTotalCheckout } from "./checkoutServidor";
 import type { Producto } from "./types";
 
@@ -99,5 +99,25 @@ describe("recomendaciones por especie (F4-02)", () => {
     const ratonGato = p({ sku: "c", nombre: "Ratón", mascota: "Gato" });
     expect(recomendable(pelotaPerro, pelotaAmbos)).toBe(true);
     expect(recomendable(pelotaPerro, ratonGato)).toBe(false);
+  });
+});
+
+describe("primera impresión del catálogo (27/10/2026)", () => {
+  it("publica en minúscula legible un nombre que llegó en MAYÚSCULAS de factura", () => {
+    const [publicado] = prepararParaPublicar([p({ nombre: "ADORNO AMO LEYENDO CON PERRO" })]);
+    expect(publicado.nombre).toBe("Adorno amo leyendo con perro");
+  });
+
+  it("deja igual un nombre que ya está bien escrito", () => {
+    const original = p({ nombre: "Pelota KONG Classic" });
+    expect(prepararParaPublicar([original])[0]).toBe(original);
+  });
+
+  it("pone las fichas completas antes que las que faltan terminar", () => {
+    const completa = p({ imagen: "/a.jpg", descripcion: "Cama redonda acolchada de felpa, lavable, para perros pequeños.", marca: "Zee.Dog" });
+    const sinNada = p({});
+    const soloFoto = p({ imagen: "/b.jpg" });
+    expect(puntajeFicha(completa)).toBeGreaterThan(puntajeFicha(soloFoto));
+    expect(puntajeFicha(soloFoto)).toBeGreaterThan(puntajeFicha(sinNada));
   });
 });

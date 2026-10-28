@@ -5,6 +5,7 @@ import TarjetaProducto from "@/components/TarjetaProducto";
 import { ESPECIES, esParaEspecie, idsRama, type ClaveEspecie } from "@/lib/navegacion";
 import { coincideProducto } from "@/lib/busqueda";
 import { presentacionVisible } from "@/lib/formato";
+import { puntajeFicha } from "@/lib/publicacion";
 import type { Categoria, Producto } from "@/lib/types";
 
 interface Props {
@@ -179,7 +180,12 @@ export default function CatalogoCliente({
     else {
       // Relevancia: lo que se puede comprar hoy va primero. Mostrar agotados
       // arriba es una de las formas más rápidas de frustrar a un cliente.
-      lista.sort((a, b) => Number(b.disponible) - Number(a.disponible));
+      // Después, las fichas completas (foto, descripción, marca) antes que
+      // las que faltan terminar — ver puntajeFicha en lib/publicacion.ts.
+      // sort es estable: a igual puntaje se conserva el orden del ERP.
+      lista.sort(
+        (a, b) => Number(b.disponible) - Number(a.disponible) || puntajeFicha(b) - puntajeFicha(a),
+      );
     }
     return lista;
   }, [productos, busquedaDiferida, catsElegidas, especie, soloDisponibles, orden, idsConHijos, categoriasDe]);

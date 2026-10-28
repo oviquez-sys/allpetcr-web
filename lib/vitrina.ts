@@ -1,4 +1,5 @@
 import type { Producto } from "./types";
+import { puntajeFicha } from "./publicacion";
 
 /** Cuántas tarjetas trae "La vitrina" de la portada. */
 export const CANTIDAD_VITRINA = 12;
@@ -69,7 +70,13 @@ export function armarVitrina(disponibles: Producto[], cantidad: number = CANTIDA
       (a, b) => (porCategoria.get(b)?.length ?? 0) - (porCategoria.get(a)?.length ?? 0),
     );
     const conFoto = new Map(
-      [...porCategoria.entries()].map(([cat, lista]) => [cat, lista.filter((p) => p.imagen)]),
+      // Dentro de cada categoría, las fichas más completas primero (foto,
+      // descripción, marca): sin esto el relleno tomaba lo último cargado
+      // en el ERP, que suele ser lo que todavía no tiene descripción.
+      [...porCategoria.entries()].map(([cat, lista]) => [
+        cat,
+        lista.filter((p) => p.imagen).sort((a, b) => puntajeFicha(b) - puntajeFicha(a)),
+      ]),
     );
     const indice = new Map<number | null, number>(orden.map((cat) => [cat, 0]));
 

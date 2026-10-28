@@ -45,7 +45,7 @@ export default function TarjetaCategoria({
   return (
     <Link
       href={href}
-      className="group relative flex min-h-[260px] flex-col justify-end overflow-hidden rounded-card focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy-500"
+      className="group relative flex min-h-[260px] flex-col bg-navy-800 justify-end overflow-hidden rounded-card focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy-500"
     >
       {imagen ? (
         <>

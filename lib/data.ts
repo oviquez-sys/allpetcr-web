@@ -1,9 +1,10 @@
 import "server-only";
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import type { Categoria, Producto } from "./types";
 import productosJson from "@/data/productos.json";
 import categoriasJson from "@/data/categorias.json";
-import { estaRetirado, marcarConsulta, prepararParaPublicar } from "./publicacion";
+import { estaRetirado, prepararCategorias, prepararFicha, prepararParaPublicar } from "./publicacion";
 
 // Catálogo en vivo en producción; JSON solo para desarrollo sin ERP.
 const ERP_API_URL = process.env.ERP_API_URL;
@@ -106,15 +107,34 @@ async function erpFetchTodasLasPaginas<T>(rutaInicial: string): Promise<T[]> {
  *  Con más productos que esto, el resto llega por `next` igual que antes. */
 const TAMANO_PAGINA_CATALOGO = 1000;
 
-// React cache deduplica por render, sin conservar precios entre visitas.
-// Las reglas de publicación (lib/publicacion.ts) se aplican aquí, en la única
-// puerta a los datos: así ninguna página, el sitemap ni el checkout pueden
-// saltárselas por olvido.
-export const getProductos = cache(async (): Promise<Producto[]> => {
-  return prepararParaPublicar(await getProductosSinFiltrar());
-});
+/**
+ * DOS PUERTAS AL CATÁLOGO (27/10/2026)
+ *
+ * Medido en producción: Inicio, Catálogo y cada ficha tardaban 1,5–2,2 s
+ * antes del primer byte, porque en CADA visita se descargaba del ERP el
+ * catálogo entero (~700 productos). Las páginas fijas (Contacto, Términos)
+ * respondían en 0,1–0,2 s.
+ *
+ *  - getProductos / getCategorias / getProductoPorSku — EN VIVO. Para lo que
+ *    compromete un precio: carrito, checkout (página y API) y recompra.
+ *    Siempre la cifra de este instante en el ERP.
+ *
+ *  - get*Publico — COPIA DE HASTA 60 s compartida entre visitantes. Para lo
+ *    que solo se mira: Inicio, Catálogo, ficha, sitemap. Al vencer, el
+ *    visitante recibe la copia anterior al instante y el sitio la renueva
+ *    por detrás (nadie espera al ERP). Un precio cambiado tarda como mucho un
+ *    minuto en verse; si alguien lo agrega al carrito en ese minuto, el
+ *    carrito y el checkout lo comparan con el ERP en vivo y avisan del
+ *    cambio, como ya hacían (ver lib/checkoutServidor.ts).
+ *
+ * React `cache` deduplica dentro de una misma visita; `unstable_cache` es la
+ * copia compartida entre visitas. Las reglas de publicación
+ * (lib/publicacion.ts) se aplican en las dos puertas: ninguna página, el
+ * sitemap ni el checkout pueden saltárselas por olvido.
+ */
+const SEGUNDOS_COPIA_PUBLICA = 60;
 
-const getProductosSinFiltrar = cache(async (): Promise<Producto[]> => {
+async function descargarProductos(): Promise<Producto[]> {
   if (!ERP_CONFIGURADO) {
     permitirRespaldoLocal();
     return productosJson as Producto[];
@@ -125,26 +145,70 @@ const getProductosSinFiltrar = cache(async (): Promise<Producto[]> => {
   // o 6 visitas por minuto. Si el ERP todavía no acepta el parámetro, lo
   // ignora y devuelve páginas de 24 con `next`: se recorren como siempre.
   return validarProductos(await erpFetchTodasLasPaginas<unknown>(`/api/catalogo/productos/?page_size=${TAMANO_PAGINA_CATALOGO}`));
-});
+}
 
-export const getCategorias = cache(async (): Promise<Categoria[]> => {
+async function descargarCategorias(): Promise<Categoria[]> {
   if (!ERP_CONFIGURADO) {
     permitirRespaldoLocal();
     return categoriasJson as Categoria[];
   }
   return validarCategorias(await erpFetch<unknown>("/api/catalogo/categorias/"));
-});
+}
 
-export const getProductoPorSku = cache(async (sku: string): Promise<Producto | undefined> => {
-  if (!ERP_CONFIGURADO) return (await getProductos()).find((p) => p.sku === sku);
+/** null = no existe o está retirada (el ERP respondió 404). */
+async function descargarFicha(sku: string): Promise<Producto | null> {
+  if (!ERP_CONFIGURADO) return (await descargarProductos()).find((p) => p.sku === sku) ?? null;
   try {
     const producto = await erpFetch<unknown>(`/api/catalogo/productos/${encodeURIComponent(sku)}/`);
     if (!esProducto(producto)) throw new Error("El ERP devolvió una ficha con un formato inválido.");
-    // Una ficha retirada responde 404, igual que una que no existe.
-    if (estaRetirado(producto)) return undefined;
-    return marcarConsulta(producto);
+    return producto;
   } catch (error) {
-    if (error instanceof ErrorCatalogo && error.status === 404) return undefined;
+    if (error instanceof ErrorCatalogo && error.status === 404) return null;
     throw error;
   }
+}
+
+/** Una ficha retirada responde 404, igual que una que no existe. */
+function publicarFicha(producto: Producto | null): Producto | undefined {
+  if (!producto || estaRetirado(producto)) return undefined;
+  return prepararFicha(producto);
+}
+
+// ── En vivo: carrito, checkout, recompra ──────────────────────────────────
+export const getProductos = cache(async (): Promise<Producto[]> => {
+  return prepararParaPublicar(await descargarProductos());
+});
+
+export const getCategorias = cache(async (): Promise<Categoria[]> => {
+  return prepararCategorias(await descargarCategorias());
+});
+
+export const getProductoPorSku = cache(async (sku: string): Promise<Producto | undefined> => {
+  return publicarFicha(await descargarFicha(sku));
+});
+
+// ── Copia de 60 s: lo que solo se mira ────────────────────────────────────
+const productosCompartidos = unstable_cache(descargarProductos, ["catalogo-productos-v1"], {
+  revalidate: SEGUNDOS_COPIA_PUBLICA,
+  tags: ["catalogo"],
+});
+const categoriasCompartidas = unstable_cache(descargarCategorias, ["catalogo-categorias-v1"], {
+  revalidate: SEGUNDOS_COPIA_PUBLICA,
+  tags: ["catalogo"],
+});
+const fichaCompartida = unstable_cache(descargarFicha, ["catalogo-ficha-v1"], {
+  revalidate: SEGUNDOS_COPIA_PUBLICA,
+  tags: ["catalogo"],
+});
+
+export const getProductosPublico = cache(async (): Promise<Producto[]> => {
+  return prepararParaPublicar(await productosCompartidos());
+});
+
+export const getCategoriasPublico = cache(async (): Promise<Categoria[]> => {
+  return prepararCategorias(await categoriasCompartidas());
+});
+
+export const getProductoPorSkuPublico = cache(async (sku: string): Promise<Producto | undefined> => {
+  return publicarFicha(await fichaCompartida(sku));
 });

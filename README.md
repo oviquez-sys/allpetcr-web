@@ -1,3 +1,25 @@
+> **Estado actual (27/10/2026) — leer esto primero.** Varias secciones de abajo
+> son históricas (de cuando el sitio leía un JSON exportado). Hoy:
+>
+> - **El catálogo viene en vivo del ERP por su API** (`lib/data.ts`), con
+>   `ERP_API_URL` y `ERP_API_TOKEN`. Ya no se corre `exportar_catalogo_web`;
+>   `data/*.json` es solo respaldo para desarrollar sin ERP.
+> - **Dos puertas al catálogo** (ver el comentario "DOS PUERTAS" en
+>   `lib/data.ts`): Inicio, Catálogo, fichas y sitemap usan una copia de hasta
+>   60 s compartida entre visitantes (`get*Publico`); carrito, checkout y
+>   recompra consultan el ERP en vivo. Medido: Inicio y Catálogo pasaron de
+>   1,5–2,2 s a menos de 0,1 s de respuesta del servidor.
+> - **Fotos:** vienen del ERP (Spaces de DigitalOcean) y se sirven en WebP
+>   por `next/image`. AVIF se quitó a propósito: tardaba ~3 s por foto en
+>   generarse en este servidor.
+> - **Nombres en MAYÚSCULAS** (los que entran desde facturas) se muestran con
+>   mayúscula inicial (`lib/nombreLegible.ts`); el ERP conserva el original.
+> - **Orden del catálogo:** disponibles primero y, entre ellos, las fichas
+>   completas (foto, descripción, marca) antes que las incompletas
+>   (`puntajeFicha` en `lib/publicacion.ts`).
+> - Últimos informes: `docs/IMPLEMENTACION-AUDITORIA-2026-10-16.md` y
+>   `docs/MEJORAS-2026-10-27.md`.
+
 > Actualización de septiembre de 2026: consultar [implementación de auditoría y lanzamiento](docs/IMPLEMENTACION-AUDITORIA-2026-09-19.md). Producción requiere ERP; el checkout verifica el catálogo antes de preparar WhatsApp. Las instrucciones históricas que indiquen catálogo estático o vaciado automático del carrito quedan sustituidas.
 
 # AllPetcr.com — sitio web
