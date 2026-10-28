@@ -15,7 +15,7 @@ import { getNavegacion } from "@/lib/navegacionServidor";
 import { sitioIndexable } from "@/lib/sitio";
 import { frasePorcentaje, regaliaVigente } from "@/lib/regaliaPublica";
 
-const titulo = "AllPet Costa Rica | Productos para perros y gatos";
+const titulo = "AllPetcr.com | Tienda de mascotas en Heredia";
 /** Imagen al compartir el sitio (auditoría F8-01): foto de la portada con el
  *  logo, 1200×630, el tamaño que piden WhatsApp, Facebook e Instagram. Si se
  *  reemplaza, usar un nombre de archivo nuevo: las redes guardan la anterior
@@ -36,14 +36,14 @@ export const metadata: Metadata = {
   // Sin metadataBase, Next no puede resolver las URLs absolutas que necesitan
   // las vistas previas al compartir (WhatsApp, Facebook) ni las canónicas.
   metadataBase: new URL(negocio.sitioUrl),
-  title: { default: titulo, template: "%s | AllPet" },
+  title: { default: titulo, template: "%s | AllPetcr.com" },
   description: descripcion,
-  applicationName: "AllPet",
+  applicationName: "AllPetcr.com",
   openGraph: {
     type: "website",
     locale: "es_CR",
     url: negocio.sitioUrl,
-    siteName: "AllPet",
+    siteName: "AllPetcr.com",
     title: titulo,
     description: descripcion,
     images: [imagenCompartir],

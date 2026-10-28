@@ -17,7 +17,7 @@ export default function Marcas() {
   if (MARCAS.length === 0) return null;
   return (
     <section className="mx-auto max-w-contenido px-4 py-20 sm:px-6">
-      <h2 className="text-center font-display text-seccion text-navy-500">Marcas que encontrás en AllPet</h2>
+      <h2 className="text-center font-display text-seccion text-navy-500">Marcas que encontrás en AllPetcr.com</h2>
       <ul className="mt-12 grid grid-cols-3 items-center gap-x-8 gap-y-10 sm:grid-cols-4 lg:grid-cols-6">
         {MARCAS.map((m) => (
           <li key={m.nombre} className="relative mx-auto h-10 w-full max-w-[140px]">

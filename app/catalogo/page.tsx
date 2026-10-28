@@ -3,7 +3,7 @@ import { ESPECIES, type ClaveEspecie } from "@/lib/navegacion";
 import { getCategoriasPublico, getProductosPublico } from "@/lib/data";
 
 export const metadata = {
-  // Sin sufijo manual: app/layout.tsx ya agrega " | AllPet" vía su template.
+  // Sin sufijo manual: app/layout.tsx ya agrega " | AllPetcr.com" vía su template.
   // Escribirlo acá también duplicaba el sufijo en la pestaña y en resultados
   // de búsqueda ("Catálogo | AllPetcr.com | AllPet").
   title: "Catálogo",

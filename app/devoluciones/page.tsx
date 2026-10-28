@@ -3,7 +3,7 @@ import { negocio } from "@/lib/negocio";
 
 export const metadata = {
   title: "Cambios y devoluciones",
-  description: "Cómo coordinar un cambio de producto o la devolución de dinero en AllPet Costa Rica.",
+  description: "Cómo coordinar un cambio de producto o la devolución de dinero en AllPetcr.com.",
 };
 
 export default function DevolucionesPage() {
@@ -65,9 +65,8 @@ export default function DevolucionesPage() {
         <h2 className="font-display text-title text-navy-500">¿Necesitás ayuda?</h2>
         <p className="mt-2 text-sm font-light leading-relaxed text-navy-400">Escribinos y coordinamos tu cambio o devolución contigo.</p>
         <Link href="/contacto" className="mt-4 inline-block rounded-full bg-navy-500 px-5 py-3 text-sm font-medium text-crema-100 transition-colors hover:bg-navy-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:ring-offset-2">
-          Contactar a AllPet
+          Contactar a AllPetcr.com
         </Link>
-        <p className="mt-4 text-xs text-navy-400">{negocio.horarioTexto}</p>
       </div>
     </section>
   );

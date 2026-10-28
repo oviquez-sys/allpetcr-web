@@ -17,7 +17,7 @@ export default function Comunidad() {
   return (
     <section className="mx-auto max-w-contenido px-4 py-20 sm:px-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <h2 className="font-display text-seccion text-navy-500">Comunidad AllPet</h2>
+        <h2 className="font-display text-seccion text-navy-500">Comunidad AllPetcr.com</h2>
         {!faltante(instagram) && (
           <a
             href={instagram}

@@ -28,7 +28,7 @@ import { analiticaActiva, FECHA_ANALITICA } from "@/lib/analitica";
 // abogado; no reemplaza asesoría legal.
 export const metadata = {
   title: "Política de privacidad",
-  description: "Qué datos personales recoge AllPet Costa Rica, para qué los usa, con quién los comparte y cómo ejercer tus derechos.",
+  description: "Qué datos personales recoge AllPetcr.com, para qué los usa, con quién los comparte y cómo ejercer tus derechos.",
   alternates: { canonical: "/privacidad" },
 };
 
@@ -45,7 +45,7 @@ export default function PrivacidadPage() {
   return (
     <PaginaLegal etiqueta="Tus datos" titulo="Política de privacidad" vigencia={VIGENCIA}>
       <p>
-        En AllPet pedimos solo los datos que necesitamos para venderte y entregarte tus productos. No los
+        En AllPetcr.com pedimos solo los datos que necesitamos para venderte y entregarte tus productos. No los
         vendemos ni los usamos para publicidad de terceros. Esta política cumple con la Ley 8968 de
         Protección de la Persona frente al Tratamiento de sus Datos Personales.
       </p>

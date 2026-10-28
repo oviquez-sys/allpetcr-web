@@ -23,7 +23,7 @@ export default function EntregasPage() {
     <h1 className="font-display text-headline">Entregas y cómo comprar</h1>
 
     <h2 className="mt-8 text-xl">Retiro en tienda</h2>
-    <p className="mt-3 leading-relaxed">Retirá sin costo en {direccionCompleta()}. Esperá la confirmación de que tu pedido está listo antes de visitarnos.</p>
+    <p className="mt-3 leading-relaxed">Retirá sin costo en nuestra tienda: {direccionCompleta().replace(/^De /, "de ")}. Esperá la confirmación de que tu pedido está listo antes de visitarnos.</p>
     <p className="mt-3 leading-relaxed">{negocio.horarioTexto}</p>
 
     <h2 className="mt-8 text-xl">Envío a domicilio</h2>

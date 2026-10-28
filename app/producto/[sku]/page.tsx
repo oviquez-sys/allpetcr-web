@@ -38,7 +38,7 @@ export async function generateMetadata({
     ? `${propia} ${formatoColones(producto.precio_venta)}. ` +
       "Retiro en tienda sin costo en Heredia."
     : `${producto.nombre}${presentacionVisible(producto.presentacion) ? ` · ${presentacionVisible(producto.presentacion)}` : ""} — ` +
-      `${formatoColones(producto.precio_venta)}. Disponible en AllPet Costa Rica, ` +
+      `${formatoColones(producto.precio_venta)}. Disponible en AllPetcr.com, ` +
       "con retiro en tienda sin costo.";
   const ruta = `/producto/${encodeURIComponent(producto.sku)}`;
   return {
@@ -47,7 +47,7 @@ export async function generateMetadata({
     alternates: { canonical: ruta },
     openGraph: {
       type: "website",
-      title: `${producto.nombre} | AllPet`,
+      title: `${producto.nombre} | AllPetcr.com`,
       description: descripcion,
       url: ruta,
       ...(producto.imagen ? { images: [{ url: producto.imagen }] } : {}),

@@ -80,7 +80,7 @@ export default function ContactoPage() {
         <div className="mt-10 overflow-hidden rounded-card border border-crema-400">
           <iframe
             src={mapa}
-            title="Ubicación de la tienda AllPet"
+            title="Ubicación de la tienda AllPetcr.com"
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
             className="h-[320px] w-full border-0"

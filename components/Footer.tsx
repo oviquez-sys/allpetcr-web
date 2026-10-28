@@ -35,7 +35,7 @@ const columnas = [
   {
     titulo: "Nosotros",
     enlaces: [
-      { href: "/sobre-nosotros", label: "Sobre AllPet" },
+      { href: "/sobre-nosotros", label: "Sobre nosotros" },
       { href: "/manada?o=web-pie", label: "🐾 Unite a la manada" },
     ],
   },
@@ -101,9 +101,11 @@ export default function Footer() {
         </div>
 
         <p className="mt-12 border-t border-navy-400/40 pt-6 text-xs text-navy-200">
-          © {new Date().getFullYear()} {negocio.nombreLegal}
-          {!faltante(negocio.cedulaJuridica) && ` · Cédula jurídica ${negocio.cedulaJuridica}`}
-          {` · ${negocio.razonSocial}`}
+          {/* 28/10/2026: antes decía "Cédula jurídica 3-102-969361 · 3-102-969361
+              Sociedad de Responsabilidad Limitada" (el número dos veces seguidas).
+              La razón social ES el número de cédula (sociedad numerada). */}
+          © {new Date().getFullYear()} {negocio.nombre}
+          {!faltante(negocio.cedulaJuridica) && ` · ${negocio.cedulaJuridica} S.R.L.`}
         </p>
       </div>
     </footer>

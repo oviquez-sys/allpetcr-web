@@ -26,7 +26,7 @@ import { PaginaLegal, Seccion, Lista, enlaceLegal } from "@/components/PaginaLeg
 export const metadata = {
   title: "Términos y condiciones",
   description:
-    "Condiciones de compra en AllPet Costa Rica: precios, pedidos, pago, entregas, retracto, cambios, garantía y reclamos.",
+    "Condiciones de compra en AllPetcr.com: precios, pedidos, pago, entregas, retracto, cambios, garantía y reclamos.",
   alternates: { canonical: "/terminos" },
 };
 
@@ -43,7 +43,7 @@ export default function TerminosPage() {
       <Seccion id="quienes-somos" titulo="1. Quiénes somos">
         <p>
           AllPetcr.com es el nombre comercial de la tienda de <strong>{negocio.razonSocial}</strong>, cédula
-          jurídica {negocio.cedulaJuridica} (en adelante, «AllPet»), sociedad costarricense que opera este
+          jurídica {negocio.cedulaJuridica} (en adelante, «AllPetcr.com»), sociedad costarricense que opera este
           sitio y la tienda física.
         </p>
         <Lista>
@@ -147,7 +147,7 @@ export default function TerminosPage() {
               página de pago.
             </li>
             <li>
-              <strong>AllPet no ve ni guarda los datos de tu tarjeta.</strong> Los escribís directamente en la
+              <strong>AllPetcr.com no ve ni guarda los datos de tu tarjeta.</strong> Los escribís directamente en la
               página del banco, protegida con {pago.seguridad}. La plataforma de pago está certificada por{" "}
               {pago.certificadora}.
             </li>
@@ -288,7 +288,7 @@ export default function TerminosPage() {
 
       <Seccion id="propiedad" titulo="12. Contenido del sitio">
         <p>
-          Los textos, fotos, logotipo y diseño de este sitio pertenecen a AllPet o a sus proveedores. No se
+          Los textos, fotos, logotipo y diseño de este sitio pertenecen a AllPetcr.com o a sus proveedores. No se
           pueden copiar ni usar con fines comerciales sin autorización.
         </p>
       </Seccion>

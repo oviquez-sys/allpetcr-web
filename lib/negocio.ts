@@ -23,8 +23,10 @@ import { sitioUrl } from "./sitio";
 export const PENDIENTE = "PENDIENTE" as const;
 
 export const negocio = {
-  nombre: "AllPet",
-  nombreLegal: "AllPetcr",
+  // 28/10/2026, decisión de Oscar: el nombre que se usa SIEMPRE es AllPetcr.com
+  // (el del rótulo y el logo). Nunca "AllPet", "AllPetcr" ni "AllPet Costa Rica".
+  nombre: "AllPetcr.com",
+  nombreLegal: "AllPetcr.com",
 
   /** Nombre registral de la sociedad (Registro Nacional). */
   razonSocial: "3-102-969361 Sociedad de Responsabilidad Limitada",

@@ -193,8 +193,7 @@ export default async function HomePage() {
                   bloques para enterarse de que no hay pago en línea. */}
               <p className="mt-3 max-w-md text-[15px] font-medium leading-relaxed text-white sm:text-base">
                 Armá tu pedido y confirmalo por WhatsApp. Te confirmamos
-                existencias y total antes de que pagués. Retiro sin costo en
-                Heredia.
+                existencias y total antes de que pagués.
               </p>
               <div className="mt-8 flex flex-wrap items-center gap-x-7 gap-y-4">
                 <Link
@@ -242,7 +241,7 @@ export default async function HomePage() {
           y las otras dos lado a lado; en escritorio, las tres en fila. */}
       <section className="pb-12 pt-12 lg:pb-16 lg:pt-16">
         <div className="mx-auto flex max-w-[2000px] items-end justify-between gap-6 px-4 sm:px-6">
-          <h2 className="font-display text-seccion text-navy-500">¿Para quién comprás?</h2>
+          <h2 className="font-display text-seccion text-navy-500">¿Qué andás buscando?</h2>
           <Link href="/catalogo" className={`hidden sm:inline-flex ${enlaceSecundario}`}>
             Ver todo el catálogo
           </Link>
@@ -288,7 +287,7 @@ export default async function HomePage() {
               <div>
                 <h2 className="font-display text-seccion text-navy-500">En la tienda hoy</h2>
                 <p className="mt-2 text-sm font-light text-navy-400">
-                  Lo que ves, lo tenemos.
+                  Disponible hoy en la tienda.
                 </p>
               </div>
               <Link href="/catalogo" className={enlaceSecundario}>
