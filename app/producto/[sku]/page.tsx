@@ -1,4 +1,5 @@
 import Link from "next/link";
+import SinFoto from "@/components/SinFoto";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import TarjetaProducto from "@/components/TarjetaProducto";
@@ -234,9 +235,7 @@ export default async function ProductoPage({
               className="rounded-card object-contain p-6"
             />
           ) : (
-            <span className="text-label uppercase text-navy-400">
-              Foto pendiente
-            </span>
+<SinFoto tamano="ficha" />
           )}
         </div>
 

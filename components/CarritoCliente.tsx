@@ -1,5 +1,6 @@
 "use client";
 
+import SinFoto from "@/components/SinFoto";
 import Link from "next/link";
 import Image from "next/image";
 import { useMemo, useState } from "react";
@@ -156,9 +157,7 @@ export default function CarritoCliente({ productos }: { productos: Producto[] })
                         className="object-contain p-1.5"
                       />
                     ) : (
-                      <span className="px-1 text-center text-[9px] uppercase tracking-wider text-navy-400">
-                        Foto pendiente
-                      </span>
+<SinFoto tamano="mini" />
                     )}
                   </div>
 

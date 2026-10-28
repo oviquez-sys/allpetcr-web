@@ -1,4 +1,5 @@
 import { memo } from "react";
+import SinFoto from "@/components/SinFoto";
 import Link from "next/link";
 import Image from "next/image";
 import type { Producto } from "@/lib/types";
@@ -72,7 +73,7 @@ function TarjetaProducto({ producto, cargaPrioritaria = false }: Props) {
               className="object-cover transition-transform duration-300 ease-out group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
             />
           ) : (
-            <span className="text-label uppercase text-navy-400">Foto pendiente</span>
+            <SinFoto />
           )}
         </div>
 
