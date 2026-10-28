@@ -11,6 +11,12 @@ interface Props {
   /** "grande" en la ficha de producto, "chico" en las tarjetas del catálogo. */
   tamano?: "grande" | "chico";
   className?: string;
+  /** Solo para el tamaño "chico". "contorno" (por defecto, 28/10/2026): en
+   *  la grilla del catálogo 24 botones sólidos competían con las fotos; de
+   *  contorno, el producto se ve primero y el botón se llena al pasar el
+   *  mouse. "solido": donde el botón ES lo principal (barra de compra fija
+   *  del celular). */
+  variante?: "contorno" | "solido";
 }
 
 /**
@@ -21,7 +27,7 @@ interface Props {
  * que no quería. El cambio de estado a "Agregado ✓" durante dos segundos es
  * la señal, y el aria-live la comunica a quien usa lector de pantalla.
  */
-export default function BotonAgregar({ producto, tamano = "grande", className = "" }: Props) {
+export default function BotonAgregar({ producto, tamano = "grande", className = "", variante = "contorno" }: Props) {
   const { agregar } = useCarrito();
   const [confirmado, setConfirmado] = useState(false);
   const temporizador = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -74,7 +80,9 @@ export default function BotonAgregar({ producto, tamano = "grande", className = 
               ? "cursor-not-allowed bg-crema-300 text-navy-300"
               : confirmado
                 ? "bg-dorado-500 text-navy-500"
-                : "bg-navy-500 text-crema-100 hover:bg-navy-600"
+                : variante === "solido"
+                  ? "bg-navy-500 text-crema-100 hover:bg-navy-600"
+                  : "border border-navy-500 bg-white text-navy-500 hover:bg-navy-500 hover:text-crema-100"
           } ${className}`}
         >
           {agotado ? "Sin existencias" : confirmado ? "Agregado al carrito ✓" : "Agregar al carrito"}

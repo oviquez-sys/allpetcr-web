@@ -70,7 +70,7 @@ export default function BarraCompraMovil({ producto, idAcciones, consulta }: Pro
               {consulta.texto}
             </a>
           ) : (
-            <BotonAgregar producto={producto} tamano="chico" />
+            <BotonAgregar producto={producto} tamano="chico" variante="solido" />
           )}
         </div>
       </div>

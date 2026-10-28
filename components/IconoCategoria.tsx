@@ -93,6 +93,33 @@ const trazos: Record<string, React.ReactNode> = {
     </>
   ),
 
+  // Pasear → correa con mango y mosquetón (28/10/2026). El collar con
+  // placa, grande y solo, se leía como un bombillo.
+  correa: (
+    <>
+      <ellipse cx="6.6" cy="6.2" rx="3.1" ry="2.6" />
+      <path d="M8.9 8c2.6 2 4.9 4.5 6.5 7.3" />
+      <path d="M14.6 15.6h3.6v2.6a1.8 1.8 0 0 1-3.6 0Z" />
+      <path d="M16.4 20v1" />
+    </>
+  ),
+
+  // Descansar → luna (28/10/2026, para «¿Cuál es el plan hoy?»)
+  descanso: (
+    <>
+      <path d="M19.5 14.6A8 8 0 1 1 9.4 4.5a6.4 6.4 0 0 0 10.1 10.1Z" />
+    </>
+  ),
+
+  // Viajar → transportadora con asa y rejilla
+  viaje: (
+    <>
+      <path d="M9 7V5.6a3 3 0 0 1 6 0V7" />
+      <rect x="3.5" y="7" width="17" height="12.5" rx="2.5" />
+      <path d="M8.5 11.2h7M8.5 15.3h7M10.6 9.6v7.3M13.4 9.6v7.3" />
+    </>
+  ),
+
   // Genérico → huella. Es la firma de la marca: aparece tres veces en la
   // fachada (rótulo, tagline y caballete).
   huella: (

@@ -1,5 +1,17 @@
 import Link from "next/link";
 import { Flecha } from "./BloqueEditorial";
+import IconoCategoria from "@/components/IconoCategoria";
+
+/** Ícono de cada actividad (28/10/2026): las cajas solo con una palabra
+ *  se veían vacías. Mismo juego de íconos que el resto del sitio. */
+const ICONO: Record<string, string> = {
+  Pasear: "correa",
+  Jugar: "juguetes",
+  Comer: "alimentos",
+  Descansar: "descanso",
+  Cuidar: "higiene",
+  Viajar: "viaje",
+};
 
 export interface ActividadResuelta {
   nombre: string;
@@ -29,8 +41,14 @@ export default function ComprarPorActividad({ actividades }: { actividades: Acti
             href={a.href}
             className="group flex h-full min-h-[128px] flex-col justify-between rounded-xl bg-crema-200 p-5 transition-colors duration-200 hover:bg-navy-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:ring-offset-2 sm:min-h-[168px] sm:p-7"
           >
-            <span className="font-display text-bloque text-navy-500 transition-colors duration-200 group-hover:text-white">
-              {a.nombre}
+            <span className="flex items-start justify-between gap-3">
+              <span className="font-display text-bloque text-navy-500 transition-colors duration-200 group-hover:text-white">
+                {a.nombre}
+              </span>
+              <IconoCategoria
+                nombre={ICONO[a.nombre] ?? "huella"}
+                className="h-8 w-8 shrink-0 text-dorado-700 transition-colors duration-200 group-hover:text-dorado-400 sm:h-10 sm:w-10"
+              />
             </span>
             <span className="mt-6 flex items-center justify-between text-xs font-medium text-navy-400 transition-colors duration-200 group-hover:text-white/85">
               {a.total} productos

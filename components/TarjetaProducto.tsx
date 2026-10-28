@@ -49,6 +49,11 @@ interface Props {
  * redundante cuando el nombre termina así, ver lib/formato.ts) — la foto y
  * el resto del sitio siguen usando `producto.nombre` completo.
  */
+// Foto (28/10/2026): `object-contain` con 8 % de margen en vez de
+// `object-cover`. Con cover, cada foto se recortaba distinto según su
+// proporción (sacos de alimento sin la parte de arriba y de abajo); con
+// contain todas quedan completas, centradas y del mismo tamaño dentro del
+// marco blanco, y la grilla se lee pareja aunque las fotos no lo sean.
 function TarjetaProducto({ producto, cargaPrioritaria = false }: Props) {
   const url = `/producto/${encodeURIComponent(producto.sku)}`;
 
@@ -70,7 +75,7 @@ function TarjetaProducto({ producto, cargaPrioritaria = false }: Props) {
               sizes="(max-width: 640px) 48vw, (max-width: 1280px) 32vw, 380px"
               placeholder="blur"
               blurDataURL={RELLENO_SHIMMER}
-              className="object-cover transition-transform duration-300 ease-out group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+              className="object-contain p-[8%] transition-transform duration-300 ease-out group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
             />
           ) : (
             <SinFoto />
