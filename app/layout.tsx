@@ -18,10 +18,11 @@ const titulo = "AllPet Costa Rica | Productos para perros y gatos";
  *  reemplaza, usar un nombre de archivo nuevo: las redes guardan la anterior
  *  en caché por URL. */
 const imagenCompartir = {
-  url: "/compartir/allpet-portada-1200x630.jpg",
+  // 27/10/2026: la fachada real de la tienda (antes, una escena generada).
+  url: "/compartir/allpet-fachada-1200x630.jpg",
   width: 1200,
   height: 630,
-  alt: "AllPet: un perro y un gato junto a sus platos de comida, con el logo de AllPetcr.com",
+  alt: "Fachada de la tienda AllPetcr.com en Heredia, con su rótulo y la vitrina",
 };
 
 const descripcion =

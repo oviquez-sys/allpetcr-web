@@ -69,7 +69,7 @@ const pasos = [
  *  por Oscar el 26/09/2026. Archivo con nombre nuevo a propósito: Cloudflare
  *  guarda 30 días las imágenes optimizadas por URL, y reemplazar
  *  alimento.jpg con el mismo nombre dejaría a parte de los visitantes viendo
- *  la anterior. La foto del hero es otra: hero.jpg. */
+ *  la anterior. La foto del hero es otra: portada/allpet-fachada-heredia.jpg. */
 const FOTOS_ESPECIE: Record<string, { imagen: string; posicion: string }> = {
   perro: { imagen: "/categorias/juguetes.jpg", posicion: "68% 40%" },
   gato: { imagen: "/categorias/gato.jpg", posicion: "40% 55%" },
@@ -138,40 +138,41 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* ── 1. HERO DE CAMPAÑA ──────────────────────────────────────────────
-          Foto a sangre (hero.jpg: perro y gato con los platos AllPet —
-          decisión de Oscar, 26/09/2026, sobre hogar.jpg), un titular, una
-          línea y un solo botón. `preload` + `fetchPriority="high"`: es el
-          elemento LCP. En Next 16 `priority` quedó obsoleto y además no marcaba
-          la prioridad de red; `preload` solo agrega el <link> de precarga.
+      {/* ── 1. HERO: LA TIENDA REAL ───────────────────────────────────────
+          27/10/2026, a pedido de Oscar ("lo que más quiero es la confianza
+          del cliente"): la foto de portada es la fachada real del local en
+          Heredia (retocada, con todo tal como está), en lugar de la escena
+          generada de perro y gato en una terraza que no existe. Quien llega
+          desde Instagram ve primero que hay una tienda de verdad, con
+          dirección, a la que puede ir.
 
-          ESCRITORIO (lg+): el texto va abajo a la izquierda sobre un velo que
-          solo oscurece esa esquina; las caras de los animales quedan limpias.
+          ESCRITORIO (lg+): texto a la izquierda sobre navy y la foto entera a
+          la derecha, sin texto encima. Así la fachada y la vitrina se ven
+          limpias, y la foto (1672 px de ancho) se muestra a su tamaño real o
+          menor: nunca se estira hasta verse borrosa en una pantalla grande.
+          El navy del fondo es el mismo de la fachada, así que se funden.
 
-          CELULAR Y TABLET VERTICAL (< lg), ajuste del 26/09/2026 a pedido de
-          Oscar: con la foto de fondo a pantalla completa, una pantalla vertical
-          solo deja ver un tercio del ancho de una foto apaisada y el gato
-          quedaba afuera. Ahí la foto va arriba, completa (4:3 en celular, 16:9
-          en tablet: entran los dos), y el texto abajo sobre el mismo navy, con
-          un degradado que funde la foto con el fondo. */}
-      <section className="relative isolate overflow-hidden bg-navy-900">
-        <div className="relative lg:h-[calc(100svh-104px)] lg:max-h-[820px] lg:min-h-[600px]">
-          <div className="relative aspect-[4/3] sm:aspect-[16/9] lg:absolute lg:inset-0 lg:aspect-auto">
+          CELULAR Y TABLET (< lg): la foto arriba (4:3 / 16:9, el rótulo
+          siempre queda dentro del recorte) y el texto abajo sobre el navy.
+
+          `preload` + `fetchPriority="high"`: es el elemento LCP. */}
+      <section className="relative isolate overflow-hidden bg-navy-500">
+        <div className="relative lg:grid lg:h-[calc(100svh-104px)] lg:max-h-[820px] lg:min-h-[600px] lg:grid-cols-[max(440px,calc((100vw-1180px)/2+540px))_minmax(0,1fr)]">
+          <div className="relative aspect-[4/3] bg-navy-500 sm:aspect-[16/9] lg:order-2 lg:aspect-auto lg:h-full">
             <Image
-              src="/categorias/hero.jpg"
-              alt="Un golden retriever y un gato atigrado junto a sus platos de comida, al sol en una terraza"
+              src="/portada/allpet-fachada-heredia.jpg"
+              alt="Fachada de la tienda AllPetcr.com en Heredia: rótulo azul con el logo y vitrina con ropa, juguetes, camas, rascadores y alimento para perros y gatos"
               fill
               preload
               fetchPriority="high"
-              sizes="100vw"
-              className="object-cover object-[50%_40%] lg:object-center"
+              sizes="(min-width: 1024px) 60vw, 100vw"
+              className="object-cover object-[50%_30%]"
             />
-            <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-navy-900 to-transparent lg:hidden" aria-hidden="true" />
-            <div className="absolute inset-0 hidden bg-gradient-to-t from-navy-900/80 via-navy-900/20 to-transparent lg:block" aria-hidden="true" />
-            <div className="absolute inset-0 hidden bg-gradient-to-r from-navy-900/55 via-transparent to-transparent lg:block" aria-hidden="true" />
+            <div className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-navy-500 to-transparent lg:hidden" aria-hidden="true" />
+            <div className="absolute inset-y-0 left-0 hidden w-24 bg-gradient-to-r from-navy-500 to-transparent lg:block" aria-hidden="true" />
           </div>
 
-          <div className="relative mx-auto flex max-w-contenido px-4 pb-12 pt-2 sm:px-6 sm:pb-16 lg:h-full lg:items-end lg:pb-20 lg:pt-0">
+          <div className="relative mx-auto flex max-w-contenido px-4 pb-12 pt-2 sm:px-6 sm:pb-16 lg:order-1 lg:mx-0 lg:h-full lg:max-w-none lg:items-center lg:py-12 lg:pl-[max(1.5rem,calc((100vw-1180px)/2+1.5rem))] lg:pr-10">
             <div className="max-w-3xl text-white">
               <p className="text-label font-medium uppercase tracking-[0.16em] text-white/85">
                 Tienda de mascotas · Heredia, Costa Rica
@@ -182,7 +183,7 @@ export default async function HomePage() {
                   retoma "¿Cuál es el plan hoy?" más abajo. Las palabras para
                   Google (tienda de mascotas, Heredia, perros, gatos) van en el
                   antetítulo y el subtítulo, no en el h1. */}
-              <h1 className="mt-4 font-display text-hero">Ellos marcan el plan.</h1>
+              <h1 className="mt-4 font-display text-hero lg:text-[4.25rem]">Ellos marcan el plan.</h1>
               <p className="mt-5 max-w-md text-base font-light leading-relaxed text-white/90 sm:text-[17px]">
                 Alimento, accesorios e higiene para perros y gatos. En línea o
                 en nuestra tienda de Heredia.
