@@ -1,5 +1,6 @@
 import type { Producto } from "./types";
 import { puntajeFicha } from "./publicacion";
+import { claveVisual } from "./variantes";
 
 /** Cuántas tarjetas trae "La vitrina" de la portada. */
 export const CANTIDAD_VITRINA = 12;
@@ -33,7 +34,8 @@ export const CANTIDAD_VITRINA = 12;
  *      sistema — para que la vidriera nunca se vea vacía ni "cargada por
  *      SKU" mientras Oscar termina de elegir sus destacados.
  *
- * Ningún nombre se repite en la vitrina (ni entre destacados, ni en el
+ * Ningún producto se repite en la vitrina, tampoco en dos tallas (28/10/2026,
+ * lib/variantes.ts → claveVisual). Ningún nombre se repite en la vitrina (ni entre destacados, ni en el
  * relleno, ni entre los dos): el ERP tiene nombres repetidos para
  * variantes ("Arnés chaleco" nueve veces) y dos tarjetas idénticas sin
  * nada que las diferencie no ayudan a nadie en un escaparate de doce.
@@ -52,16 +54,16 @@ export function armarVitrina(disponibles: Producto[], cantidad: number = CANTIDA
     .sort((a, b) => (a.orden_home ?? Number.MAX_SAFE_INTEGER) - (b.orden_home ?? Number.MAX_SAFE_INTEGER));
   for (const p of destacados) {
     if (vitrina.length >= cantidad) break;
-    if (nombresUsados.has(p.nombre)) continue;
+    if (nombresUsados.has(claveVisual(p))) continue;
     vitrina.push(p);
-    nombresUsados.add(p.nombre);
+    nombresUsados.add(claveVisual(p));
   }
 
   // ── 2. Relleno automático por categoría, si hacen falta más lugares ──
   if (vitrina.length < cantidad) {
     const porCategoria = new Map<number | null, Producto[]>();
     for (const p of disponibles) {
-      if (nombresUsados.has(p.nombre)) continue; // ya entró como destacado
+      if (nombresUsados.has(claveVisual(p))) continue; // ya entró como destacado
       const lista = porCategoria.get(p.categoria_id) ?? [];
       lista.push(p);
       porCategoria.set(p.categoria_id, lista);
@@ -86,10 +88,10 @@ export function armarVitrina(disponibles: Producto[], cantidad: number = CANTIDA
         if (vitrina.length >= cantidad) break;
         const lista = conFoto.get(cat) ?? [];
         let i = indice.get(cat) ?? 0;
-        while (i < lista.length && nombresUsados.has(lista[i].nombre)) i++;
+        while (i < lista.length && nombresUsados.has(claveVisual(lista[i]))) i++;
         if (i < lista.length) {
           vitrina.push(lista[i]);
-          nombresUsados.add(lista[i].nombre);
+          nombresUsados.add(claveVisual(lista[i]));
           indice.set(cat, i + 1);
           agregoAlguno = true;
         } else {

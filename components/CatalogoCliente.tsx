@@ -6,6 +6,7 @@ import { ESPECIES, esParaEspecie, idsRama, type ClaveEspecie } from "@/lib/naveg
 import { coincideProducto, puntajeCoincidencia } from "@/lib/busqueda";
 import { presentacionVisible } from "@/lib/formato";
 import { puntajeFicha } from "@/lib/publicacion";
+import { agruparTallas } from "@/lib/variantes";
 import { urlWhatsApp } from "@/lib/negocio";
 import type { Categoria, Producto } from "@/lib/types";
 
@@ -228,7 +229,11 @@ export default function CatalogoCliente({
     setVisibles(24);
   }
 
-  const paraMostrar = filtrados.slice(0, visibles);
+  // Tallas del mismo producto en una sola tarjeta (lib/variantes.ts). Se
+  // agrupa DESPUÉS de filtrar y ordenar: cada grupo queda donde estaba su
+  // primera talla, y si un filtro deja una sola talla se ve como normal.
+  const items = useMemo(() => agruparTallas(filtrados), [filtrados]);
+  const paraMostrar = items.slice(0, visibles);
 
   const alternarCategoria = (id: number) =>
     setCatsElegidas((prev) =>
@@ -353,8 +358,8 @@ export default function CatalogoCliente({
           <h2 className="sr-only">Resultados</h2>
           <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-crema-400 pb-4">
             <p role="status" aria-atomic="true" className="text-sm text-navy-400">
-              {filtrados.length}{" "}
-              {filtrados.length === 1 ? "producto" : "productos"}
+              {items.length}{" "}
+              {items.length === 1 ? "producto" : "productos"}
             </p>
             <label className="flex items-center gap-2 text-sm text-navy-400">
               Ordenar
@@ -422,10 +427,11 @@ export default function CatalogoCliente({
                 filtrando ? "opacity-60" : "opacity-100"
               }`}
             >
-              {paraMostrar.map((p, indice) => (
+              {paraMostrar.map(({ principal: p, tallas }, indice) => (
                 <TarjetaProducto
                   key={p.sku}
                   producto={p}
+                  tallas={tallas}
                   // La grilla es de 2 columnas en móvil/tablet y 3 en xl: las
                   // primeras 3 tarjetas están siempre visibles sin scroll en
                   // cualquier ancho. Antes solo la primera tenía prioridad —
@@ -444,11 +450,11 @@ export default function CatalogoCliente({
             </div>
           )}
 
-          {filtrados.length > visibles && (
+          {items.length > visibles && (
             <div className="mt-10 border-t border-crema-400 pt-8 text-center">
               <p className="text-sm text-navy-400">
                 Mostrando <span className="font-medium text-navy-500">{paraMostrar.length}</span> de{" "}
-                <span className="font-medium text-navy-500">{filtrados.length}</span>
+                <span className="font-medium text-navy-500">{items.length}</span>
               </p>
               <button
                 onClick={() => setVisibles((v) => v + 24)}

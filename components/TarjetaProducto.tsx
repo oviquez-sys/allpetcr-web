@@ -5,6 +5,7 @@ import Image from "next/image";
 import type { Producto } from "@/lib/types";
 import { formatoColones, nombreResumido, tinteDeSku } from "@/lib/formato";
 import BotonAgregar from "./BotonAgregar";
+import { separarTalla } from "@/lib/variantes";
 
 // Placeholder "shimmer" mientras carga la foto (20/09/2026): no reduce el
 // peso real de la imagen —para eso está `minimumCacheTTL` en next.config.ts—
@@ -21,6 +22,10 @@ interface Props {
   /** Se sigue recibiendo por compatibilidad; la tarjeta ya no la muestra. */
   categoria?: string;
   cargaPrioritaria?: boolean;
+  /** Tallas del mismo producto (lib/variantes.ts). Con 2 o más, la tarjeta
+   *  muestra el nombre sin talla, «Tallas S · M · L», «Desde ₡…» y
+   *  «Elegir talla» en vez de agregar al carrito (hay que elegir cuál). */
+  tallas?: Producto[];
 }
 
 /**
@@ -33,6 +38,11 @@ interface Props {
  *
  * Fondo blanco con un borde muy sutil (`crema-300`) para que el cuadro se
  * distinga de la página sin usar un color de relleno. La foto en sí no se toca.
+ *
+ * ACTUALIZADO 28/10/2026: ahora es `object-contain` con margen (ver la nota
+ * junto a la función). Oscar lo aprobó viendo una muestra sobre el catálogo
+ * real: con cover los sacos de alimento salían recortados. Lo de abajo queda
+ * como historia de la decisión anterior.
  *
  * `object-cover`, sin relleno (20/09/2026, a pedido de Oscar: quiere la foto
  * a tamaño completo del cuadro). Antes tenía `object-contain` + `padding`,
@@ -54,8 +64,15 @@ interface Props {
 // proporción (sacos de alimento sin la parte de arriba y de abajo); con
 // contain todas quedan completas, centradas y del mismo tamaño dentro del
 // marco blanco, y la grilla se lee pareja aunque las fotos no lo sean.
-function TarjetaProducto({ producto, cargaPrioritaria = false }: Props) {
+function TarjetaProducto({ producto, cargaPrioritaria = false, tallas }: Props) {
   const url = `/producto/${encodeURIComponent(producto.sku)}`;
+  const agrupado = tallas && tallas.length > 1 ? tallas : null;
+  const base = agrupado ? (separarTalla(producto.nombre)?.base ?? producto.nombre) : producto.nombre;
+  const disponibles = agrupado ? agrupado.filter((t) => t.disponible) : [];
+  const precios = (disponibles.length ? disponibles : agrupado ?? []).map((t) => t.precio_venta);
+  const precioMin = agrupado ? Math.min(...precios) : producto.precio_venta;
+  const precioVaria = agrupado ? new Set(precios).size > 1 : false;
+  const algunaDisponible = agrupado ? disponibles.length > 0 : producto.disponible;
 
   return (
     <article className="tarjeta-diferida group flex flex-col">
@@ -82,7 +99,7 @@ function TarjetaProducto({ producto, cargaPrioritaria = false }: Props) {
           )}
         </div>
 
-        {!producto.disponible && (
+        {!algunaDisponible && (
           <span className="pointer-events-none absolute left-3 top-3 rounded-full bg-white/95 px-3 py-1 text-[10.5px] tracking-wide text-navy-400">
             Sin existencias
           </span>
@@ -94,15 +111,30 @@ function TarjetaProducto({ producto, cargaPrioritaria = false }: Props) {
         className="mt-3 block rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:ring-offset-2 sm:mt-4"
       >
         <h3 className="text-sm font-bold leading-snug text-navy-500 sm:text-[17px]">
-          {nombreResumido(producto.nombre)}
+          {nombreResumido(base)}
         </h3>
+        {agrupado && (
+          <p className="mt-1 text-xs text-navy-400 sm:text-[13px]">
+            Tallas {agrupado.map((t) => separarTalla(t.nombre)?.talla).join(" · ")}
+          </p>
+        )}
         <p className="mt-1.5 text-sm text-navy-400 sm:mt-2.5 sm:text-[17px]">
-          {formatoColones(producto.precio_venta)}
+          {precioVaria ? "Desde " : ""}
+          {formatoColones(precioMin)}
         </p>
       </Link>
 
       <div className="mt-3 sm:mt-4">
-        <BotonAgregar producto={producto} tamano="chico" />
+        {agrupado && algunaDisponible ? (
+          <Link
+            href={url}
+            className="flex h-11 w-full items-center justify-center rounded-full border border-navy-500 bg-white text-[13px] font-medium text-navy-500 transition-colors duration-150 hover:bg-navy-500 hover:text-crema-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:ring-offset-2"
+          >
+            Elegir talla
+          </Link>
+        ) : (
+          <BotonAgregar producto={producto} tamano="chico" />
+        )}
       </div>
     </article>
   );

@@ -12,6 +12,7 @@ import { getCategoriasPublico, getProductoPorSkuPublico, getProductosPublico } f
 import { formatoColones, presentacionVisible, tinteDeSku } from "@/lib/formato";
 import { negocio, urlWhatsApp, faltante } from "@/lib/negocio";
 import { recomendable, TEXTO_CONSULTA } from "@/lib/publicacion";
+import { claveVisual, separarTalla, tallasDe } from "@/lib/variantes";
 
 // La ficha se arma en cada visita con la copia de hasta 60 s del catálogo
 // (ver "DOS PUERTAS" en lib/data.ts). El precio que se compromete lo vuelven
@@ -84,9 +85,21 @@ export default async function ProductoPage({
   const mismaCategoria = productos.filter(
     (p) => p.sku !== producto.sku && p.categoria_id === producto.categoria_id && recomendable(producto, p),
   );
-  const relacionados = [
-    ...mismaCategoria.filter((p) => p.disponible),
-  ].slice(0, 4);
+  // Tallas (28/10/2026): las otras tallas de este producto no se recomiendan
+  // (ya están en el selector de talla), y de un producto con varias tallas
+  // se recomienda una sola tarjeta.
+  const tallas = tallasDe(producto, productos);
+  const claveActual = claveVisual(producto);
+  const yaRecomendado = new Set<string>([claveActual]);
+  const relacionados = mismaCategoria
+    .filter((p) => p.disponible)
+    .filter((p) => {
+      const k = claveVisual(p);
+      if (yaRecomendado.has(k)) return false;
+      yaRecomendado.add(k);
+      return true;
+    })
+    .slice(0, 4);
 
   const url = `${negocio.sitioUrl}/producto/${encodeURIComponent(producto.sku)}`;
   const ficha = producto.ficha_alimento ?? null;
@@ -287,6 +300,41 @@ export default async function ProductoPage({
             </div>
           )}
 
+          {tallas.length > 1 && (
+            <div className="mt-6">
+              <p className="text-sm text-navy-400">
+                Talla: <span className="font-medium text-navy-500">{separarTalla(producto.nombre)?.talla}</span>
+              </p>
+              {/* Cada talla es su propia página (su código y precio): elegir
+                  una talla es ir a esa página. Las agotadas se ven tachadas
+                  pero se pueden abrir, para pedir el aviso de disponibilidad. */}
+              <ul className="mt-2.5 flex flex-wrap gap-2" aria-label="Tallas disponibles">
+                {tallas.map((t) => {
+                  const actual = t.sku === producto.sku;
+                  const talla = separarTalla(t.nombre)?.talla;
+                  return (
+                    <li key={t.sku}>
+                      <Link
+                        href={`/producto/${encodeURIComponent(t.sku)}`}
+                        aria-current={actual ? "page" : undefined}
+                        aria-label={`Talla ${talla}${t.disponible ? "" : ", sin existencias"}`}
+                        className={`inline-flex h-11 min-w-11 items-center justify-center rounded-full border px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:ring-offset-2 ${
+                          actual
+                            ? "border-navy-500 bg-navy-500 text-crema-100"
+                            : t.disponible
+                              ? "border-crema-500 bg-white text-navy-500 hover:border-navy-500"
+                              : "border-crema-400 bg-crema-100 text-navy-300 line-through"
+                        }`}
+                      >
+                        {talla}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
+
           <p className="mt-7 text-[30px] font-medium text-navy-500">
             {formatoColones(producto.precio_venta)}
           </p>
@@ -399,7 +447,7 @@ export default async function ProductoPage({
           </h2>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {relacionados.map((p) => (
-              <TarjetaProducto key={p.sku} producto={p} categoria={categoria?.nombre} />
+              <TarjetaProducto key={p.sku} producto={p} categoria={categoria?.nombre} tallas={tallasDe(p, productos)} />
             ))}
           </div>
         </section>
