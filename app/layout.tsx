@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import AvisoConfiguracion from "@/components/AvisoConfiguracion";
 import AvisoRecompra from "@/components/AvisoRecompra";
 import RecordarOrigen from "@/components/RecordarOrigen";
+import BotonWhatsAppFlotante from "@/components/BotonWhatsAppFlotante";
 import { ProveedorCarrito } from "@/lib/carrito";
 import { negocio, faltante } from "@/lib/negocio";
 import { construirNavegacion } from "@/lib/navegacion";
@@ -126,6 +127,7 @@ export default async function RootLayout({
             {children}
           </main>
           <Footer />
+          <BotonWhatsAppFlotante />
         </ProveedorCarrito>
         {/* Medición de visitas sin cookies (lib/analitica.ts). Se carga
             después de que la página ya se puede usar: no frena a nadie. */}

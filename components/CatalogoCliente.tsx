@@ -6,6 +6,7 @@ import { ESPECIES, esParaEspecie, idsRama, type ClaveEspecie } from "@/lib/naveg
 import { coincideProducto, puntajeCoincidencia } from "@/lib/busqueda";
 import { presentacionVisible } from "@/lib/formato";
 import { puntajeFicha } from "@/lib/publicacion";
+import { urlWhatsApp } from "@/lib/negocio";
 import type { Categoria, Producto } from "@/lib/types";
 
 interface Props {
@@ -130,6 +131,10 @@ export default function CatalogoCliente({
       })
       .filter((c) => c.cuantos > 0 || catsElegidas.includes(c.id));
   }, [productos, categorias, idsConHijos, especie, catsElegidas]);
+
+  const whatsappBusqueda = urlWhatsApp(
+    `Hola, busqué «${busquedaDiferida.trim()}» en allpetcr.com y no lo encontré. ¿Lo tienen o me lo pueden conseguir?`,
+  );
 
   const filtrados = useMemo(() => {
     const term = busquedaDiferida.trim().toLowerCase();
@@ -368,13 +373,45 @@ export default function CatalogoCliente({
 
           {filtrados.length === 0 ? (
             <div className="rounded-card border border-dashed border-crema-500 py-20 text-center">
-              <p className="text-navy-400">No encontramos productos con esos filtros.</p>
-              <button
-                onClick={limpiar}
-                className="mt-4 rounded-full bg-navy-500 px-6 py-2.5 text-sm text-crema-100 transition-colors hover:bg-navy-600"
-              >
-                Limpiar filtros
-              </button>
+              {/* Búsqueda sin resultados (28/10/2026): en vez de un callejón sin
+                  salida, WhatsApp con lo que buscó ya escrito. Puede estar en
+                  tienda sin cargar todavía, o se puede conseguir; y a la
+                  tienda le llega qué busca la gente que no encuentra. */}
+              {busquedaDiferida.trim() ? (
+                <>
+                  <p className="px-6 font-display text-xl text-navy-500">
+                    No encontramos «{busquedaDiferida.trim()}»
+                  </p>
+                  <p className="mx-auto mt-2 max-w-sm px-6 text-sm leading-relaxed text-navy-400">
+                    Puede que lo tengamos en la tienda o que te lo podamos conseguir. Escribinos y te
+                    respondemos.
+                  </p>
+                </>
+              ) : (
+                <p className="text-navy-400">No encontramos productos con esos filtros.</p>
+              )}
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-3 px-6">
+                {busquedaDiferida.trim() && whatsappBusqueda && (
+                  <a
+                    href={whatsappBusqueda}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-full bg-emerald-700 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2"
+                  >
+                    Preguntar por WhatsApp
+                  </a>
+                )}
+                <button
+                  onClick={limpiar}
+                  className={`rounded-full px-6 py-2.5 text-sm transition-colors ${
+                    busquedaDiferida.trim()
+                      ? "border border-crema-500 text-navy-500 hover:border-navy-300"
+                      : "bg-navy-500 text-crema-100 hover:bg-navy-600"
+                  }`}
+                >
+                  {busquedaDiferida.trim() ? "Ver todo el catálogo" : "Limpiar filtros"}
+                </button>
+              </div>
             </div>
           ) : (
             <div

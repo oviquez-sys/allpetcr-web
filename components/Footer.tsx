@@ -47,7 +47,7 @@ export default function Footer() {
     "rounded transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dorado-400 focus-visible:ring-offset-2 focus-visible:ring-offset-navy-600";
 
   return (
-    <footer className="superficie-navy-plana text-crema-200">
+    <footer className="superficie-navy-plana pb-20 text-crema-200 lg:pb-0">
       <div className="franja-dorada" aria-hidden="true" />
       <div className="mx-auto max-w-contenido px-6 py-16">
         <div className="grid gap-9 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr]">
