@@ -55,3 +55,23 @@ describe("división de alimentos", () => {
     expect(s.grupos.map((g) => g.label)).toEqual(["Alimento húmedo para perro", "Alimento húmedo para gato"]);
   });
 });
+
+describe("secciones sin especie (adornos)", () => {
+  const cats: Categoria[] = [
+    { id: 30, nombre: "Juguetes", padre_id: null, orden: 30 },
+    { id: 150, nombre: "Adornos y decoración", padre_id: null, orden: 150 },
+  ];
+  const p = (sku: string, categoria_id: number, mascota: string, disponible = true): Producto =>
+    ({ ...producto, sku, categoria_id, mascota, disponible });
+
+  it("un adorno con mascota Otros sale en su propia sección y no en Perros ni Gatos", () => {
+    const menu = construirNavegacion(cats, [p("a", 150, "Otros"), p("j", 30, "Perro")]);
+    expect(menu.find((s) => s.id === "adornos")).toEqual({ id: "adornos", label: "Adornos", href: "/catalogo?cats=150", grupos: [] });
+    expect(menu.find((s) => s.id === "perro")?.grupos.map((g) => g.label)).toEqual(["Juguetes"]);
+    expect(menu.find((s) => s.id === "gato")?.grupos).toEqual([]);
+  });
+
+  it("no aparece si no hay adornos disponibles", () => {
+    expect(construirNavegacion(cats, [p("a", 150, "Otros", false)]).some((s) => s.id === "adornos")).toBe(false);
+  });
+});

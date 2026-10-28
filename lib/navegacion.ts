@@ -39,6 +39,14 @@ export function idsRama(categorias: Categoria[], id: number): number[] {
  *  nombre porque son parte del árbol oficial del ERP (`asegurar_categorias`)
  *  y no cambian; la misma lista vive en `catalogo/divisiones.py`. */
 export const RAICES_ALIMENTO = ["Alimento", "Snacks y premios"];
+/** Raíces que NO son de una especie (28/10/2026, pedido de Oscar): los adornos
+ *  para la casa con figuras de perros o gatos no son productos PARA la mascota,
+ *  así que en el ERP llevan mascota "Otros" y no caen en Perros ni en Gatos.
+ *  Cada una sale como sección propia del menú. El nombre es el del árbol
+ *  oficial del ERP (`asegurar_categorias`). */
+export const RAICES_SIN_ESPECIE: { nombre: string; id: string; label: string }[] = [
+  { nombre: "Adornos y decoración", id: "adornos", label: "Adornos" },
+];
 
 function porOrden(a: Categoria, b: Categoria): number {
   return a.orden - b.orden || a.nombre.localeCompare(b.nombre, "es");
@@ -88,7 +96,20 @@ export function construirNavegacion(categorias: Categoria[], productos: Producto
       const rama = idsRama(categorias, c.id);
       return productos.some((p) => p.disponible && p.categoria_id !== null && rama.includes(p.categoria_id) && esParaEspecie(p.mascota, e.clave));
     }).map((c) => ({ label: c.nombre, href: hrefCatsEspecie([c.id], e.clave) })),
-  }))];
+  })), ...construirSinEspecie(categorias, productos)];
+}
+
+/** Secciones de RAICES_SIN_ESPECIE con existencia; sin desplegable. */
+export function construirSinEspecie(categorias: Categoria[], productos: Producto[]): SeccionNav[] {
+  const secciones: SeccionNav[] = [];
+  for (const r of RAICES_SIN_ESPECIE) {
+    const raiz = categorias.find((c) => c.padre_id === null && c.nombre === r.nombre);
+    if (!raiz) continue;
+    const rama = idsRama(categorias, raiz.id);
+    const hay = productos.some((p) => p.disponible && p.categoria_id !== null && rama.includes(p.categoria_id));
+    if (hay) secciones.push({ id: r.id, label: r.label, href: hrefCats([raiz.id]), grupos: [] });
+  }
+  return secciones;
 }
 export interface PuertaNav {
   clave: ClaveEspecie;
