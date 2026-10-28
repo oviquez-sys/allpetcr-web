@@ -59,7 +59,12 @@ body {
    recorre la página. El valor es la altura aproximada de una tarjeta. */
 .tarjeta-diferida {
   content-visibility: auto;
-  contain-intrinsic-size: auto 420px;
+  /* Solo el ALTO reservado (27/10/2026). Antes era `contain-intrinsic-size:
+     auto 420px`, que con un solo valor fija ancho Y alto: cada tarjeta fuera
+     de pantalla medía 420 px de ancho, más que un celular (390), y la página
+     de producto quedaba más ancha que la pantalla. El ancho lo pone la grilla. */
+  contain-intrinsic-block-size: auto 420px;
+  min-width: 0;
 }
 
 /* Filas deslizables del inicio (components/inicio/CarruselProductos.tsx):

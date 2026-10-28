@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import TarjetaProducto from "@/components/TarjetaProducto";
 import BotonAgregar from "@/components/BotonAgregar";
 import BotonAvisoDisponibilidad from "@/components/BotonAvisoDisponibilidad";
+import BarraCompraMovil from "@/components/BarraCompraMovil";
 import FichaAlimento from "@/components/ficha/FichaAlimento";
 import { connection } from "next/server";
 import { getCategoriasPublico, getProductoPorSkuPublico, getProductosPublico } from "@/lib/data";
@@ -323,7 +324,7 @@ export default async function ProductoPage({
             </p>
           )}
 
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div id="acciones-compra" className="mt-8 flex flex-wrap gap-3">
             {/* Un agotado no se compra: el botón de aviso REEMPLAZA al de
                 comprar, no convive con uno deshabilitado al lado. */}
             {consulta && producto.disponible ? (
@@ -404,6 +405,14 @@ export default async function ProductoPage({
           </div>
         </section>
       )}
+
+      <BarraCompraMovil
+        producto={producto}
+        idAcciones="acciones-compra"
+        consulta={consulta && consultaWa ? { href: consultaWa, texto: consulta.botonCorto } : null}
+      />
+      {/* Espacio para que la barra fija no tape el final de la página. */}
+      {producto.disponible && <div className="h-20 lg:hidden" aria-hidden="true" />}
     </>
   );
 }
