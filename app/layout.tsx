@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Script from "next/script";
+import { analiticaActiva, ORIGEN_SCRIPT_ANALITICA, TOKEN_ANALITICA } from "@/lib/analitica";
 import "./globals.css";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
@@ -125,6 +127,15 @@ export default async function RootLayout({
           </main>
           <Footer />
         </ProveedorCarrito>
+        {/* Medición de visitas sin cookies (lib/analitica.ts). Se carga
+            después de que la página ya se puede usar: no frena a nadie. */}
+        {analiticaActiva && (
+          <Script
+            src={`${ORIGEN_SCRIPT_ANALITICA}/beacon.min.js`}
+            strategy="afterInteractive"
+            data-cf-beacon={JSON.stringify({ token: TOKEN_ANALITICA })}
+          />
+        )}
       </body>
     </html>
   );

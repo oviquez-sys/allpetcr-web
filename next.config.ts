@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import { loadEnvConfig } from "@next/env";
+import { analiticaActiva, ORIGEN_ENVIO_ANALITICA, ORIGEN_SCRIPT_ANALITICA } from "./lib/analitica";
 
 // Next.js carga .env DESPUÉS de evaluar next.config.ts (es un orden de
 // arranque documentado, no un descuido de acá) — sin esta línea,
@@ -75,14 +76,15 @@ const origenCdnFotos = process.env.PRODUCTOS_CDN_URL
 
 const csp = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${esDesarrollo ? " 'unsafe-eval'" : ""}`,
+  // Medición de visitas (lib/analitica.ts): solo se abre si está activa.
+  `script-src 'self' 'unsafe-inline'${esDesarrollo ? " 'unsafe-eval'" : ""}${analiticaActiva ? ` ${ORIGEN_SCRIPT_ANALITICA}` : ""}`,
   "style-src 'self' 'unsafe-inline'",
   // *.tile.openstreetmap.org: los cuadros del mapa de MapaDireccion.tsx
   // (ítem 33) — Leaflet los carga como <img> normales, no via next/image,
   // así que entran por CSP y no por remotePatterns.
   `img-src 'self' data: blob: https://*.googleapis.com https://*.gstatic.com https://*.tile.openstreetmap.org${origenErp ? ` ${origenErp}` : ""}${origenCdnFotos ? ` ${origenCdnFotos}` : ""}`,
   "font-src 'self' data:",
-  "connect-src 'self'",
+  `connect-src 'self'${analiticaActiva ? ` ${ORIGEN_ENVIO_ANALITICA}` : ""}`,
   "frame-src https://www.google.com https://maps.google.com",
   "frame-ancestors 'none'",
   "base-uri 'self'",

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { negocio, direccionCompleta } from "@/lib/negocio";
 import { PaginaLegal, Seccion, Lista, enlaceLegal } from "@/components/PaginaLegal";
+import { analiticaActiva, FECHA_ANALITICA } from "@/lib/analitica";
 
 // Política de privacidad (21/09/2026).
 //
@@ -16,7 +17,8 @@ import { PaginaLegal, Seccion, Lista, enlaceLegal } from "@/components/PaginaLeg
 //   cliente; las coordenadas pasan por /api/geocodificar → Nominatim.
 // - Aviso de disponibilidad: correo + producto → se guarda en el ERP.
 // - localStorage: carrito y "volver a pedir" (caduca a los 180 días).
-// - Sin analítica ni publicidad. El mapa de /contacto es de Google.
+// - Sin publicidad. Analítica: solo Cloudflare Web Analytics, sin cookies,
+//   y solo cuando está activa en lib/analitica.ts. El mapa de /contacto es de Google.
 // - Servidores en DigitalOcean, Nueva York.
 // El pago con tarjeta ya está descrito: aparece solo cuando
 // `negocio.pagoEnLinea.activo` es true. Si se agrega analítica o cuentas de
@@ -32,7 +34,9 @@ export const metadata = {
 
 // 16/10/2026: auditoría de prelanzamiento (borrador del checkout, código de La
 // manada, proveedor de correo identificado). Si se publica otro día, poner esa fecha.
-const VIGENCIA = "16 de octubre de 2026";
+// 28/10/2026: medición de visitas sin cookies (Cloudflare Web Analytics). La
+// vigencia y los párrafos cambian solos al activarla en lib/analitica.ts.
+const VIGENCIA = analiticaActiva ? FECHA_ANALITICA : "16 de octubre de 2026";
 
 export default function PrivacidadPage() {
   const direccion = direccionCompleta();
@@ -121,11 +125,22 @@ export default function PrivacidadPage() {
           nombre de la campaña por la que entraste, si fue por un enlace nuestro. Todo se borra solo al cerrar
           la pestaña y nunca incluye la aceptación de estos términos.
         </p>
+        {analiticaActiva ? (
+          <p>
+            Para saber cuántas personas visitan el sitio, qué páginas ven y desde qué tipo de dispositivo
+            entran, usamos Cloudflare Web Analytics. No usa cookies ni te identifica por tu dirección IP o tu navegador,
+            y solo nos muestra totales (por ejemplo, «120 visitas al catálogo esta semana»).
+            No usamos cookies de publicidad. El mapa de nuestra página de{" "}
+            <Link href="/contacto" className={enlaceLegal}>contacto</Link> lo muestra Google Maps, que puede
+            usar sus propias cookies según su política.
+          </p>
+        ) : (
         <p>
           No usamos cookies de publicidad ni herramientas de analítica. El mapa de nuestra página de{" "}
           <Link href="/contacto" className={enlaceLegal}>contacto</Link> lo muestra Google Maps, que puede
           usar sus propias cookies según su política.
         </p>
+        )}
       </Seccion>
 
       <Seccion id="compartimos" titulo="4. Con quién los compartimos">
@@ -154,6 +169,12 @@ export default function PrivacidadPage() {
             <strong>Resend (nuestro proveedor de envío de correos):</strong> recibe tu correo y el mensaje
             que te mandamos (por ejemplo, tu código de la manada o tu comprobante), solo para entregarlo.
           </li>
+          {analiticaActiva && (
+            <li>
+              <strong>Cloudflare:</strong> mide las visitas al sitio de forma anónima, sin cookies y sin
+              identificarte; solo nos entrega totales.
+            </li>
+          )}
           <li>
             <strong>OpenStreetMap:</strong> solo si usás el mapa, recibe las coordenadas (sin tu nombre)
             para devolvernos la dirección aproximada.

@@ -162,6 +162,23 @@ export default async function ProductoPage({
     ].join("\n"),
   );
 
+  // Ficha sin descripción (27/10/2026: ~46 % del catálogo). En vez de dejar
+  // un hueco, se dice la verdad —la descripción todavía no está— y se ofrece
+  // lo que sí podemos dar ya: medidas, material y fotos reales del producto
+  // en tienda, por WhatsApp. No se inventa ningún dato. Desaparece solo en
+  // cuanto el ERP tenga descripción. Los alimentos con ficha no lo muestran.
+  const sinDescripcion = !descripcionVisible && !ficha;
+  const detallesWa = sinDescripcion
+    ? urlWhatsApp(
+        [
+          "Hola, ¿me pueden mandar medidas, material y fotos reales de este producto?",
+          `Producto: ${producto.nombre}`,
+          `Código: ${producto.sku}`,
+          `Enlace: ${url}`,
+        ].join("\n"),
+      )
+    : "";
+
   return (
     <>
       <script type="application/ld+json"
@@ -251,6 +268,23 @@ export default async function ProductoPage({
             <p className="mt-5 max-w-prose text-[15px] font-light leading-relaxed text-navy-400">
               {descripcionVisible}
             </p>
+          )}
+          {sinDescripcion && detallesWa && (
+            <div className="mt-5 max-w-prose rounded-card border border-crema-400 bg-crema-100 px-4 py-3.5 text-sm leading-relaxed text-navy-400">
+              <p>
+                Todavía estamos completando la descripción de este producto.
+                ¿Querés saber medidas, material o verlo en fotos reales? Te lo
+                mandamos por WhatsApp.
+              </p>
+              <a
+                href={detallesWa}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 inline-flex min-h-11 items-center font-medium text-navy-500 underline decoration-navy-200 underline-offset-4 hover:decoration-navy-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500"
+              >
+                Pedir detalles y fotos por WhatsApp
+              </a>
+            </div>
           )}
 
           <p className="mt-7 text-[30px] font-medium text-navy-500">
