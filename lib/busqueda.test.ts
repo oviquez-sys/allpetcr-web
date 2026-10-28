@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { coincideAproximado, coincideProducto, distanciaLevenshtein, normalizar } from "./busqueda";
+import { coincideAproximado, coincideProducto, distanciaLevenshtein, normalizar, puntajeCoincidencia } from "./busqueda";
 
 describe("normalizar", () => {
   it("pasa a minúsculas y saca tildes", () => {
@@ -148,5 +148,38 @@ describe("coincideProducto (buscador inteligente, 20/10/2026)", () => {
   });
   it("sin término no filtra", () => {
     expect(coincideProducto(puppy, "  de  ")).toBe(true);
+  });
+});
+
+describe("buscador más inteligente (28/10/2026)", () => {
+  const zee = { nombre: "Arnés H Gotham Zee.Dog talla M", categorias: "Paseo Arneses" };
+  const sabanilla = { nombre: "Sabanillas para perros", categorias: "Higiene y aseo" };
+  const pato = { nombre: "First Choice Perro Adulto Hipoalergénico Pato 11 kg", categorias: "Alimento" };
+  const correa = { nombre: "Correa corta reflectiva", categorias: "Paseo Correas" };
+  const arnesConCorrea = { nombre: "Arnés ajustable con correa", categorias: "Paseo Arneses" };
+
+  it("encuentra la marca escrita pegada o separada", () => {
+    expect(coincideProducto(zee, "zeedog")).toBe(true);
+    expect(coincideProducto(zee, "zee dog")).toBe(true);
+    expect(coincideProducto(zee, "zee.dog")).toBe(true);
+  });
+
+  it("entiende sinónimos de paseo, higiene y casa", () => {
+    expect(coincideProducto(zee, "pechera")).toBe(true);
+    expect(coincideProducto(sabanilla, "pads")).toBe(true);
+    expect(coincideProducto(sabanilla, "pats")).toBe(true);
+    expect(coincideProducto({ nombre: "Comedero cuadrado", categorias: "Platos" }, "tasa")).toBe(true);
+  });
+
+  it("no confunde 'pats' con 'pato'", () => {
+    expect(coincideProducto(pato, "pats")).toBe(false);
+  });
+
+  it("un sinónimo no se busca en la descripción", () => {
+    expect(coincideProducto({ nombre: "Pelota de goma", descripcion: "Ideal para jugar en casa" }, "casita")).toBe(false);
+  });
+
+  it("pone primero el producto que ES lo buscado", () => {
+    expect(puntajeCoincidencia(correa, "correa")).toBeGreaterThan(puntajeCoincidencia(arnesConCorrea, "correa"));
   });
 });

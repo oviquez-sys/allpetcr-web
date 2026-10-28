@@ -115,17 +115,56 @@ function similares(a: string, b: string): boolean {
  * valen como palabra completa, para que "cat" no encuentre "catalogo".
  */
 const EQUIVALENCIAS: string[][] = [
-  ["comida", "alimento", "concentrado", "croqueta", "food"],
+  // ── Alimento ──
+  ["comida", "alimento", "concentrado", "croqueta", "food", "pienso"],
   ["cachorro", "puppy", "junior"],
   ["gatito", "kitten"],
   ["adulto", "adult"],
-  ["perro", "dog"],
-  ["gato", "cat"],
-  ["golosina", "snack", "premio", "treat"],
+  ["perro", "dog", "canino", "perrito"],
+  ["gato", "cat", "felino", "michi"],
+  ["golosina", "snack", "premio", "treat", "galleta"],
+  ["humedo", "lata", "pate", "wet"],
+  // ── Paseo (28/10/2026, pedido de Oscar: "pechera" no encontraba los arneses) ──
+  ["arnes", "pechera", "petral", "harness"],
+  ["correa", "trailla", "leash", "guia"],
+  ["collar", "collarin"],
+  ["bozal", "muzzle"],
+  // ── Higiene y casa ──
+  ["sabanilla", "pad", "pads", "pats", "entrenador", "empapador"],
+  ["arena", "sanitaria", "litter"],
+  ["arenero", "bandeja", "sanitario"],
+  ["bolsa", "bolsita", "popo", "heces", "excremento", "caca"],
+  ["toallita", "wipe", "wipes"],
+  ["shampoo", "champu", "jabon"],
+  ["pañal", "panal", "calzon"],
+  ["cepillo", "peine", "carda", "quitapelos", "deslanador"],
+  ["plato", "comedero", "tazon", "taza", "tasa", "bowl"],
+  ["bebedero", "waterer"],
+  ["cama", "camita", "colchoneta", "cojin", "colchon", "bed"],
+  ["casa", "casita", "cueva", "iglu"],
+  ["rascador", "rascadero", "scratcher", "gimnasio"],
+  ["transportadora", "transportador", "kennel", "jaula", "guacal"],
+  ["mochila", "bolso", "cargador"],
+  // ── Juego y ropa ──
+  ["juguete", "toy", "juego"],
+  ["pelota", "bola", "ball"],
+  ["peluche", "muñeco", "muneco"],
+  ["ropa", "camisa", "camiseta", "sueter", "buzo", "abrigo", "chaleco", "disfraz"],
+  ["pañuelo", "panuelo", "bandana", "corbatin"],
+  // ── Salud ──
+  ["antipulgas", "pulga", "pulgas", "garrapata", "garrapatas"],
+  ["desparasitante", "antiparasitario", "parasitos", "lombrices"],
+  ["vitamina", "suplemento"],
 ];
 
+// Los tokens de búsqueda ya vienen sin tildes ni eñes (normalizar + solo
+// a-z0-9): las equivalencias se comparan en esa misma forma.
+const EQUIVALENCIAS_NORM: string[][] = EQUIVALENCIAS.map((g) => [...new Set(g.map((e) => normalizar(e).replace(/[^a-z0-9]+/g, "")))]);
+
 function equivalentes(palabra: string): string[] {
-  const grupo = EQUIVALENCIAS.find((g) => g.some((e) => palabra === e || (e.length >= LARGO_MINIMO_DIFUSO && palabra.startsWith(e))));
+  const grupo = EQUIVALENCIAS_NORM.find((g) =>
+    g.some((e) => palabra === e || (e.length >= LARGO_MINIMO_DIFUSO && palabra.startsWith(e))),
+  );
   return grupo ? [palabra, ...grupo.filter((e) => e !== palabra)] : [palabra];
 }
 
@@ -175,19 +214,91 @@ export interface CamposBusqueda {
   etiquetas?: string;
 }
 
-export function coincideProducto(campos: CamposBusqueda, termino: string): boolean {
-  const buscadas = tokens(termino).filter((w) => !PALABRAS_VACIAS.has(w));
-  if (buscadas.length === 0) return true;
-  const todas = tokens(
-    `${campos.nombre} ${campos.presentacion ?? ""} ${campos.descripcion ?? ""} ${campos.categorias ?? ""} ${campos.etiquetas ?? ""}`,
+/**
+ * Palabras pegadas (28/10/2026, pedido de Oscar): "zeedog" no encontraba
+ * nada porque la marca está escrita "Zee.Dog", que se parte en "zee" + "dog".
+ * Además de cada palabra suelta, se compara contra las uniones de 2 y 3
+ * palabras seguidas: "zee"+"dog" → "zeedog", "pro"+"plan" → "proplan",
+ * "royal"+"canin" → "royalcanin". Funciona en los dos sentidos: "zee dog"
+ * separado ya coincidía palabra por palabra.
+ */
+function conUniones(lista: string[]): string[] {
+  const out = [...lista];
+  for (let i = 0; i < lista.length; i++) {
+    if (i + 1 < lista.length) out.push(lista[i] + lista[i + 1]);
+    if (i + 2 < lista.length) out.push(lista[i] + lista[i + 1] + lista[i + 2]);
+  }
+  return out;
+}
+
+// Los sinónimos se buscan en nombre, presentación, categoría y etiquetas,
+// NO en la descripción: palabras como "casa" o "juego" aparecen en
+// cualquier descripción ("ideal para la casa") y traerían productos que no
+// tienen nada que ver. La palabra tal cual escrita sí se busca en todo.
+// Una variante de menos de 4 letras ("pats" → "pat") solo vale como palabra
+// completa: como comienzo de palabra, "pat" encontraba "pato" y "pats"
+// devolvía 101 productos, casi todos alimento de pato (medido 28/10/2026).
+function empiezaCon(px: string, v: string): boolean {
+  return v.length < LARGO_MINIMO_DIFUSO ? px === v : px.startsWith(v);
+}
+
+function encuentraPalabra(pt: string, todas: string[], sinDescripcion: string[], delNombre: string[]): boolean {
+  if (variantes(pt).some((v) => todas.some((px) => empiezaCon(px, v)))) return true;
+  const otras = equivalentes(pt).slice(1);
+  if (otras.some((e) => sinDescripcion.some((px) => (e.length < LARGO_MINIMO_DIFUSO ? px === e : px.startsWith(e))))) return true;
+  // Una palabra que el buscador ya conoce (tiene sinónimos) no es un error
+  // de escritura: sin esto "pats" ≈ "pato" traía alimento de pato.
+  if (otras.length > 0) return false;
+  return delNombre.some((px) => similares(pt, px));
+}
+
+function prepararCampos(campos: CamposBusqueda) {
+  const todas = conUniones(
+    tokens(`${campos.nombre} ${campos.presentacion ?? ""} ${campos.descripcion ?? ""} ${campos.categorias ?? ""} ${campos.etiquetas ?? ""}`),
   );
-  const delNombre = tokens(campos.nombre);
-  return buscadas.every((pt) => {
-    if (variantes(pt).some((v) => todas.some((px) => px.startsWith(v)))) return true;
-    const otras = equivalentes(pt).slice(1);
-    if (otras.some((e) => todas.some((px) => (e.length < LARGO_MINIMO_DIFUSO ? px === e : px.startsWith(e))))) return true;
-    return delNombre.some((px) => similares(pt, px));
-  });
+  const sinDescripcion = conUniones(
+    tokens(`${campos.nombre} ${campos.presentacion ?? ""} ${campos.categorias ?? ""} ${campos.etiquetas ?? ""}`),
+  );
+  const delNombre = conUniones(tokens(campos.nombre));
+  return { todas, sinDescripcion, delNombre };
+}
+
+function palabrasBuscadas(termino: string): string[] {
+  return tokens(termino).filter((w) => !PALABRAS_VACIAS.has(w));
+}
+
+export function coincideProducto(campos: CamposBusqueda, termino: string): boolean {
+  const buscadas = palabrasBuscadas(termino);
+  if (buscadas.length === 0) return true;
+  const { todas, sinDescripcion, delNombre } = prepararCampos(campos);
+  return buscadas.every((pt) => encuentraPalabra(pt, todas, sinDescripcion, delNombre));
+}
+
+/**
+ * Qué tan bien coincide un producto que YA coincide (28/10/2026): para
+ * ordenar los resultados de una búsqueda. Una palabra que está en el nombre
+ * vale más que una que solo aparece en la descripción o en las etiquetas, y
+ * la palabra tal cual escrita vale más que su sinónimo. Así "correa" muestra
+ * primero las correas y después el "arnés con correa".
+ */
+export function puntajeCoincidencia(campos: CamposBusqueda, termino: string): number {
+  const buscadas = palabrasBuscadas(termino);
+  if (buscadas.length === 0) return 0;
+  const delNombre = conUniones(tokens(campos.nombre));
+  const deCategoria = tokens(campos.categorias);
+  let puntos = 0;
+  const primera = tokens(campos.nombre)[0] ?? "";
+  for (const pt of buscadas) {
+    const directa = variantes(pt);
+    // La palabra buscada es la PRIMERA del nombre ("Correa retráctil" ante
+    // "Arnés con correa"): eso es lo que el producto ES, no lo que trae.
+    if (directa.some((v) => empiezaCon(primera, v))) puntos += 2;
+    if (directa.some((v) => delNombre.some((px) => empiezaCon(px, v)))) puntos += 4;
+    else if (equivalentes(pt).slice(1).some((e) => delNombre.some((px) => (e.length < LARGO_MINIMO_DIFUSO ? px === e : px.startsWith(e))))) puntos += 3;
+    else if (delNombre.some((px) => similares(pt, px))) puntos += 2;
+    if (directa.some((v) => deCategoria.some((px) => empiezaCon(px, v)))) puntos += 1;
+  }
+  return puntos;
 }
 
 /** True si CADA palabra del término aparece —exacta o aproximada— en el

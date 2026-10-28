@@ -3,7 +3,7 @@
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import TarjetaProducto from "@/components/TarjetaProducto";
 import { ESPECIES, esParaEspecie, idsRama, type ClaveEspecie } from "@/lib/navegacion";
-import { coincideProducto } from "@/lib/busqueda";
+import { coincideProducto, puntajeCoincidencia } from "@/lib/busqueda";
 import { presentacionVisible } from "@/lib/formato";
 import { puntajeFicha } from "@/lib/publicacion";
 import type { Categoria, Producto } from "@/lib/types";
@@ -183,8 +183,23 @@ export default function CatalogoCliente({
       // Después, las fichas completas (foto, descripción, marca) antes que
       // las que faltan terminar — ver puntajeFicha en lib/publicacion.ts.
       // sort es estable: a igual puntaje se conserva el orden del ERP.
+      // Con búsqueda (28/10/2026): entre los disponibles, primero lo que
+      // mejor coincide (la palabra en el NOMBRE pesa más que en la
+      // descripción; ver puntajeCoincidencia en lib/busqueda.ts).
+      const coincidencia = new Map<string, number>();
+      if (term) {
+        for (const p of lista) {
+          coincidencia.set(
+            p.sku,
+            puntajeCoincidencia({ nombre: p.nombre, categorias: categoriasDe(p.categoria_id) }, term),
+          );
+        }
+      }
       lista.sort(
-        (a, b) => Number(b.disponible) - Number(a.disponible) || puntajeFicha(b) - puntajeFicha(a),
+        (a, b) =>
+          Number(b.disponible) - Number(a.disponible) ||
+          (coincidencia.get(b.sku) ?? 0) - (coincidencia.get(a.sku) ?? 0) ||
+          puntajeFicha(b) - puntajeFicha(a),
       );
     }
     return lista;
