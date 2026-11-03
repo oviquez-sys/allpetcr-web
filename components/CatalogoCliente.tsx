@@ -1,12 +1,13 @@
 "use client";
 
-import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState, type ReactNode } from "react";
 import TarjetaProducto from "@/components/TarjetaProducto";
 import { ESPECIES, esParaEspecie, idsRama, type ClaveEspecie } from "@/lib/navegacion";
 import { coincideProducto, puntajeCoincidencia } from "@/lib/busqueda";
 import { presentacionVisible } from "@/lib/formato";
 import { puntajeFicha } from "@/lib/publicacion";
 import { agruparTallas } from "@/lib/variantes";
+import { claveMarca, opcionesMarca, opcionesSubcategoria } from "@/lib/filtrosCatalogo";
 import { urlWhatsApp } from "@/lib/negocio";
 import type { Categoria, Producto } from "@/lib/types";
 
@@ -21,7 +22,14 @@ interface Props {
   especieInicial?: ClaveEspecie | null;
   ordenInicial?: Orden;
   disponiblesInicial?: boolean;
+  /** Claves de marca (parámetro ?marca=zeedog,gosbi). */
+  marcasIniciales?: string[];
+  /** Subcategoría elegida dentro de la categoría (parámetro ?sub=). */
+  subInicial?: number | null;
 }
+
+/** Cuántas marcas se ven antes de «Ver todas». */
+const MARCAS_A_LA_VISTA = 8;
 
 type Orden = "relevancia" | "precio-asc" | "precio-desc" | "nombre";
 
@@ -34,6 +42,8 @@ export default function CatalogoCliente({
   especieInicial = null,
   ordenInicial = "relevancia",
   disponiblesInicial = false,
+  marcasIniciales = [],
+  subInicial = null,
 }: Props) {
   const [busqueda, setBusqueda] = useState(busquedaInicial);
   const [filtrosAbiertos, setFiltrosAbiertos] = useState(false);
@@ -50,6 +60,9 @@ export default function CatalogoCliente({
   const [especie, setEspecie] = useState<ClaveEspecie | null>(especieInicial);
   const [soloDisponibles, setSoloDisponibles] = useState(disponiblesInicial);
   const [orden, setOrden] = useState<Orden>(ordenInicial);
+  const [marcas, setMarcas] = useState<string[]>(marcasIniciales);
+  const [sub, setSub] = useState<number | null>(subInicial);
+  const [todasLasMarcas, setTodasLasMarcas] = useState(false);
   useEffect(() => {
     const temporizador = setTimeout(() => {
       const params = new URLSearchParams();
@@ -58,11 +71,13 @@ export default function CatalogoCliente({
       if (especie) params.set("para", especie);
       if (soloDisponibles) params.set("disponibles", "1");
       if (orden !== "relevancia") params.set("orden", orden);
+      if (marcas.length) params.set("marca", marcas.join(","));
+      if (sub !== null) params.set("sub", String(sub));
       const query = params.toString();
       window.history.replaceState(null, "", `/catalogo${query ? `?${query}` : ""}`);
     }, 400);
     return () => clearTimeout(temporizador);
-  }, [busqueda, catsElegidas, especie, soloDisponibles, orden]);
+  }, [busqueda, catsElegidas, especie, soloDisponibles, orden, marcas, sub]);
 
   // El ERP publica solo lo que hay en existencia (regla del 02/08/2026), así
   // que normalmente TODO lo que llega está disponible y la casilla "solo con
@@ -137,11 +152,26 @@ export default function CatalogoCliente({
     `Hola, busqué «${busquedaDiferida.trim()}» en allpetcr.com y no lo encontré. ¿Lo tienen o me lo pueden conseguir?`,
   );
 
-  const filtrados = useMemo(() => {
+  // Subcategorías (lib/filtrosCatalogo.ts): solo con UNA categoría raíz
+  // elegida y solo si el ERP ya asignó subcategoría a casi todo (regla 90 %).
+  const raizUnica =
+    catsElegidas.length === 1 && categorias.find((c) => c.id === catsElegidas[0])?.padre_id === null
+      ? catsElegidas[0]
+      : null;
+  const subOpciones = useMemo(() => {
+    if (raizUnica === null) return [];
+    const base = especie ? productos.filter((p) => esParaEspecie(p.mascota, especie)) : productos;
+    return opcionesSubcategoria(categorias, base, raizUnica);
+  }, [raizUnica, categorias, productos, especie]);
+  const subActiva = sub !== null && subOpciones.some((o) => o.id === sub) ? sub : null;
+
+  // Todo menos la marca: de acá salen las marcas que se ofrecen, así cada
+  // marca de la lista tiene productos con los demás filtros puestos.
+  const sinMarca = useMemo(() => {
     const term = busquedaDiferida.trim().toLowerCase();
     // Expandir cada categoría raíz elegida a [ella misma, ...sus hijas].
-    const idsElegidos = catsElegidas.flatMap((id) => idsConHijos(id));
-    let lista = productos.filter((p) => {
+    const idsElegidos = subActiva !== null ? idsConHijos(subActiva) : catsElegidas.flatMap((id) => idsConHijos(id));
+    return productos.filter((p) => {
       if (soloDisponibles && !p.disponible) return false;
       if (especie && !esParaEspecie(p.mascota, especie)) return false;
       if (catsElegidas.length > 0) {
@@ -178,8 +208,14 @@ export default function CatalogoCliente({
       }
       return true;
     });
+  }, [productos, busquedaDiferida, catsElegidas, subActiva, especie, soloDisponibles, idsConHijos, categoriasDe]);
 
-    lista = [...lista];
+  const marcasOfrecidas = useMemo(() => opcionesMarca(sinMarca, marcas), [sinMarca, marcas]);
+  const nombreMarca = useMemo(() => new Map(marcasOfrecidas.map((m) => [m.clave, m.nombre])), [marcasOfrecidas]);
+
+  const filtrados = useMemo(() => {
+    const term = busquedaDiferida.trim().toLowerCase();
+    let lista = marcas.length ? sinMarca.filter((p) => marcas.includes(claveMarca(p.marca))) : [...sinMarca];
     if (orden === "precio-asc") lista.sort((a, b) => a.precio_venta - b.precio_venta);
     else if (orden === "precio-desc") lista.sort((a, b) => b.precio_venta - a.precio_venta);
     else if (orden === "nombre") lista.sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
@@ -209,7 +245,7 @@ export default function CatalogoCliente({
       );
     }
     return lista;
-  }, [productos, busquedaDiferida, catsElegidas, especie, soloDisponibles, orden, idsConHijos, categoriasDe]);
+  }, [sinMarca, marcas, busquedaDiferida, orden, categoriasDe]);
 
   // Catálogo por bloques de 24, no los 184 de una sola pasada — hallazgo de
   // la auditoría: sin corte, recorrer el catálogo completo (~28.000px) no
@@ -222,7 +258,7 @@ export default function CatalogoCliente({
   // usa para cerrar el menú al navegar: comparar contra el valor anterior en
   // el cuerpo del componente evita el fotograma de conteo viejo que un
   // useEffect dejaría ver antes de correr.
-  const filtroClave = `${catsElegidas.join(",")}|${especie ?? ""}|${soloDisponibles}|${busquedaDiferida}|${orden}`;
+  const filtroClave = `${catsElegidas.join(",")}|${subActiva ?? ""}|${marcas.join(",")}|${especie ?? ""}|${soloDisponibles}|${busquedaDiferida}|${orden}`;
   const [filtroClavePrevia, setFiltroClavePrevia] = useState(filtroClave);
   if (filtroClave !== filtroClavePrevia) {
     setFiltroClavePrevia(filtroClave);
@@ -235,15 +271,28 @@ export default function CatalogoCliente({
   const items = useMemo(() => agruparTallas(filtrados), [filtrados]);
   const paraMostrar = items.slice(0, visibles);
 
-  const alternarCategoria = (id: number) =>
+  // Cambiar de categoría borra la subcategoría: «Seco» no tiene sentido
+  // dentro de Juguetes.
+  const alternarCategoria = (id: number) => {
+    setSub(null);
     setCatsElegidas((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
+  };
+  /** Chips del celular: una categoría a la vez; tocar la activa la quita. */
+  const elegirSoloCategoria = (id: number | null) => {
+    setSub(null);
+    setCatsElegidas((prev) => (id === null || (prev.length === 1 && prev[0] === id) ? [] : [id]));
+  };
+  const alternarMarca = (clave: string) =>
+    setMarcas((prev) => (prev.includes(clave) ? prev.filter((x) => x !== clave) : [...prev, clave]));
 
   const hayFiltros =
-    catsElegidas.length > 0 || especie !== null || soloDisponibles || busqueda.trim() !== "";
+    catsElegidas.length > 0 || marcas.length > 0 || especie !== null || soloDisponibles || busqueda.trim() !== "";
 
   const limpiar = () => {
+    setSub(null);
+    setMarcas([]);
     setCatsElegidas([]);
     setEspecie(null);
     setSoloDisponibles(false);
@@ -253,14 +302,15 @@ export default function CatalogoCliente({
   return (
     <div className="mx-auto max-w-contenido px-6 py-12">
       <h1 className="font-display text-headline text-navy-500">{especie ? `Productos para ${especie === "perro" ? "perros" : "gatos"}` : "Catálogo"}</h1>
-      {hayFiltros && <p className="mt-3 text-sm text-navy-400">{[busqueda && `Búsqueda: ${busqueda}`, ...catsElegidas.map((id) => nombrePorCategoria.get(id)), soloDisponibles && "Con existencias"].filter(Boolean).join(" · ")}</p>}
+      {hayFiltros && <p className="mt-3 text-sm text-navy-400">{[busqueda && `Búsqueda: ${busqueda}`, ...catsElegidas.map((id) => nombrePorCategoria.get(id)), subActiva !== null && nombrePorCategoria.get(subActiva), ...marcas.map((m) => nombreMarca.get(m) ?? m), soloDisponibles && "Con existencias"].filter(Boolean).join(" · ")}</p>}
 
       {/* md, no lg: a ~900px (tablet) el panel de filtros a ancho completo
           enterraba la grilla de 184 productos bajo el fold. Con dos columnas
           desde md (768px) el filtro ocupa una franja angosta y el catálogo es
           visible de inmediato en todo el rango donde ya hay espacio real. */}
       <div className="mt-8 grid gap-8 md:grid-cols-[200px_1fr] md:gap-6 lg:grid-cols-[230px_1fr] lg:gap-10">
-        <aside className="md:sticky md:top-40 md:self-start">
+        {/* Con marca, la columna puede pasar el alto de la pantalla: se desliza por dentro para que el final no quede inalcanzable. */}
+        <aside className="min-w-0 md:sticky md:top-40 md:max-h-[calc(100vh-11rem)] md:self-start md:overflow-y-auto md:overscroll-contain">
           <button type="button" aria-expanded={filtrosAbiertos} aria-controls="filtros-catalogo" onClick={() => setFiltrosAbiertos(!filtrosAbiertos)} className="w-full rounded-lg border border-navy-500 px-5 py-3 text-left text-sm text-navy-500 md:hidden">{filtrosAbiertos ? "Ocultar filtros" : "Buscar y filtrar"}{hayFiltros ? " · filtros activos" : ""}</button>
           <div id="filtros-catalogo" className={`${filtrosAbiertos ? "block" : "hidden"} rounded-card border border-crema-400 bg-white p-5 md:block`}>
             <label className="block text-xs font-medium uppercase tracking-wider text-navy-400">
@@ -326,6 +376,40 @@ export default function CatalogoCliente({
               </fieldset>
             )}
 
+            {/* Marca (28/10/2026): solo marcas con 2+ productos con los
+                filtros actuales, de la más a la menos frecuente. */}
+            {marcasOfrecidas.length >= 2 && (
+              <fieldset className="mt-6">
+                <legend className="text-xs font-medium uppercase tracking-wider text-navy-400">
+                  Marca
+                </legend>
+                <div className="mt-2 space-y-1.5">
+                  {(todasLasMarcas ? marcasOfrecidas : marcasOfrecidas.filter((m, i) => i < MARCAS_A_LA_VISTA || marcas.includes(m.clave))).map((m) => (
+                    <label key={m.clave} className="flex min-h-11 items-center gap-2.5 text-sm text-navy-400">
+                      <input
+                        type="checkbox"
+                        checked={marcas.includes(m.clave)}
+                        onChange={() => alternarMarca(m.clave)}
+                        className="h-3.5 w-3.5 accent-navy-500"
+                      />
+                      <span className="flex-1">{m.nombre}</span>
+                      <span className="text-xs tabular-nums text-navy-300">{m.cuantos}</span>
+                    </label>
+                  ))}
+                </div>
+                {marcasOfrecidas.length > MARCAS_A_LA_VISTA && (
+                  <button
+                    type="button"
+                    aria-expanded={todasLasMarcas}
+                    onClick={() => setTodasLasMarcas(!todasLasMarcas)}
+                    className="mt-1 min-h-11 text-sm text-navy-500 underline underline-offset-4 hover:text-navy-600"
+                  >
+                    {todasLasMarcas ? "Ver menos" : `Ver todas (${marcasOfrecidas.length})`}
+                  </button>
+                )}
+              </fieldset>
+            )}
+
             {/* Solo aparece si de verdad hay algo agotado que filtrar.
                 Ver `hayAgotados` arriba. */}
             {hayAgotados && (
@@ -351,11 +435,56 @@ export default function CatalogoCliente({
           </div>
         </aside>
 
-        <div>
+        {/* min-w-0: sin esto la fila de chips (más ancha que la pantalla)
+            estiraba la columna y la página entera se corría de lado. */}
+        <div className="min-w-0">
           {/* sr-only: sin esto el H1 "Catálogo" saltaba directo a los H3 de
               cada tarjeta de producto (×184), rompiendo la navegación por
               encabezados de lectores de pantalla. No cambia nada visible. */}
           <h2 className="sr-only">Resultados</h2>
+
+          {/* Categorías a un toque en el celular (28/10/2026): antes había
+              que abrir «Buscar y filtrar» para elegir una. Fila que se
+              desliza de lado; en tablet y compu ya están en la columna. */}
+          {categoriasConProductos.length > 1 && (
+            <nav aria-label="Categorías" className="-mx-6 mb-4 md:hidden">
+              <ul className="flex gap-2 overflow-x-auto px-6 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <li>
+                  <Chip activo={catsElegidas.length === 0} onClick={() => elegirSoloCategoria(null)}>
+                    Todo
+                  </Chip>
+                </li>
+                {categoriasConProductos.map((c) => (
+                  <li key={c.id}>
+                    <Chip activo={catsElegidas.length === 1 && catsElegidas[0] === c.id} onClick={() => elegirSoloCategoria(c.id)}>
+                      {c.nombre}
+                    </Chip>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          )}
+
+          {/* Subcategorías: aparecen solas cuando la categoría elegida las
+              tiene bien asignadas en el ERP (lib/filtrosCatalogo.ts). */}
+          {raizUnica !== null && subOpciones.length > 0 && (
+            <nav aria-label={`Tipos de ${nombrePorCategoria.get(raizUnica) ?? "producto"}`} className="-mx-6 mb-4 md:mx-0">
+              <ul className="flex gap-2 overflow-x-auto px-6 pb-1 md:flex-wrap md:overflow-visible md:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <li>
+                  <Chip activo={subActiva === null} onClick={() => setSub(null)} suave>
+                    Todo {nombrePorCategoria.get(raizUnica)?.toLowerCase()}
+                  </Chip>
+                </li>
+                {subOpciones.map((o) => (
+                  <li key={o.id}>
+                    <Chip activo={subActiva === o.id} onClick={() => setSub(subActiva === o.id ? null : o.id)} suave>
+                      {o.nombre} <span className="tabular-nums opacity-70">{o.cuantos}</span>
+                    </Chip>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          )}
           <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-crema-400 pb-4">
             <p role="status" aria-atomic="true" className="text-sm text-navy-400">
               {items.length}{" "}
@@ -467,5 +596,35 @@ export default function CatalogoCliente({
         </div>
       </div>
     </div>
+  );
+}
+
+function Chip({
+  activo,
+  onClick,
+  suave = false,
+  children,
+}: {
+  activo: boolean;
+  onClick: () => void;
+  /** Subcategorías: mismo chip, en tono crema para distinguirlas de la categoría. */
+  suave?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={activo}
+      onClick={onClick}
+      className={`inline-flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-full border px-4 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:ring-offset-2 ${
+        activo
+          ? "border-navy-500 bg-navy-500 text-crema-100"
+          : suave
+            ? "border-crema-400 bg-crema-200 text-navy-500 hover:border-navy-300"
+            : "border-crema-400 bg-white text-navy-500 hover:border-navy-300"
+      }`}
+    >
+      {children}
+    </button>
   );
 }

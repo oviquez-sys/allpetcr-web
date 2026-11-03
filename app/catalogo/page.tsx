@@ -18,6 +18,8 @@ export const metadata = {
  *   ?cats=3,7     ids de categoría — los generan los enlaces de navegación
  *   ?c=Nombre     nombre de categoría; se mantiene por compatibilidad con
  *                 enlaces ya compartidos o indexados
+ *   ?marca=zeedog,gosbi  claves de marca (ver claveMarca en lib/filtrosCatalogo.ts)
+ *   ?sub=190      subcategoría dentro de la categoría elegida
  *   ?para=perro   especie (perro | gato). Filtro cruzado: se combina con la
  *                 categoría en vez de reemplazarla — ver ESPECIES en
  *                 lib/navegacion.ts
@@ -34,7 +36,7 @@ export const metadata = {
 export default async function CatalogoPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; c?: string; cats?: string; para?: string; orden?: string; disponibles?: string }>;
+  searchParams: Promise<{ q?: string; c?: string; cats?: string; para?: string; orden?: string; disponibles?: string; marca?: string; sub?: string }>;
 }) {
   const [productos, categorias, params] = await Promise.all([
     getProductosPublico(),
@@ -52,6 +54,16 @@ export default async function CatalogoPage({
   const para = (params.para ?? "").toLowerCase();
   const especieInicial =
     (ESPECIES.find((e) => e.clave === para)?.clave as ClaveEspecie | undefined) ?? null;
+
+  // Marca: solo letras y números (la clave), máximo 10. Una marca que no
+  // existe no filtra nada raro: aparece marcada con 0 y se puede quitar.
+  const marcasIniciales = (params.marca ?? "")
+    .split(",")
+    .map((m) => m.toLowerCase().replace(/[^a-z0-9]/g, ""))
+    .filter(Boolean)
+    .slice(0, 10);
+  const subNum = Number.parseInt(params.sub ?? "", 10);
+  const subInicial = categorias.some((c) => c.id === subNum && c.padre_id !== null) ? subNum : null;
 
   // `key` fuerza a React a MONTAR un CatalogoCliente nuevo cada vez que la
   // combinación de filtros de la URL cambia, en vez de reutilizar el que ya
@@ -84,6 +96,8 @@ export default async function CatalogoPage({
       especieInicial={especieInicial}
       ordenInicial={params.orden === "precio-asc" || params.orden === "precio-desc" || params.orden === "nombre" ? params.orden : "relevancia"}
       disponiblesInicial={params.disponibles === "1"}
+      marcasIniciales={marcasIniciales}
+      subInicial={subInicial}
     />
   );
 }
