@@ -10,6 +10,8 @@ import FichaAlimento from "@/components/ficha/FichaAlimento";
 import { connection } from "next/server";
 import { getCategoriasPublico, getProductoPorSkuPublico, getProductosPublico } from "@/lib/data";
 import { formatoColones, presentacionVisible, tinteDeSku } from "@/lib/formato";
+import { ahorro, enOferta, fechaCorta } from "@/lib/ofertas";
+import CuentaRegresiva from "@/components/CuentaRegresiva";
 import { negocio, urlWhatsApp, faltante } from "@/lib/negocio";
 import { recomendable, TEXTO_CONSULTA } from "@/lib/publicacion";
 import { claveVisual, separarTalla, tallasDe } from "@/lib/variantes";
@@ -136,6 +138,8 @@ export default async function ProductoPage({
       url,
       price: producto.precio_venta,
       priceCurrency: "CRC",
+      // Con oferta, Google necesita saber hasta cuándo vale ese precio.
+      ...(enOferta(producto) ? { priceValidUntil: producto.oferta.hasta } : {}),
       availability: producto.disponible
         ? "https://schema.org/InStock"
         : "https://schema.org/OutOfStock",
@@ -335,9 +339,28 @@ export default async function ProductoPage({
             </div>
           )}
 
-          <p className="mt-7 text-[30px] font-medium text-navy-500">
-            {formatoColones(producto.precio_venta)}
-          </p>
+          {enOferta(producto) ? (
+            <div className="mt-7">
+              {/* Oferta (04/11/2026): precio final, precio de antes tachado,
+                  ahorro y vigencia a la vista — lo que revisa el MEIC. */}
+              <p className="flex flex-wrap items-baseline gap-x-3">
+                <span className="text-[30px] font-bold text-orange-700">{formatoColones(producto.precio_venta)}</span>
+                <span className="text-lg text-navy-300 line-through"><span className="sr-only">Antes </span>{formatoColones(producto.precio_antes)}</span>
+              </p>
+              <p className="mt-2 inline-block rounded-lg bg-orange-50 px-3 py-1.5 text-sm font-bold text-orange-800">
+                Ahorrás {formatoColones(ahorro(producto))} ({producto.oferta.pct} %)
+              </p>
+              <div className="mt-3 max-w-prose rounded-card border border-dashed border-orange-300 px-4 py-3 text-sm leading-relaxed text-orange-900">
+                <strong>{producto.oferta.nombre}:</strong> válido hasta el {fechaCorta(producto.oferta.hasta)} o hasta
+                agotar existencias. Mismo precio en la tienda y en línea.
+                <CuentaRegresiva hasta={producto.oferta.hasta} />
+              </div>
+            </div>
+          ) : (
+            <p className="mt-7 text-[30px] font-medium text-navy-500">
+              {formatoColones(producto.precio_venta)}
+            </p>
+          )}
 
           {/* El estado no se comunica SOLO por color (WCAG 1.4.1): el punto
               acompaña al texto, no lo sustituye. Y no usa el dorado de marca:

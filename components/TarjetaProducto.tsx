@@ -6,6 +6,7 @@ import type { Producto } from "@/lib/types";
 import { formatoColones, nombreResumido, tinteDeSku } from "@/lib/formato";
 import BotonAgregar from "./BotonAgregar";
 import { separarTalla } from "@/lib/variantes";
+import { enOferta, fechaCorta } from "@/lib/ofertas";
 
 // Placeholder "shimmer" mientras carga la foto (20/09/2026): no reduce el
 // peso real de la imagen —para eso está `minimumCacheTTL` en next.config.ts—
@@ -73,6 +74,12 @@ function TarjetaProducto({ producto, cargaPrioritaria = false, tallas }: Props) 
   const precioMin = agrupado ? Math.min(...precios) : producto.precio_venta;
   const precioVaria = agrupado ? new Set(precios).size > 1 : false;
   const algunaDisponible = agrupado ? disponibles.length > 0 : producto.disponible;
+  // Ofertas (04/11/2026): con tallas, la etiqueta dice el mayor % de las
+  // tallas en oferta; el tachado solo se muestra en un producto suelto, donde
+  // "antes" es un solo precio y no se presta a confusión.
+  const enPromo = (agrupado ? (disponibles.length ? disponibles : agrupado) : [producto]).filter(enOferta);
+  const pctOferta = enPromo.length ? Math.max(...enPromo.map((t) => t.oferta.pct)) : 0;
+  const ofertaSuelta = !agrupado && enOferta(producto) ? producto : null;
 
   return (
     <article className="tarjeta-diferida group flex flex-col">
@@ -99,9 +106,13 @@ function TarjetaProducto({ producto, cargaPrioritaria = false, tallas }: Props) 
           )}
         </div>
 
-        {!algunaDisponible && (
+        {!algunaDisponible ? (
           <span className="pointer-events-none absolute left-3 top-3 rounded-full bg-white/95 px-3 py-1 text-[10.5px] tracking-wide text-navy-400">
             Sin existencias
+          </span>
+        ) : pctOferta > 0 && (
+          <span className="pointer-events-none absolute left-2.5 top-2.5 rounded-lg bg-orange-700 px-2 py-1 text-[13px] font-extrabold leading-none text-white shadow-md sm:left-3 sm:top-3 sm:text-[15px]">
+            {agrupado && enPromo.length < agrupado.length ? "Hasta " : ""}-{pctOferta}%
           </span>
         )}
       </Link>
@@ -118,10 +129,22 @@ function TarjetaProducto({ producto, cargaPrioritaria = false, tallas }: Props) 
             Tallas {agrupado.map((t) => separarTalla(t.nombre)?.talla).join(" · ")}
           </p>
         )}
-        <p className="mt-1.5 text-sm text-navy-400 sm:mt-2.5 sm:text-[17px]">
-          {precioVaria ? "Desde " : ""}
-          {formatoColones(precioMin)}
-        </p>
+        {ofertaSuelta ? (
+          <>
+            <p className="mt-1.5 flex flex-wrap items-baseline gap-x-2 sm:mt-2.5">
+              <span className="text-[15px] font-bold text-orange-700 sm:text-[18px]">{formatoColones(ofertaSuelta.precio_venta)}</span>
+              <span className="text-xs text-navy-300 line-through sm:text-sm">
+                <span className="sr-only">Antes </span>{formatoColones(ofertaSuelta.precio_antes)}
+              </span>
+            </p>
+            <p className="mt-0.5 text-[11px] text-navy-400 sm:text-xs">Oferta hasta el {fechaCorta(ofertaSuelta.oferta.hasta)}</p>
+          </>
+        ) : (
+          <p className={`mt-1.5 text-sm sm:mt-2.5 sm:text-[17px] ${pctOferta ? "font-bold text-orange-700" : "text-navy-400"}`}>
+            {precioVaria ? "Desde " : ""}
+            {formatoColones(precioMin)}
+          </p>
+        )}
       </Link>
 
       <div className="mt-3 sm:mt-4">

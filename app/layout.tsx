@@ -11,7 +11,7 @@ import BotonWhatsAppFlotante from "@/components/BotonWhatsAppFlotante";
 import { ProveedorCarrito } from "@/lib/carrito";
 import { negocio, faltante } from "@/lib/negocio";
 import { construirNavegacion } from "@/lib/navegacion";
-import { getNavegacion } from "@/lib/navegacionServidor";
+import { getNavegacion, getResumenOfertas } from "@/lib/navegacionServidor";
 import { sitioIndexable } from "@/lib/sitio";
 import { frasePorcentaje, regaliaVigente } from "@/lib/regaliaPublica";
 
@@ -121,7 +121,8 @@ export default async function RootLayout({
           </a>
           <AvisoConfiguracion />
           <RecordarOrigen />
-          <NavBar navegacion={navegacion} fraseManada={frasePorcentaje(await regaliaVigente())} />
+          <NavBar navegacion={navegacion} fraseManada={frasePorcentaje(await regaliaVigente())}
+            ofertas={await getResumenOfertas().catch(() => null)} />
           <AvisoRecompra />
           <main id="contenido" className="min-h-screen">
             {children}

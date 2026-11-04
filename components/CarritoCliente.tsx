@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useMemo, useState } from "react";
 import { useCarrito, resolverCarrito, sePuedePedir } from "@/lib/carrito";
 import { formatoColones, presentacionVisible, tinteDeSku } from "@/lib/formato";
+import { enOferta } from "@/lib/ofertas";
 import { TEXTO_CONSULTA } from "@/lib/publicacion";
 import type { Producto } from "@/lib/types";
 
@@ -217,6 +218,12 @@ export default function CarritoCliente({ productos }: { productos: Producto[] })
                             {item.cantidad > 1 && (
                               <p className="text-[11px] text-navy-400">
                                 {formatoColones(p.precio_venta)} c/u
+                              </p>
+                            )}
+                            {enOferta(p) && (
+                              <p className="text-[11px] font-semibold text-orange-700">
+                                {p.oferta.nombre} -{p.oferta.pct}% · antes{" "}
+                                <span className="line-through">{formatoColones(p.precio_antes * item.cantidad)}</span>
                               </p>
                             )}
                           </>

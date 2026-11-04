@@ -20,6 +20,7 @@ export const metadata = {
  *                 enlaces ya compartidos o indexados
  *   ?marca=zeedog,gosbi  claves de marca (ver claveMarca en lib/filtrosCatalogo.ts)
  *   ?sub=190      subcategoría dentro de la categoría elegida
+ *   ?ofertas=1    solo lo que está en oferta (promociones del ERP, 04/11/2026)
  *   ?para=perro   especie (perro | gato). Filtro cruzado: se combina con la
  *                 categoría en vez de reemplazarla — ver ESPECIES en
  *                 lib/navegacion.ts
@@ -36,7 +37,7 @@ export const metadata = {
 export default async function CatalogoPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; c?: string; cats?: string; para?: string; orden?: string; disponibles?: string; marca?: string; sub?: string }>;
+  searchParams: Promise<{ q?: string; c?: string; cats?: string; para?: string; orden?: string; disponibles?: string; marca?: string; sub?: string; ofertas?: string }>;
 }) {
   const [productos, categorias, params] = await Promise.all([
     getProductosPublico(),
@@ -83,7 +84,7 @@ export default async function CatalogoPage({
   // viejo y montar uno de cero con las props correctas ya en su useState
   // inicial. Se deja `q` fuera de la key a propósito: escribir en el
   // buscador no debe reiniciar el componente en cada tecla.
-  const key = `${idsIniciales.join(",")}|${especieInicial ?? ""}|${params.c ?? ""}|${params.q ?? ""}`;
+  const key = `${idsIniciales.join(",")}|${especieInicial ?? ""}|${params.c ?? ""}|${params.q ?? ""}|${params.ofertas ?? ""}`;
 
   return (
     <CatalogoCliente
@@ -98,6 +99,7 @@ export default async function CatalogoPage({
       disponiblesInicial={params.disponibles === "1"}
       marcasIniciales={marcasIniciales}
       subInicial={subInicial}
+      ofertasInicial={params.ofertas === "1"}
     />
   );
 }

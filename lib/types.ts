@@ -63,6 +63,24 @@ export interface Producto {
   /** Lo calcula el sitio, no el ERP (lib/publicacion.ts): si no es null, el
    *  producto se muestra pero se vende solo con consulta previa por WhatsApp. */
   solo_consulta?: MotivoConsulta | null;
+  /** Ofertas (04/11/2026, promociones del ERP). Con una promoción vigente,
+   *  `precio_venta` YA ES el precio de oferta —el que cobra la caja—, y
+   *  `precio_antes` el normal, para tacharlo. Sin oferta, los dos llegan null
+   *  (o faltan en un JSON viejo). Ver lib/ofertas.ts. */
+  precio_antes?: number | null;
+  oferta?: Oferta | null;
+}
+
+export interface Oferta {
+  /** El % anunciado (el real es igual o un poco mayor: el ERP redondea el
+   *  precio de oferta hacia abajo). */
+  pct: number;
+  /** Nombre de la promoción para la web ("Black Friday"). */
+  nombre: string;
+  /** Último día de la oferta, "AAAA-MM-DD" (hora de Costa Rica). */
+  hasta: string;
+  /** Si sale en la sección «Ofertas» y en la franja de arriba. */
+  en_ofertas: boolean;
 }
 
 /** "salud": antiparasitario sin la información de la etiqueta.

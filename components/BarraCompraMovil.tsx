@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import BotonAgregar from "@/components/BotonAgregar";
 import { formatoColones } from "@/lib/formato";
+import { enOferta } from "@/lib/ofertas";
 import type { Producto } from "@/lib/types";
 
 interface Props {
@@ -57,7 +58,14 @@ export default function BarraCompraMovil({ producto, idAcciones, consulta }: Pro
       <div className="mx-auto flex max-w-contenido items-center gap-4">
         <div className="min-w-0 flex-1">
           <p className="truncate text-xs text-navy-400">{producto.nombre}</p>
-          <p className="text-lg font-medium leading-tight text-navy-500">{formatoColones(producto.precio_venta)}</p>
+          {enOferta(producto) ? (
+            <p className="flex items-baseline gap-2 leading-tight">
+              <span className="text-lg font-bold text-orange-700">{formatoColones(producto.precio_venta)}</span>
+              <span className="text-xs text-navy-300 line-through"><span className="sr-only">Antes </span>{formatoColones(producto.precio_antes)}</span>
+            </p>
+          ) : (
+            <p className="text-lg font-medium leading-tight text-navy-500">{formatoColones(producto.precio_venta)}</p>
+          )}
         </div>
         <div className="w-[52%] max-w-[220px] shrink-0">
           {consulta ? (

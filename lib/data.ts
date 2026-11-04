@@ -5,6 +5,7 @@ import type { Categoria, Producto } from "./types";
 import productosJson from "@/data/productos.json";
 import categoriasJson from "@/data/categorias.json";
 import { estaRetirado, prepararCategorias, prepararFicha, prepararParaPublicar } from "./publicacion";
+import { normalizarOferta } from "./ofertas";
 
 // Catálogo en vivo en producción; JSON solo para desarrollo sin ERP.
 const ERP_API_URL = process.env.ERP_API_URL;
@@ -47,7 +48,8 @@ function validarProductos(valores: unknown[]): Producto[] {
   // La ficha individual y el checkout siguen validándose contra el ERP.
   const porSku = new Map<string, Producto>();
   for (const producto of valores) {
-    if (!porSku.has(producto.sku)) porSku.set(producto.sku, producto);
+    // Ofertas (04/11/2026): una oferta mal formada se descarta, no tumba el catálogo.
+    if (!porSku.has(producto.sku)) porSku.set(producto.sku, normalizarOferta(producto));
   }
   return [...porSku.values()];
 }
@@ -161,7 +163,7 @@ async function descargarFicha(sku: string): Promise<Producto | null> {
   try {
     const producto = await erpFetch<unknown>(`/api/catalogo/productos/${encodeURIComponent(sku)}/`);
     if (!esProducto(producto)) throw new Error("El ERP devolvió una ficha con un formato inválido.");
-    return producto;
+    return normalizarOferta(producto);
   } catch (error) {
     if (error instanceof ErrorCatalogo && error.status === 404) return null;
     throw error;

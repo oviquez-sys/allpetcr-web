@@ -1,4 +1,5 @@
 import type { Categoria, Producto } from "./types";
+import { HREF_OFERTAS, resumenOfertas } from "./ofertas";
 
 export const ESPECIES = [
   { clave: "perro", label: "Perros", coincide: ["Perro", "Perro y gato"] },
@@ -88,9 +89,13 @@ export function construirAlimentos(categorias: Categoria[], productos: Producto[
 export function construirNavegacion(categorias: Categoria[], productos: Producto[]): SeccionNav[] {
   const raices = categorias.filter((c) => c.padre_id === null).sort(porOrden);
   const alimentos = construirAlimentos(categorias, productos);
+  // Ofertas (04/11/2026): primera mientras haya una promoción vigente con
+  // productos disponibles; desaparece sola cuando termina.
+  const ofertas: SeccionNav[] = resumenOfertas(productos)
+    ? [{ id: "ofertas", label: "Ofertas", href: HREF_OFERTAS, grupos: [] }] : [];
   // Alimentos va primero: es lo que la gente viene a comprar (mismo criterio
   // que el orden del árbol en el ERP).
-  return [...(alimentos ? [alimentos] : []), ...ESPECIES.map((e) => ({
+  return [...ofertas, ...(alimentos ? [alimentos] : []), ...ESPECIES.map((e) => ({
     id: e.clave, label: e.label, href: hrefEspecie(e.clave),
     grupos: raices.filter((c) => {
       const rama = idsRama(categorias, c.id);

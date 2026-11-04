@@ -10,6 +10,7 @@ import { agruparTallas } from "@/lib/variantes";
 import { claveMarca, opcionesMarca, opcionesSubcategoria } from "@/lib/filtrosCatalogo";
 import { urlWhatsApp } from "@/lib/negocio";
 import type { Categoria, Producto } from "@/lib/types";
+import { enOferta } from "@/lib/ofertas";
 
 interface Props {
   productos: Producto[];
@@ -26,6 +27,8 @@ interface Props {
   marcasIniciales?: string[];
   /** Subcategoría elegida dentro de la categoría (parámetro ?sub=). */
   subInicial?: number | null;
+  /** Solo productos en oferta (parámetro ?ofertas=1, 04/11/2026). */
+  ofertasInicial?: boolean;
 }
 
 /** Cuántas marcas se ven antes de «Ver todas». */
@@ -44,6 +47,7 @@ export default function CatalogoCliente({
   disponiblesInicial = false,
   marcasIniciales = [],
   subInicial = null,
+  ofertasInicial = false,
 }: Props) {
   const [busqueda, setBusqueda] = useState(busquedaInicial);
   const [filtrosAbiertos, setFiltrosAbiertos] = useState(false);
@@ -62,6 +66,8 @@ export default function CatalogoCliente({
   const [orden, setOrden] = useState<Orden>(ordenInicial);
   const [marcas, setMarcas] = useState<string[]>(marcasIniciales);
   const [sub, setSub] = useState<number | null>(subInicial);
+  const [soloOfertas, setSoloOfertas] = useState(ofertasInicial);
+  const hayOfertas = useMemo(() => productos.some(enOferta), [productos]);
   const [todasLasMarcas, setTodasLasMarcas] = useState(false);
   useEffect(() => {
     const temporizador = setTimeout(() => {
@@ -73,11 +79,12 @@ export default function CatalogoCliente({
       if (orden !== "relevancia") params.set("orden", orden);
       if (marcas.length) params.set("marca", marcas.join(","));
       if (sub !== null) params.set("sub", String(sub));
+      if (soloOfertas) params.set("ofertas", "1");
       const query = params.toString();
       window.history.replaceState(null, "", `/catalogo${query ? `?${query}` : ""}`);
     }, 400);
     return () => clearTimeout(temporizador);
-  }, [busqueda, catsElegidas, especie, soloDisponibles, orden, marcas, sub]);
+  }, [busqueda, catsElegidas, especie, soloDisponibles, orden, marcas, sub, soloOfertas]);
 
   // El ERP publica solo lo que hay en existencia (regla del 02/08/2026), así
   // que normalmente TODO lo que llega está disponible y la casilla "solo con
@@ -172,6 +179,7 @@ export default function CatalogoCliente({
     // Expandir cada categoría raíz elegida a [ella misma, ...sus hijas].
     const idsElegidos = subActiva !== null ? idsConHijos(subActiva) : catsElegidas.flatMap((id) => idsConHijos(id));
     return productos.filter((p) => {
+      if (soloOfertas && !enOferta(p)) return false;
       if (soloDisponibles && !p.disponible) return false;
       if (especie && !esParaEspecie(p.mascota, especie)) return false;
       if (catsElegidas.length > 0) {
@@ -208,7 +216,7 @@ export default function CatalogoCliente({
       }
       return true;
     });
-  }, [productos, busquedaDiferida, catsElegidas, subActiva, especie, soloDisponibles, idsConHijos, categoriasDe]);
+  }, [productos, busquedaDiferida, catsElegidas, subActiva, especie, soloDisponibles, soloOfertas, idsConHijos, categoriasDe]);
 
   const marcasOfrecidas = useMemo(() => opcionesMarca(sinMarca, marcas), [sinMarca, marcas]);
   const nombreMarca = useMemo(() => new Map(marcasOfrecidas.map((m) => [m.clave, m.nombre])), [marcasOfrecidas]);
@@ -288,7 +296,7 @@ export default function CatalogoCliente({
     setMarcas((prev) => (prev.includes(clave) ? prev.filter((x) => x !== clave) : [...prev, clave]));
 
   const hayFiltros =
-    catsElegidas.length > 0 || marcas.length > 0 || especie !== null || soloDisponibles || busqueda.trim() !== "";
+    catsElegidas.length > 0 || marcas.length > 0 || especie !== null || soloDisponibles || soloOfertas || busqueda.trim() !== "";
 
   const limpiar = () => {
     setSub(null);
@@ -296,12 +304,13 @@ export default function CatalogoCliente({
     setCatsElegidas([]);
     setEspecie(null);
     setSoloDisponibles(false);
+    setSoloOfertas(false);
     setBusqueda("");
   };
 
   return (
     <div className="mx-auto max-w-contenido px-6 py-12">
-      <h1 className="font-display text-headline text-navy-500">{especie ? `Productos para ${especie === "perro" ? "perros" : "gatos"}` : "Catálogo"}</h1>
+      <h1 className="font-display text-headline text-navy-500">{soloOfertas ? "Ofertas" : especie ? `Productos para ${especie === "perro" ? "perros" : "gatos"}` : "Catálogo"}</h1>
       {hayFiltros && <p className="mt-3 text-sm text-navy-400">{[busqueda && `Búsqueda: ${busqueda}`, ...catsElegidas.map((id) => nombrePorCategoria.get(id)), subActiva !== null && nombrePorCategoria.get(subActiva), ...marcas.map((m) => nombreMarca.get(m) ?? m), soloDisponibles && "Con existencias"].filter(Boolean).join(" · ")}</p>}
 
       {/* md, no lg: a ~900px (tablet) el panel de filtros a ancho completo
@@ -323,6 +332,19 @@ export default function CatalogoCliente({
                 className="mt-2 w-full rounded-lg border border-crema-400 bg-crema-200 px-3 py-2 text-sm font-normal normal-case tracking-normal text-navy-500 outline-none focus:border-navy-300"
               />
             </label>
+
+            {(hayOfertas || soloOfertas) && (
+              <button
+                type="button"
+                aria-pressed={soloOfertas}
+                onClick={() => setSoloOfertas(!soloOfertas)}
+                className={`mt-5 w-full rounded-full border px-3 py-2 text-sm font-semibold transition-colors ${
+                  soloOfertas ? "border-orange-700 bg-orange-700 text-white" : "border-orange-300 bg-orange-50 text-orange-800 hover:border-orange-700"
+                }`}
+              >
+                🔥 Solo ofertas
+              </button>
+            )}
 
             {hayMascota && (
               <fieldset className="mt-6">

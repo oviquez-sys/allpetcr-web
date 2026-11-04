@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import AvisoBarra from "@/components/manada/AvisoBarra";
+import { fechaCorta, HREF_OFERTAS, type ResumenOfertas } from "@/lib/ofertas";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useCarrito } from "@/lib/carrito";
@@ -56,7 +57,9 @@ function IconoBuscar({ className = "" }: { className?: string }) {
   );
 }
 
-export default function NavBar({ navegacion, fraseManada = null }: { navegacion: SeccionNav[]; fraseManada?: string | null }) {
+export default function NavBar({ navegacion, fraseManada = null, ofertas = null }: {
+  navegacion: SeccionNav[]; fraseManada?: string | null; ofertas?: ResumenOfertas | null;
+}) {
   const { unidades, listo } = useCarrito();
   const [abierto, setAbierto] = useState(false);
   const [megaAbierto, setMegaAbierto] = useState<string | null>(null);
@@ -154,15 +157,26 @@ export default function NavBar({ navegacion, fraseManada = null }: { navegacion:
           escritorio: son tareas de quien ya compró, no de quien explora, y
           en la fila principal le quitaban aire al menú. En móvil siguen
           dentro del menú desplegable. */}
-      <div className="bg-navy-500 text-[12px] font-light text-crema-200">
+      <div className={`${ofertas ? "bg-orange-700 text-white" : "bg-navy-500 text-crema-200"} text-[12px] font-light`}>
         <div className="mx-auto flex max-w-contenido items-center justify-center gap-6 px-6 py-1.5 lg:justify-between">
-          {/* La invitación a la manada ocupa esta línea (14/10/2026); a quien
-              ya se unió le vuelve a salir la de siempre. */}
+          {/* Con una promoción vigente, la línea la anuncia (04/11/2026) con
+              su vigencia, que es lo que pide el MEIC. Si no, la invitación a
+              la manada (14/10/2026); a quien ya se unió, la de siempre. */}
           <p>
-            <AvisoBarra frase={fraseManada} normal={<>
-              Tienda en Heredia · Retiro sin costo
-              <span className="hidden sm:inline"> · Envíos en la GAM</span>
-            </>} />
+            {ofertas ? (
+              <Link href={HREF_OFERTAS}
+                className="inline-flex items-center gap-1.5 font-medium underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
+                <span aria-hidden="true">🔥</span>
+                <span><strong className="font-extrabold uppercase tracking-wide">{ofertas.nombre}</strong>
+                  {" "}· hasta {ofertas.pctMax} % OFF<span className="hidden sm:inline"> · hasta el {fechaCorta(ofertas.hasta)}</span></span>
+                <span aria-hidden="true">→</span>
+              </Link>
+            ) : (
+              <AvisoBarra frase={fraseManada} normal={<>
+                Tienda en Heredia · Retiro sin costo
+                <span className="hidden sm:inline"> · Envíos en la GAM</span>
+              </>} />
+            )}
           </p>
           <ul className="hidden items-center gap-5 lg:flex">
             {whatsapp && (
@@ -240,8 +254,9 @@ export default function NavBar({ navegacion, fraseManada = null }: { navegacion:
                     >
                       <Link
                         href={seccion.href}
-                        className={`rounded-lg py-2.5 pl-3 text-[14.5px] font-medium text-navy-500 transition-colors hover:text-dorado-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 ${tieneHijos ? "pr-0.5" : "pr-3"}`}
+                        className={`rounded-lg py-2.5 pl-3 text-[14.5px] font-medium transition-colors hover:text-dorado-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 ${tieneHijos ? "pr-0.5" : "pr-3"} ${seccion.id === "ofertas" ? "font-bold text-orange-700" : "text-navy-500"}`}
                       >
+                        {seccion.id === "ofertas" && <span aria-hidden="true">🔥 </span>}
                         {seccion.label}
                       </Link>
                       {tieneHijos && (
