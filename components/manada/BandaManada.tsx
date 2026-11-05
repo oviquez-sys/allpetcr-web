@@ -9,7 +9,7 @@ import { useEsMiembro } from "./useEsMiembro";
  * se ve como continuación y no como otro sitio. Desaparece para quien ya se
  * unió desde ese celular.
  */
-export default function BandaManada({ porcentaje }: { porcentaje: string | null }) {
+export default function BandaManada({ porcentaje, sinAlimentos = false }: { porcentaje: string | null; sinAlimentos?: boolean }) {
   const miembro = useEsMiembro();
   if (miembro) return null;
   return (
@@ -22,7 +22,7 @@ export default function BandaManada({ porcentaje }: { porcentaje: string | null 
               <span className="font-display text-[4.5rem] leading-none text-dorado-300">{porcentaje}</span>
               <span className="font-display text-3xl text-dorado-300">%</span>
             </div>
-            <p className="mt-1 text-[13px] font-light text-crema-200">en tu primera compra</p>
+            <p className="mt-1 text-[13px] font-light text-crema-200">en tu primera compra{sinAlimentos ? ", excepto alimentos" : ""}</p>
             <p className="mt-0.5 text-[12px] font-light text-crema-200">En la tienda, por WhatsApp o en la web</p>
           </div>
         ) : (

@@ -42,10 +42,13 @@ const DIRECCION_VACIA: DireccionEntrega = {
 export default function CheckoutCliente({
   productos,
   porcentajeManada = null,
+  manadaSinAlimentos = false,
 }: {
   productos: Producto[];
   /** Porcentaje de la regalía de La manada vigente en el ERP, o null. */
   porcentajeManada?: string | null;
+  /** La regalía no rebaja el alimento (05/11/2026). */
+  manadaSinAlimentos?: boolean;
 }) {
   const { lineas, listo } = useCarrito();
   const [catalogo, setCatalogo] = useState(productos);
@@ -502,7 +505,7 @@ export default function CheckoutCliente({
             />
             <p id="ayuda-codigo-manada" className="mt-1.5 text-[12.5px] leading-relaxed text-navy-400">
               Escribí tu código o el WhatsApp con que te registraste.
-              {porcentajeManada ? ` El ${porcentajeManada} % aplica a tu primera compra.` : ""}{" "}
+              {porcentajeManada ? ` El ${porcentajeManada} % aplica a tu primera compra${manadaSinAlimentos ? ", excepto alimentos" : ""}.` : ""}{" "}
               Lo validamos y te confirmamos el total con el descuento por WhatsApp antes de que pagués.
             </p>
           </div>

@@ -32,7 +32,7 @@ export const metadata = {
 
 // 16/10/2026: auditoría de prelanzamiento (envío y total final por WhatsApp,
 // beneficio de La manada, plazo mínimo de garantía). Si se publica otro día, poner esa fecha.
-const VIGENCIA = "16 de octubre de 2026";
+const VIGENCIA = "5 de noviembre de 2026";
 
 export default function TerminosPage() {
   const direccion = direccionCompleta();
@@ -89,7 +89,10 @@ export default function TerminosPage() {
           <li id="manada">
             <strong>Beneficio de bienvenida de La manada:</strong> el descuento que se anuncia al registrarte
             aplica una sola vez por persona, en tu primera compra, ya sea en la tienda, por WhatsApp o en este
-            sitio. No vence, salvo que al registrarte se te indique una fecha. En la tienda mostrás tu código o
+            sitio. No aplica a alimentos para mascotas (secos ni húmedos); si en esa compra solo llevás
+            alimento, el beneficio te queda para la siguiente. Quien se registró antes del 5 de noviembre de 2026
+            lo recibe en las condiciones que se le indicaron entonces. No vence, salvo que al registrarte se te
+            indique una fecha. En la tienda mostrás tu código o
             decís tu WhatsApp; en un pedido en línea lo escribís en «Código de La manada» o en tu mensaje, y te
             confirmamos el total con el descuento antes de que pagués. Más detalles en{" "}
             <Link href="/manada" className={enlaceLegal}>La manada</Link>.

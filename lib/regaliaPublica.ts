@@ -14,6 +14,9 @@ export interface Regalia {
   activa: boolean;
   porcentaje?: string;
   texto?: string;
+  /** El descuento no rebaja el alimento (05/11/2026): el margen del
+   *  alimento es muy chico. El `texto` del ERP ya trae la condición. */
+  excluye_alimentos?: boolean;
   dias_vigencia?: number;
 }
 
@@ -34,7 +37,10 @@ export async function regaliaVigente(): Promise<Regalia | null> {
   }
 }
 
-/** "10" → "10 % en tu primera compra"; sin regalía activa, null. */
+/** "10" → "10 % en tu primera compra, excepto alimentos"; sin regalía activa, null.
+ *  La condición va pegada al porcentaje: un anuncio de descuento no puede
+ *  callarse una exclusión que el cliente va a descubrir en la caja. */
 export function frasePorcentaje(r: Regalia | null): string | null {
-  return r?.activa && r.porcentaje ? `${r.porcentaje} % en tu primera compra` : null;
+  if (!r?.activa || !r.porcentaje) return null;
+  return `${r.porcentaje} % en tu primera compra${r.excluye_alimentos ? ", excepto alimentos" : ""}`;
 }

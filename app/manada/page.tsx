@@ -56,7 +56,7 @@ export default async function ManadaPage({
               <span className="font-display text-[3.5rem] leading-none text-dorado-300">{regalia.porcentaje}</span>
               <span className="font-display text-2xl text-dorado-300">%</span>
               <span className="ml-3 text-left text-sm font-light leading-tight text-crema-200">
-                en tu<br />primera compra
+                en tu<br />primera compra{regalia.excluye_alimentos && <><br />excepto alimentos</>}
               </span>
             </div>
           )}
@@ -104,6 +104,8 @@ export default async function ManadaPage({
                   <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-dorado-500" aria-hidden="true" />
                   <span>
                     Aplica solo a tu primera compra y es de un solo uso por persona.
+                    {regalia.excluye_alimentos &&
+                      " No aplica a alimentos (secos ni húmedos); sí a snacks, juguetes, accesorios y todo lo demás. Si en esa compra solo llevás alimento, el regalo te queda para la próxima."}
                     {regalia.dias_vigencia
                       ? ` Vale por ${regalia.dias_vigencia} días desde que te registrás.`
                       : " No vence."}

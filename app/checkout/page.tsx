@@ -11,5 +11,6 @@ export const metadata = {
 export default async function CheckoutPage() {
   const [productos, regalia] = await Promise.all([getProductos(), regaliaVigente()]);
   const porcentaje = regalia?.activa && regalia.porcentaje ? regalia.porcentaje : null;
-  return <CheckoutCliente productos={productos} porcentajeManada={porcentaje} />;
+  return <CheckoutCliente productos={productos} porcentajeManada={porcentaje}
+    manadaSinAlimentos={!!regalia?.excluye_alimentos} />;
 }

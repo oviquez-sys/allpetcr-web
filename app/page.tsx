@@ -302,7 +302,8 @@ export default async function HomePage() {
       {/* ── 3b. LA MANADA ───────────────────────────────────────────────────
           Después de ver producto y antes de la pausa: quien llegó hasta acá
           ya se interesó, y es el momento de ofrecerle el regalo. */}
-      <BandaManada porcentaje={regalia?.activa && regalia.porcentaje ? regalia.porcentaje : null} />
+      <BandaManada porcentaje={regalia?.activa && regalia.porcentaje ? regalia.porcentaje : null}
+        sinAlimentos={!!regalia?.excluye_alimentos} />
 
       {/* ── 4. BANDA LIFESTYLE ──────────────────────────────────────────── */}
       <BandaLifestyle
