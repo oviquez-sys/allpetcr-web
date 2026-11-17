@@ -3,7 +3,7 @@ import Image from "next/image";
 import BloqueEditorial, { Flecha } from "@/components/inicio/BloqueEditorial";
 import CarruselProductos from "@/components/inicio/CarruselProductos";
 import BandaLifestyle from "@/components/inicio/BandaLifestyle";
-import ComprarPorActividad from "@/components/inicio/ComprarPorActividad";
+import CategoriasConFoto from "@/components/inicio/CategoriasConFoto";
 import TiendaFisica from "@/components/inicio/TiendaFisica";
 import Marcas from "@/components/inicio/Marcas";
 import Comunidad from "@/components/inicio/Comunidad";
@@ -14,7 +14,7 @@ import BandaCampana from "@/components/campana/BandaCampana";
 import { leerCampana } from "@/lib/campanaServidor";
 import { CAMPANA_IMPRESA, estadoCampana } from "@/lib/campana";
 import { ESPECIES, esParaEspecie, hrefEspecie, hrefCats, idsRama, RAICES_ALIMENTO } from "@/lib/navegacion";
-import { ACTIVIDADES } from "@/lib/contenidoInicio";
+import { puntajeFicha } from "@/lib/publicacion";
 import { armarVitrina } from "@/lib/vitrina";
 import { connection } from "next/server";
 import { getCategoriasPublico, getProductosPublico } from "@/lib/data";
@@ -30,7 +30,7 @@ export const metadata = { alternates: { canonical: "/" } };
  *   3. En la tienda hoy        producto real, con existencia
  *   3b. La manada (14/10/2026) invitación con el regalo de bienvenida
  *   4. Banda lifestyle         la pausa: para qué se compra
- *   5. Comprar por actividad   pasear, jugar, comer… → categorías reales
+ *   (5. Comprar por actividad: retirada el 17/11/2026, ver abajo)
  *   6. Cómo comprar            la mecánica sin pago en línea, en una franja
  *   7. La tienda física        dirección, horario, retiro, cómo llegar
  *   8. Marcas / Comunidad      listas, pero apagadas hasta tener datos reales
@@ -65,6 +65,27 @@ const pasos = [
   { n: "1", titulo: "Armá tu pedido", texto: "Sin registro y sin tarjeta." },
   { n: "2", titulo: "Confirmamos por WhatsApp", texto: "Te confirmamos existencias y total antes de que pagués." },
   { n: "3", titulo: "Retirás o te lo enviamos", texto: "Retiro sin costo en Heredia o entrega en la GAM." },
+];
+
+/** Categorías con foto (17/11/2026): nombre corto para la fila de la portada
+ *  (el nombre completo sigue en el catálogo y el menú) y el orden en que se
+ *  muestran: primero lo que más se compra. Una raíz nueva del ERP que no esté
+ *  aquí aparece al final con su nombre completo. */
+const NOMBRE_CORTO: Record<string, string> = {
+  "Snacks y premios": "Snacks",
+  "Comederos y bebederos": "Comederos",
+  "Arena y sanitarios": "Arena",
+  "Higiene y aseo": "Higiene",
+  "Ropa y accesorios": "Ropa",
+  "Rascadores y muebles": "Rascadores",
+  "Salud y cuidado": "Salud",
+  "Adornos y decoración": "Adornos",
+  Descanso: "Camas",
+};
+const ORDEN_CATEGORIAS = [
+  "Alimento", "Snacks y premios", "Juguetes", "Paseo", "Descanso", "Higiene y aseo",
+  "Arena y sanitarios", "Comederos y bebederos", "Ropa y accesorios", "Rascadores y muebles",
+  "Salud y cuidado", "Transporte", "Adornos y decoración", "Acuario",
 ];
 
 /** Fotos de las tres entradas grandes. Criterio (docs/DIRECCION-DE-ARTE.md):
@@ -120,11 +141,33 @@ export default async function HomePage() {
       : []),
   ].filter((e) => e.total > 0);
 
-  // ── ACTIVIDADES → categorías reales por id.
-  const actividades = ACTIVIDADES.map((a) => {
-    const ids = idsPorNombre(a.categorias);
-    return { nombre: a.nombre, href: hrefCats(ids), total: ids.length ? contarRamas(ids) : 0 };
-  }).filter((a) => a.total > 0);
+  // ── CATEGORÍAS CON FOTO (17/11/2026). La foto es la de un producto real
+  // de cada categoría: primero los destacados del ERP y los que tienen marca
+  // (sus fotos son las oficiales, con fondo limpio), después la ficha más
+  // completa. Reemplaza a «¿Cuál es el plan hoy?»: mostraba seis actividades
+  // con ícono; esta fila muestra todas las categorías con un producto de
+  // verdad, y la portada queda una pantalla más corta en el celular.
+  const posicion = (nombre: string) => {
+    const i = ORDEN_CATEGORIAS.indexOf(nombre);
+    return i < 0 ? 99 : i;
+  };
+  const categoriasFoto = categorias
+    .filter((c) => c.padre_id === null)
+    .map((c) => {
+      const rama = new Set(idsRama(categorias, c.id));
+      const enRama = disponibles.filter((p) => p.categoria_id !== null && rama.has(p.categoria_id));
+      const elegido = enRama
+        .filter((p) => p.imagen)
+        .sort((a, b) =>
+          (b.destacado_home ? 10 : 0) + ((b.marca ?? "").trim() ? 3 : 0) + puntajeFicha(b) -
+          ((a.destacado_home ? 10 : 0) + ((a.marca ?? "").trim() ? 3 : 0) + puntajeFicha(a)))[0];
+      return {
+        id: c.id, nombre: NOMBRE_CORTO[c.nombre] ?? c.nombre, href: hrefCats([c.id]),
+        total: enRama.length, imagen: elegido?.imagen ?? null, orden: posicion(c.nombre),
+      };
+    })
+    .filter((c) => c.total > 0)
+    .sort((a, b) => a.orden - b.orden);
 
   const idsPaseo = idsPorNombre(["Paseo"]);
 
@@ -174,7 +217,7 @@ export default async function HomePage() {
           `preload` + `fetchPriority="high"`: es el elemento LCP. */}
       <section className="relative isolate overflow-hidden bg-navy-500">
         <div className="relative lg:grid lg:h-[calc(100svh-104px)] lg:max-h-[820px] lg:min-h-[600px] lg:grid-cols-[max(440px,calc((100vw-1180px)/2+540px))_minmax(0,1fr)]">
-          <div className="relative aspect-[4/3] bg-navy-500 sm:aspect-[16/9] lg:order-2 lg:aspect-auto lg:h-full">
+          <div className="relative aspect-[16/10] bg-navy-500 sm:aspect-[16/9] lg:order-2 lg:aspect-auto lg:h-full">
             <Image
               src="/portada/allpet-fachada-heredia.jpg"
               alt="Fachada de la tienda AllPetcr.com en Heredia: rótulo azul con el logo y vitrina con ropa, juguetes, camas, rascadores y alimento para perros y gatos"
@@ -188,7 +231,7 @@ export default async function HomePage() {
             <div className="absolute inset-y-0 left-0 hidden w-24 bg-gradient-to-r from-navy-500 to-transparent lg:block" aria-hidden="true" />
           </div>
 
-          <div className="relative mx-auto flex max-w-contenido px-4 pb-12 pt-2 sm:px-6 sm:pb-16 lg:order-1 lg:mx-0 lg:h-full lg:max-w-none lg:items-center lg:py-12 lg:pl-[max(1.5rem,calc((100vw-1180px)/2+1.5rem))] lg:pr-10">
+          <div className="relative mx-auto flex max-w-contenido px-4 pb-9 pt-1 sm:px-6 sm:pb-16 lg:order-1 lg:mx-0 lg:h-full lg:max-w-none lg:items-center lg:py-12 lg:pl-[max(1.5rem,calc((100vw-1180px)/2+1.5rem))] lg:pr-10">
             <div className="max-w-3xl text-white">
               <p className="text-label font-medium uppercase tracking-[0.16em] text-white/85">
                 Tienda de mascotas · Heredia, Costa Rica
@@ -199,8 +242,8 @@ export default async function HomePage() {
                   retoma "¿Cuál es el plan hoy?" más abajo. Las palabras para
                   Google (tienda de mascotas, Heredia, perros, gatos) van en el
                   antetítulo y el subtítulo, no en el h1. */}
-              <h1 className="mt-4 font-display text-hero lg:text-[4.25rem]">Ellos marcan el plan.</h1>
-              <p className="mt-5 max-w-md text-base font-light leading-relaxed text-white/90 sm:text-[17px]">
+              <h1 className="mt-3 font-display text-[2.6rem] leading-[1.02] sm:mt-4 sm:text-hero lg:text-[4.25rem]">Ellos marcan el plan.</h1>
+              <p className="mt-3 max-w-md text-base font-light leading-relaxed text-white/90 sm:mt-5 sm:text-[17px]">
                 Alimento, accesorios e higiene para perros y gatos. En línea o
                 en nuestra tienda de Heredia.
               </p>
@@ -211,7 +254,7 @@ export default async function HomePage() {
                 Armá tu pedido y confirmalo por WhatsApp. Te confirmamos
                 existencias y total antes de que pagués.
               </p>
-              <div className="mt-8 flex flex-wrap items-center gap-x-7 gap-y-4">
+              <div className="mt-6 flex flex-wrap items-center gap-x-7 gap-y-3 sm:mt-8 sm:gap-y-4">
                 <Link
                   href="/catalogo"
                   className="inline-flex items-center gap-2.5 rounded-full bg-white px-8 py-4 text-sm font-medium text-navy-500 transition-colors hover:bg-crema-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-navy-900"
@@ -255,14 +298,18 @@ export default async function HomePage() {
           (27/09/2026): dos bloques de 176 px lado a lado recortaban la foto
           y el título chocaba con la flecha. En tablet, la primera a lo ancho
           y las otras dos lado a lado; en escritorio, las tres en fila. */}
-      <section className="pb-12 pt-12 lg:pb-16 lg:pt-16">
+      <section className="pb-10 pt-10 lg:pb-16 lg:pt-16">
         <div className="mx-auto flex max-w-[2000px] items-end justify-between gap-6 px-4 sm:px-6">
           <h2 className="font-display text-seccion text-navy-500">¿Qué andás buscando?</h2>
           <Link href="/catalogo" className={`hidden sm:inline-flex ${enlaceSecundario}`}>
             Ver todo el catálogo
           </Link>
         </div>
-        <div className={`mx-auto mt-8 grid max-w-[2000px] grid-cols-1 gap-2 px-2 sm:grid-cols-2 sm:gap-3 sm:px-3 lg:mt-10 ${entradas.length === 3 ? "lg:grid-cols-3" : ""}`}>
+        {/* Celular (17/11/2026): las tres fotos se deslizan de lado, a 80 %
+            del ancho y horizontales (no se recortan), en vez de ir una debajo
+            de la otra: eran casi una pantalla cada una. Tablet y compu, igual
+            que antes. */}
+        <div className={`sin-barra mx-auto mt-6 flex max-w-[2000px] snap-x snap-mandatory gap-2 overflow-x-auto scroll-px-2 px-2 sm:mt-8 sm:grid sm:grid-cols-2 sm:gap-3 sm:overflow-visible sm:px-3 lg:mt-10 ${entradas.length === 3 ? "lg:grid-cols-3" : ""}`}>
           {entradas.map((e, i) => (
             <BloqueEditorial
               key={e.clave}
@@ -271,35 +318,42 @@ export default async function HomePage() {
               detalle={`${e.total} productos`}
               imagen={e.imagen}
               posicion={e.posicion}
-              // En el celular todas van a lo ancho (100vw); en tablet la
+              // En el celular cada una ocupa 80 % del ancho; en tablet la
               // primera de tres ocupa dos columnas. Declarar menos de lo que
               // ocupa hace que el teléfono baje media resolución y se vea
               // blanda (auditoría de rendimiento, 26/09/2026).
               sizes={
                 entradas.length !== 3
-                  ? "(max-width: 640px) 100vw, 50vw"
+                  ? "(max-width: 640px) 80vw, 50vw"
                   : i === 0
-                    ? "(max-width: 1024px) 100vw, 34vw"
-                    : "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 34vw"
+                    ? "(max-width: 640px) 80vw, (max-width: 1024px) 100vw, 34vw"
+                    : "(max-width: 640px) 80vw, (max-width: 1024px) 50vw, 34vw"
               }
               className={
                 // Horizontales, con la forma de las fotos (3:2), para que se
                 // vean casi completas: un bloque cuadrado o vertical recorta
                 // los costados y se ve "con zoom" (pedido de Oscar, 27/09).
-                entradas.length === 3 && i === 0
-                  ? "aspect-[3/2] sm:col-span-2 lg:col-span-1"
-                  : "aspect-[3/2] sm:aspect-[4/3] lg:aspect-[3/2]"
+                `w-[80%] shrink-0 snap-start sm:w-auto ${
+                  entradas.length === 3 && i === 0
+                    ? "aspect-[3/2] sm:col-span-2 lg:col-span-1"
+                    : "aspect-[3/2] sm:aspect-[4/3] lg:aspect-[3/2]"
+                }`
               }
             />
           ))}
+        </div>
+
+        {/* Todas las categorías con foto (17/11/2026). */}
+        <div className="mx-auto mt-8 max-w-contenido px-4 sm:px-6 lg:mt-12">
+          <CategoriasConFoto categorias={categoriasFoto} />
         </div>
       </section>
 
       {/* ── 3. EN LA TIENDA HOY ─────────────────────────────────────────── */}
       {vitrina.length > 0 && (
         <section className="bg-crema-100">
-          <div className="mx-auto max-w-contenido px-4 py-20 sm:px-6 lg:py-28">
-            <div className="mb-8 flex items-end justify-between gap-6 lg:mb-10">
+          <div className="mx-auto max-w-contenido px-4 py-12 sm:px-6 sm:py-20 lg:py-28">
+            <div className="mb-6 flex items-end justify-between gap-6 sm:mb-8 lg:mb-10">
               <div>
                 <h2 className="font-display text-seccion text-navy-500">En la tienda hoy</h2>
                 <p className="mt-2 text-sm font-light text-navy-400">
@@ -334,17 +388,6 @@ export default async function HomePage() {
         imagen="/categorias/paseo.jpg"
         posicion="center 60%"
       />
-
-      {/* ── 5. COMPRAR POR ACTIVIDAD ────────────────────────────────────── */}
-      {actividades.length > 0 && (
-        <section className="mx-auto max-w-contenido px-4 py-20 sm:px-6 lg:py-28">
-          <h2 className="font-display text-seccion text-navy-500">¿Cuál es el plan hoy?</h2>
-          <p className="mt-2 text-sm font-light text-navy-400">Comprá por actividad.</p>
-          <div className="mt-8 lg:mt-10">
-            <ComprarPorActividad actividades={actividades} />
-          </div>
-        </section>
-      )}
 
       {/* ── 6. CÓMO COMPRAR ─────────────────────────────────────────────────
           Responde "no veo botón de pagar, ¿cómo compro?". Una tienda sin

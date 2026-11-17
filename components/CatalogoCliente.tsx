@@ -1,6 +1,6 @@
 "use client";
 
-import { useDeferredValue, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import TarjetaProducto from "@/components/TarjetaProducto";
 import { ESPECIES, esParaEspecie, idsRama, type ClaveEspecie } from "@/lib/navegacion";
 import { coincideProducto, puntajeCoincidencia } from "@/lib/busqueda";
@@ -298,6 +298,30 @@ export default function CatalogoCliente({
   const hayFiltros =
     catsElegidas.length > 0 || marcas.length > 0 || especie !== null || soloDisponibles || soloOfertas || busqueda.trim() !== "";
 
+  // Cuántos filtros hay puestos: lo dice el botón «Filtrar (3)» del celular.
+  const cantidadFiltros =
+    catsElegidas.length + marcas.length + (subActiva !== null ? 1 : 0) + (especie ? 1 : 0) +
+    (soloDisponibles ? 1 : 0) + (soloOfertas ? 1 : 0) + (busqueda.trim() ? 1 : 0);
+
+  // Celular (17/11/2026): los filtros se abren como panel a pantalla
+  // completa, con «Ver N productos» abajo. Mientras está abierto, la página
+  // de atrás no se mueve, y Escape lo cierra.
+  const refCerrarFiltros = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!filtrosAbiertos) return;
+    const esCelular = window.matchMedia("(max-width: 767px)").matches;
+    if (!esCelular) return;
+    const previo = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    refCerrarFiltros.current?.focus();
+    const alTeclear = (e: KeyboardEvent) => { if (e.key === "Escape") setFiltrosAbiertos(false); };
+    window.addEventListener("keydown", alTeclear);
+    return () => {
+      document.body.style.overflow = previo;
+      window.removeEventListener("keydown", alTeclear);
+    };
+  }, [filtrosAbiertos]);
+
   const limpiar = () => {
     setSub(null);
     setMarcas([]);
@@ -309,19 +333,74 @@ export default function CatalogoCliente({
   };
 
   return (
-    <div className="mx-auto max-w-contenido px-6 py-12">
-      <h1 className="font-display text-headline text-navy-500">{soloOfertas ? "Ofertas" : especie ? `Productos para ${especie === "perro" ? "perros" : "gatos"}` : "Catálogo"}</h1>
-      {hayFiltros && <p className="mt-3 text-sm text-navy-400">{[busqueda && `Búsqueda: ${busqueda}`, ...catsElegidas.map((id) => nombrePorCategoria.get(id)), subActiva !== null && nombrePorCategoria.get(subActiva), ...marcas.map((m) => nombreMarca.get(m) ?? m), soloDisponibles && "Con existencias"].filter(Boolean).join(" · ")}</p>}
+    <div className="mx-auto max-w-contenido px-4 py-6 sm:px-6 sm:py-12">
+      <h1 className="font-display text-[1.75rem] leading-tight text-navy-500 sm:text-headline">{soloOfertas ? "Ofertas" : especie ? `Productos para ${especie === "perro" ? "perros" : "gatos"}` : "Catálogo"}</h1>
+      {hayFiltros && <p className="mt-2 text-sm text-navy-400 sm:mt-3">{[busqueda && `Búsqueda: ${busqueda}`, ...catsElegidas.map((id) => nombrePorCategoria.get(id)), subActiva !== null && nombrePorCategoria.get(subActiva), ...marcas.map((m) => nombreMarca.get(m) ?? m), soloDisponibles && "Con existencias"].filter(Boolean).join(" · ")}</p>}
 
       {/* md, no lg: a ~900px (tablet) el panel de filtros a ancho completo
           enterraba la grilla de 184 productos bajo el fold. Con dos columnas
           desde md (768px) el filtro ocupa una franja angosta y el catálogo es
           visible de inmediato en todo el rango donde ya hay espacio real. */}
-      <div className="mt-8 grid gap-8 md:grid-cols-[200px_1fr] md:gap-6 lg:grid-cols-[230px_1fr] lg:gap-10">
+      {/* Barra del celular (17/11/2026): Filtrar, Ordenar y cuántos hay, en
+          una sola línea que se queda pegada debajo del encabezado al bajar.
+          Antes, título, botón de filtros, conteo y orden ocupaban casi tres
+          cuartos de la primera pantalla. */}
+      <div className="sticky top-[var(--alto-encabezado,64px)] z-30 -mx-4 mt-3 border-b border-crema-300 bg-white/95 px-4 py-2 backdrop-blur md:hidden">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            aria-expanded={filtrosAbiertos}
+            aria-controls="filtros-catalogo"
+            onClick={() => setFiltrosAbiertos(true)}
+            className={`inline-flex h-10 shrink-0 items-center gap-2 rounded-full border px-4 text-sm font-medium ${
+              cantidadFiltros ? "border-navy-500 bg-navy-500 text-crema-100" : "border-navy-500 bg-white text-navy-500"
+            }`}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4" /></svg>
+            Filtrar{cantidadFiltros ? ` (${cantidadFiltros})` : ""}
+          </button>
+          <label className="relative inline-flex h-10 min-w-0 items-center rounded-full border border-crema-500 bg-white pl-4 pr-9 text-sm text-navy-500">
+            <span className="sr-only">Ordenar</span>
+            <select
+              value={orden}
+              onChange={(e) => setOrden(e.target.value as Orden)}
+              className="w-full min-w-0 appearance-none truncate bg-transparent outline-none"
+            >
+              <option value="relevancia">Disponibles primero</option>
+              <option value="precio-asc">Menor precio</option>
+              <option value="precio-desc">Mayor precio</option>
+              <option value="nombre">Nombre A–Z</option>
+            </select>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="pointer-events-none absolute right-3.5" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+          </label>
+          <p role="status" aria-atomic="true" className="ml-auto shrink-0 text-xs tabular-nums text-navy-400">
+            {items.length} {items.length === 1 ? "producto" : "productos"}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-4 grid gap-6 md:mt-8 md:grid-cols-[200px_1fr] md:gap-6 lg:grid-cols-[230px_1fr] lg:gap-10">
         {/* Con marca, la columna puede pasar el alto de la pantalla: se desliza por dentro para que el final no quede inalcanzable. */}
         <aside className="min-w-0 md:sticky md:top-40 md:max-h-[calc(100vh-11rem)] md:self-start md:overflow-y-auto md:overscroll-contain">
-          <button type="button" aria-expanded={filtrosAbiertos} aria-controls="filtros-catalogo" onClick={() => setFiltrosAbiertos(!filtrosAbiertos)} className="w-full rounded-lg border border-navy-500 px-5 py-3 text-left text-sm text-navy-500 md:hidden">{filtrosAbiertos ? "Ocultar filtros" : "Buscar y filtrar"}{hayFiltros ? " · filtros activos" : ""}</button>
-          <div id="filtros-catalogo" className={`${filtrosAbiertos ? "block" : "hidden"} rounded-card border border-crema-400 bg-white p-5 md:block`}>
+          <div
+            id="filtros-catalogo"
+            role={filtrosAbiertos ? "dialog" : undefined}
+            aria-modal={filtrosAbiertos ? true : undefined}
+            aria-label="Filtros"
+            className={`${filtrosAbiertos ? "fixed inset-0 z-[60] block overflow-y-auto overscroll-contain bg-white px-5 pb-28 pt-3" : "hidden"} md:static md:z-auto md:block md:overflow-visible md:rounded-card md:border md:border-crema-400 md:p-5 md:pb-5`}
+          >
+            <div className="-mx-5 mb-4 flex items-center justify-between border-b border-crema-300 px-5 pb-3 md:hidden">
+              <p className="font-display text-xl text-navy-500">Filtros</p>
+              <button
+                ref={refCerrarFiltros}
+                type="button"
+                onClick={() => setFiltrosAbiertos(false)}
+                aria-label="Cerrar filtros"
+                className="grid h-11 w-11 place-items-center rounded-full text-navy-500 hover:bg-crema-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+              </button>
+            </div>
             <label className="block text-xs font-medium uppercase tracking-wider text-navy-400">
               Buscar
               <input
@@ -454,6 +533,17 @@ export default function CatalogoCliente({
                 Limpiar filtros
               </button>
             )}
+
+            {/* Celular: cerrar y ver lo que quedó. */}
+            <div className="fixed inset-x-0 bottom-0 border-t border-crema-300 bg-white px-5 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 md:hidden">
+              <button
+                type="button"
+                onClick={() => setFiltrosAbiertos(false)}
+                className="h-12 w-full rounded-full bg-navy-500 text-[15px] font-medium text-crema-100 hover:bg-navy-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:ring-offset-2"
+              >
+                Ver {items.length} {items.length === 1 ? "producto" : "productos"}
+              </button>
+            </div>
           </div>
         </aside>
 
@@ -469,8 +559,8 @@ export default function CatalogoCliente({
               que abrir «Buscar y filtrar» para elegir una. Fila que se
               desliza de lado; en tablet y compu ya están en la columna. */}
           {categoriasConProductos.length > 1 && (
-            <nav aria-label="Categorías" className="-mx-6 mb-4 md:hidden">
-              <ul className="flex gap-2 overflow-x-auto px-6 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <nav aria-label="Categorías" className="-mx-4 mb-4 md:hidden">
+              <ul className="flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 <li>
                   <Chip activo={catsElegidas.length === 0} onClick={() => elegirSoloCategoria(null)}>
                     Todo
@@ -490,8 +580,8 @@ export default function CatalogoCliente({
           {/* Subcategorías: aparecen solas cuando la categoría elegida las
               tiene bien asignadas en el ERP (lib/filtrosCatalogo.ts). */}
           {raizUnica !== null && subOpciones.length > 0 && (
-            <nav aria-label={`Tipos de ${nombrePorCategoria.get(raizUnica) ?? "producto"}`} className="-mx-6 mb-4 md:mx-0">
-              <ul className="flex gap-2 overflow-x-auto px-6 pb-1 md:flex-wrap md:overflow-visible md:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <nav aria-label={`Tipos de ${nombrePorCategoria.get(raizUnica) ?? "producto"}`} className="-mx-4 mb-4 sm:-mx-6 md:mx-0">
+              <ul className="flex gap-2 overflow-x-auto px-4 pb-1 sm:px-6 md:flex-wrap md:overflow-visible md:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 <li>
                   <Chip activo={subActiva === null} onClick={() => setSub(null)} suave>
                     Todo {nombrePorCategoria.get(raizUnica)?.toLowerCase()}
@@ -507,7 +597,7 @@ export default function CatalogoCliente({
               </ul>
             </nav>
           )}
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-crema-400 pb-4">
+          <div className="mb-6 hidden flex-wrap items-center justify-between gap-4 border-b border-crema-400 pb-4 md:flex">
             <p role="status" aria-atomic="true" className="text-sm text-navy-400">
               {items.length}{" "}
               {items.length === 1 ? "producto" : "productos"}

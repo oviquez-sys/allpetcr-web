@@ -69,6 +69,36 @@ export default function NavBar({ navegacion, fraseManada = null, ofertas = null,
   const [megaAbierto, setMegaAbierto] = useState<string | null>(null);
   const ruta = usePathname();
   const botonMenu = useRef<HTMLButtonElement>(null);
+  const refEncabezado = useRef<HTMLElement>(null);
+  // Celular (17/11/2026): al bajar, la fila del buscador se esconde y el
+  // encabezado fijo queda en una sola línea (64 px en vez de ~124); al subir,
+  // vuelve. Así la barra «Filtrar · Ordenar» del catálogo y el contenido
+  // tienen lugar. No se esconde si el buscador tiene el foco o el menú está
+  // abierto.
+  const [buscadorOculto, setBuscadorOculto] = useState(false);
+  useEffect(() => {
+    let ultimo = window.scrollY;
+    const alMover = () => {
+      const y = window.scrollY;
+      if (Math.abs(y - ultimo) < 10) return;
+      const escribiendo = document.activeElement?.id === "buscar-mov";
+      setBuscadorOculto(!escribiendo && y > ultimo && y > 180);
+      ultimo = y;
+    };
+    window.addEventListener("scroll", alMover, { passive: true });
+    return () => window.removeEventListener("scroll", alMover);
+  }, []);
+  // Alto real del encabezado como variable CSS: lo usan las barras que se
+  // pegan debajo de él (catálogo).
+  useEffect(() => {
+    const el = refEncabezado.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const medir = () => document.documentElement.style.setProperty("--alto-encabezado", `${el.offsetHeight}px`);
+    const observador = new ResizeObserver(medir);
+    observador.observe(el);
+    medir();
+    return () => observador.disconnect();
+  }, []);
   const cierreDiferido = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Cerrar al navegar. Se ajusta durante el render comparando la ruta previa
@@ -206,7 +236,7 @@ export default function NavBar({ navegacion, fraseManada = null, ofertas = null,
         </div>
       </div>
 
-      <header className="sticky top-0 z-50 border-b border-crema-300 bg-white/95 backdrop-blur">
+      <header ref={refEncabezado} className="sticky top-0 z-50 border-b border-crema-300 bg-white/95 backdrop-blur">
         <div className="mx-auto max-w-contenido px-4 sm:px-6">
           {/* Una sola fila en escritorio: logo · menú · buscador · carrito.
               La segunda fila que había antes llevaba el encabezado a ~130px;
@@ -352,7 +382,16 @@ export default function NavBar({ navegacion, fraseManada = null, ofertas = null,
           </div>
 
           {/* Buscador móvil: ancho completo, fuera de la fila apretada. */}
-          <div className="pb-3 sm:hidden">{buscador("buscar-mov")}</div>
+          <div
+            className={`grid transition-[grid-template-rows] duration-200 ease-out motion-reduce:transition-none sm:hidden ${
+              buscadorOculto && !abierto ? "grid-rows-[0fr]" : "grid-rows-[1fr]"
+            }`}
+            inert={buscadorOculto && !abierto}
+          >
+            <div className="overflow-hidden">
+              <div className="pb-3">{buscador("buscar-mov")}</div>
+            </div>
+          </div>
         </div>
 
         {/* Menú móvil: lista con las subcategorías indentadas. Un acordeón

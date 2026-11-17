@@ -27,6 +27,7 @@ export default function CarruselProductos({
         <li key={p.sku} className="w-[42%] shrink-0 snap-start sm:w-[30%] lg:w-auto">
           <TarjetaProducto
             producto={p}
+            diferida={false}
             categoria={p.categoria_id === null ? undefined : nombrePorId.get(p.categoria_id)}
           />
         </li>

@@ -169,3 +169,21 @@ body {
    (components/PuertaEspecie.tsx), como filete por dentro del borde. La regla
    de fondo es la misma de siempre y no cambió — el dorado TRAZA, no RELLENA.
    Ver DESIGN.md, "La regla del acento único". */
+
+/* Aviso «Agregado al carrito» (components/AvisoAgregado.tsx). */
+@keyframes aparecer {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Marco de foto de producto (17/11/2026). Fondo crema parejo y la foto en
+   «multiplicar»: el blanco de cada foto toma el tono del marco, así fotos
+   de distintos proveedores se ven como una sola vitrina y la tarjeta ya no
+   necesita borde. Las fotos con fondo gris o con escena siguen viéndose
+   distintas: esas se corrigen en el archivo (lista para el ERP). */
+.marco-foto {
+  background-color: #f3efe8;
+}
+.marco-foto img {
+  mix-blend-mode: multiply;
+}

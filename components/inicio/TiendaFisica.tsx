@@ -51,7 +51,7 @@ export default function TiendaFisica() {
 
   return (
     <section id="tienda" className="scroll-mt-24 bg-crema-200">
-      <div className="mx-auto grid max-w-contenido gap-10 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:gap-20 lg:py-28">
+      <div className="mx-auto grid max-w-contenido gap-8 px-4 py-14 sm:gap-10 sm:px-6 sm:py-20 lg:grid-cols-2 lg:gap-20 lg:py-28">
         <div className="flex flex-col justify-center">
           <p className="text-label font-medium uppercase text-dorado-700">La tienda</p>
           <h2 className="mt-4 font-display text-seccion text-navy-500">Nuestra tienda en Heredia</h2>

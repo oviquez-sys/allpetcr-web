@@ -3,6 +3,7 @@ import SinFoto from "@/components/SinFoto";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import TarjetaProducto from "@/components/TarjetaProducto";
+import { marcaVisible } from "@/lib/marcaVisible";
 import BotonAgregar from "@/components/BotonAgregar";
 import BotonAvisoDisponibilidad from "@/components/BotonAvisoDisponibilidad";
 import BarraCompraMovil from "@/components/BarraCompraMovil";
@@ -224,7 +225,7 @@ export default async function ProductoPage({
         </nav>
       </div>
 
-      <article className="mx-auto grid max-w-contenido gap-12 px-6 py-10 lg:grid-cols-2">
+      <article className="mx-auto grid max-w-contenido gap-7 px-4 py-5 sm:gap-12 sm:px-6 sm:py-10 lg:grid-cols-2">
         {/* object-contain y fondo blanco: la foto del catálogo es apaisada
             (300x231) y este marco es cuadrado. Con object-cover el navegador
             la ampliaba hasta llenar y le cortaba los costados, que en la
@@ -239,7 +240,7 @@ export default async function ProductoPage({
             nunca se rompió. */}
         <div
           className={`relative grid aspect-square place-items-center overflow-hidden rounded-card ${
-            producto.imagen ? "bg-white" : tinteDeSku(producto.sku)
+            producto.imagen ? "marco-foto" : tinteDeSku(producto.sku)
           }`}
         >
           {producto.imagen ? (
@@ -249,7 +250,7 @@ export default async function ProductoPage({
               fill
               priority
               sizes="(max-width: 1024px) 90vw, 45vw"
-              className="rounded-card object-contain p-6"
+              className="object-contain p-[6%]"
             />
           ) : (
 <SinFoto tamano="ficha" />
@@ -257,9 +258,9 @@ export default async function ProductoPage({
         </div>
 
         <div className="lg:py-4">
-          {categoria && (
+          {(categoria || marcaVisible(producto)) && (
             <p className="text-label uppercase text-dorado-700">
-              {categoria.nombre}
+              {[marcaVisible(producto), categoria?.nombre].filter(Boolean).join(" · ")}
             </p>
           )}
           <h1 className="mt-2 font-display text-headline leading-tight text-navy-500">
@@ -425,11 +426,22 @@ export default async function ProductoPage({
             )}
           </div>
 
-          <p className="mt-4 text-xs font-light leading-relaxed text-navy-400">
-            {consulta && producto.disponible
-              ? "No se cobra nada en línea: te confirmamos existencias y total por WhatsApp antes de que pagués."
-              : "Agregá al carrito y confirmá el pedido por WhatsApp. No se cobra nada en línea: te confirmamos existencias y total antes de que pagués."}
-          </p>
+          {/* Franja de confianza (17/11/2026): lo que pregunta quien no
+              conoce la tienda, junto al botón y no al final de la página. */}
+          <ul className="mt-6 grid gap-3 rounded-card bg-crema-100 p-4 text-[13.5px] leading-snug text-navy-500 sm:grid-cols-3 sm:gap-4">
+            <li className="flex items-start gap-2.5">
+              <IconoConfianza tipo="tienda" />
+              <span>{producto.disponible ? "Retiro sin costo en la tienda de Heredia" : "Tienda física en Heredia"}</span>
+            </li>
+            <li className="flex items-start gap-2.5">
+              <IconoConfianza tipo="envio" />
+              <span>Envíos en la GAM, coordinados por WhatsApp</span>
+            </li>
+            <li className="flex items-start gap-2.5">
+              <IconoConfianza tipo="pago" />
+              <span>No se cobra en línea: confirmamos existencias y total antes de que pagués</span>
+            </li>
+          </ul>
 
           <dl className="mt-10 divide-y divide-crema-400 border-t border-crema-400 text-sm">
             <div className="flex justify-between py-3">
@@ -484,5 +496,19 @@ export default async function ProductoPage({
       {/* Espacio para que la barra fija no tape el final de la página. */}
       {producto.disponible && <div className="h-20 lg:hidden" aria-hidden="true" />}
     </>
+  );
+}
+
+/** Íconos de la franja de confianza: trazo navy, sin relleno. */
+function IconoConfianza({ tipo }: { tipo: "tienda" | "envio" | "pago" }) {
+  const trazo = {
+    tienda: "M3 9.5 4.5 4h15L21 9.5M3 9.5h18M3 9.5V20h18V9.5M9 20v-6h6v6",
+    envio: "M3 6h11v10H3zM14 9h4l3 3v4h-7M7 19.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM17 19.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z",
+    pago: "M12 3 4 6v6c0 4.5 3.4 8.2 8 9 4.6-.8 8-4.5 8-9V6l-8-3Zm-3.5 9 2.5 2.5 4.5-5",
+  }[tipo];
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" className="mt-px shrink-0 text-dorado-700" aria-hidden="true">
+      <path d={trazo} />
+    </svg>
   );
 }

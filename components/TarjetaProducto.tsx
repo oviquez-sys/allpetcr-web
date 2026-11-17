@@ -7,6 +7,7 @@ import { formatoColones, nombreResumido, tinteDeSku } from "@/lib/formato";
 import BotonAgregar from "./BotonAgregar";
 import { separarTalla } from "@/lib/variantes";
 import { enOferta, fechaCorta } from "@/lib/ofertas";
+import { marcaVisible } from "@/lib/marcaVisible";
 
 // Placeholder "shimmer" mientras carga la foto (20/09/2026): no reduce el
 // peso real de la imagen —para eso está `minimumCacheTTL` en next.config.ts—
@@ -27,6 +28,11 @@ interface Props {
    *  muestra el nombre sin talla, «Tallas S · M · L», «Desde ₡…» y
    *  «Elegir talla» en vez de agregar al carrito (hay que elegir cuál). */
   tallas?: Producto[];
+  /** content-visibility: solo en la grilla larga del catálogo. En las filas
+   *  que se deslizan de lado (inicio, «También te puede servir») dejaba un
+   *  hueco en blanco abajo: las tarjetas fuera de la vista reservaban 420 px
+   *  de alto y estiraban toda la fila (17/11/2026). */
+  diferida?: boolean;
 }
 
 /**
@@ -60,12 +66,24 @@ interface Props {
  * redundante cuando el nombre termina así, ver lib/formato.ts) — la foto y
  * el resto del sitio siguen usando `producto.nombre` completo.
  */
+// TARJETA 17/11/2026 (Oscar aprobó «todas las mejoras»):
+//  - Marco de foto crema parejo, sin borde, y la foto en «multiplicar»
+//    (.marco-foto en globals.css): las fotos de proveedores distintos se ven
+//    como una sola vitrina. Margen interno 6 % (antes 8 %): el producto se ve
+//    más grande.
+//  - Marca arriba del nombre, cuando el nombre no la dice (lib/marcaVisible).
+//  - Precio más grande y, a su derecha, un botón redondo «+» de 44 px. NO va
+//    sobre la foto: eso se probó el 20/09 y tapaba el producto. El aviso
+//    «Agregado · Ver carrito» (AvisoAgregado.tsx) confirma cada toque.
+//  - Precio y botón alineados abajo en todas las tarjetas de una fila,
+//    aunque los nombres ocupen distinto número de líneas.
+//
 // Foto (28/10/2026): `object-contain` con 8 % de margen en vez de
 // `object-cover`. Con cover, cada foto se recortaba distinto según su
 // proporción (sacos de alimento sin la parte de arriba y de abajo); con
 // contain todas quedan completas, centradas y del mismo tamaño dentro del
 // marco blanco, y la grilla se lee pareja aunque las fotos no lo sean.
-function TarjetaProducto({ producto, cargaPrioritaria = false, tallas }: Props) {
+function TarjetaProducto({ producto, cargaPrioritaria = false, tallas, diferida = true }: Props) {
   const url = `/producto/${encodeURIComponent(producto.sku)}`;
   const agrupado = tallas && tallas.length > 1 ? tallas : null;
   const base = agrupado ? (separarTalla(producto.nombre)?.base ?? producto.nombre) : producto.nombre;
@@ -80,26 +98,28 @@ function TarjetaProducto({ producto, cargaPrioritaria = false, tallas }: Props) 
   const enPromo = (agrupado ? (disponibles.length ? disponibles : agrupado) : [producto]).filter(enOferta);
   const pctOferta = enPromo.length ? Math.max(...enPromo.map((t) => t.oferta.pct)) : 0;
   const ofertaSuelta = !agrupado && enOferta(producto) ? producto : null;
+  const marca = marcaVisible(producto);
+  const nombre = nombreResumido(base);
 
   return (
-    <article className="tarjeta-diferida group flex flex-col">
+    <article className={`${diferida ? "tarjeta-diferida " : ""}group flex h-full min-w-0 flex-col`}>
       <Link
         href={url}
-        className={`relative aspect-[1/0.9] overflow-hidden rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:ring-offset-2 ${
-          producto.imagen ? "border border-crema-300 bg-white" : tinteDeSku(producto.sku)
-        }`}
+        tabIndex={-1}
+        aria-hidden="true"
+        className={`relative aspect-square overflow-hidden rounded-xl ${producto.imagen ? "marco-foto" : tinteDeSku(producto.sku)}`}
       >
         <div className="absolute inset-0 grid place-items-center">
           {producto.imagen ? (
             <Image
               src={producto.imagen}
-              alt={producto.nombre}
+              alt=""
               fill
               {...(cargaPrioritaria ? { priority: true } : { loading: "lazy" as const })}
               sizes="(max-width: 640px) 48vw, (max-width: 1280px) 32vw, 380px"
               placeholder="blur"
               blurDataURL={RELLENO_SHIMMER}
-              className="object-contain p-[8%] transition-transform duration-300 ease-out group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+              className="object-contain p-[6%] transition-transform duration-300 ease-out group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
             />
           ) : (
             <SinFoto />
@@ -107,57 +127,65 @@ function TarjetaProducto({ producto, cargaPrioritaria = false, tallas }: Props) 
         </div>
 
         {!algunaDisponible ? (
-          <span className="pointer-events-none absolute left-3 top-3 rounded-full bg-white/95 px-3 py-1 text-[10.5px] tracking-wide text-navy-400">
+          <span className="pointer-events-none absolute left-2.5 top-2.5 rounded-full bg-white/95 px-3 py-1 text-[10.5px] tracking-wide text-navy-400">
             Sin existencias
           </span>
         ) : pctOferta > 0 && (
-          <span className="pointer-events-none absolute left-2.5 top-2.5 rounded-lg bg-orange-700 px-2 py-1 text-[13px] font-extrabold leading-none text-white shadow-md sm:left-3 sm:top-3 sm:text-[15px]">
+          <span className="pointer-events-none absolute left-2.5 top-2.5 rounded-full bg-orange-700 px-2.5 py-1 text-[12.5px] font-extrabold leading-none text-white sm:text-[14px]">
             {agrupado && enPromo.length < agrupado.length ? "Hasta " : ""}-{pctOferta}%
           </span>
         )}
       </Link>
 
-      <Link
-        href={url}
-        className="mt-3 block rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:ring-offset-2 sm:mt-4"
-      >
-        <h3 className="text-sm font-bold leading-snug text-navy-500 sm:text-[17px]">
-          {nombreResumido(base)}
-        </h3>
+      <div className="mt-3 flex flex-1 flex-col">
+        {marca && (
+          <p className="truncate text-[10.5px] font-semibold uppercase tracking-[0.1em] text-navy-300 sm:text-[11px]">{marca}</p>
+        )}
+        <Link
+          href={url}
+          className="mt-0.5 block rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:ring-offset-2"
+        >
+          <h3 className="line-clamp-3 text-[14px] font-medium leading-snug text-navy-500 group-hover:underline group-hover:decoration-navy-200 group-hover:underline-offset-4 sm:line-clamp-2 sm:text-[15.5px]">
+            {nombre}
+          </h3>
+        </Link>
         {agrupado && (
           <p className="mt-1 text-xs text-navy-400 sm:text-[13px]">
             Tallas {agrupado.map((t) => separarTalla(t.nombre)?.talla).join(" · ")}
           </p>
         )}
-        {ofertaSuelta ? (
-          <>
-            <p className="mt-1.5 flex flex-wrap items-baseline gap-x-2 sm:mt-2.5">
-              <span className="text-[15px] font-bold text-orange-700 sm:text-[18px]">{formatoColones(ofertaSuelta.precio_venta)}</span>
-              <span className="text-xs text-navy-300 line-through sm:text-sm">
-                <span className="sr-only">Antes </span>{formatoColones(ofertaSuelta.precio_antes)}
-              </span>
-            </p>
-            <p className="mt-0.5 text-[11px] text-navy-400 sm:text-xs">Oferta hasta el {fechaCorta(ofertaSuelta.oferta.hasta)}</p>
-          </>
-        ) : (
-          <p className={`mt-1.5 text-sm sm:mt-2.5 sm:text-[17px] ${pctOferta ? "font-bold text-orange-700" : "text-navy-400"}`}>
-            {precioVaria ? "Desde " : ""}
-            {formatoColones(precioMin)}
-          </p>
-        )}
-      </Link>
 
-      <div className="mt-3 sm:mt-4">
-        {agrupado && algunaDisponible ? (
-          <Link
-            href={url}
-            className="flex h-11 w-full items-center justify-center rounded-full border border-navy-500 bg-white text-[13px] font-medium text-navy-500 transition-colors duration-150 hover:bg-navy-500 hover:text-crema-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:ring-offset-2"
-          >
-            Elegir talla
-          </Link>
-        ) : (
-          <BotonAgregar producto={producto} tamano="chico" />
-        )}
+        <div className="mt-auto flex items-end justify-between gap-2 pt-2.5">
+          <div className="min-w-0">
+            {ofertaSuelta ? (
+              <>
+                <p className="text-[17px] font-bold leading-tight text-orange-700 sm:text-[19px]">{formatoColones(ofertaSuelta.precio_venta)}</p>
+                <p className="text-xs text-navy-300 line-through sm:text-[13px]">
+                  <span className="sr-only">Antes </span>{formatoColones(ofertaSuelta.precio_antes)}
+                </p>
+                <p className="text-[11px] text-navy-400">Hasta el {fechaCorta(ofertaSuelta.oferta.hasta)}</p>
+              </>
+            ) : (
+              <p className={`leading-tight ${pctOferta ? "text-orange-700" : "text-navy-500"}`}>
+                {precioVaria && <span className="block text-[11px] font-normal text-navy-400 sm:text-xs">Desde</span>}
+                <span className="text-[17px] font-semibold sm:text-[19px]">{formatoColones(precioMin)}</span>
+              </p>
+            )}
+          </div>
+          {agrupado ? (
+            algunaDisponible && (
+              <Link
+                href={url}
+                aria-label={`Elegir talla de ${nombre}`}
+                className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white text-navy-500 ring-1 ring-inset ring-navy-500 transition-colors duration-150 hover:bg-navy-500 hover:text-crema-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:ring-offset-2"
+              >
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+              </Link>
+            )
+          ) : (
+            <BotonAgregar producto={producto} tamano="icono" />
+          )}
+        </div>
       </div>
     </article>
   );

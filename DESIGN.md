@@ -376,3 +376,25 @@ datos reales todavía y sus secciones no se pintan. Fotos del inicio: el hero
 usa `hero.jpg` (perro y gato) y la entrada "Alimentos" usa `alimento.jpg`
 (bolsas, latas y platos). Son archivos distintos a propósito: reemplazar la
 foto de una sección no puede cambiar la de otra.
+
+## Modernización — 17/11/2026 (aprobada por Oscar: «aplique todas las mejoras»)
+
+- **Marco de foto crema, sin borde.** Las tarjetas y la ficha muestran la foto
+  sobre `.marco-foto` (#F3EFE8) con `mix-blend-mode: multiply`: el blanco de
+  cada foto toma el tono del marco y fotos de proveedores distintos se leen
+  como una sola vitrina. Esto reemplaza la regla «blanco para tarjetas de
+  producto». Las fotos con fondo gris o de tienda se corrigen en el archivo
+  (lista para el ERP), no con CSS.
+- **Tarjeta:** marca arriba del nombre (si el nombre no la dice), precio más
+  grande y botón redondo «+» de 44 px A LA DERECHA DEL PRECIO, nunca sobre la
+  foto (eso se probó el 20/09 y tapaba el producto). Cada toque muestra el
+  aviso «Agregado · Ver carrito» abajo de la pantalla.
+- **Portada en el celular:** de ~8 a ~6 pantallas. Perros/Gatos/Alimentos se
+  deslizan de lado; nueva fila con TODAS las categorías y la foto de un
+  producto real de cada una; se retiró «¿Cuál es el plan hoy?» (la fila de
+  categorías la reemplaza).
+- **Catálogo en el celular:** barra fija «Filtrar · Ordenar · N productos»
+  debajo del encabezado; los filtros se abren a pantalla completa con «Ver N
+  productos». Al bajar, el buscador del encabezado se esconde y vuelve al subir.
+- **Ficha:** franja de confianza junto al botón (retiro, envíos, sin cobro en
+  línea).
