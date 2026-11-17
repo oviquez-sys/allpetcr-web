@@ -1,6 +1,9 @@
 import FormularioManada from "@/components/manada/FormularioManada";
 import { regaliaVigente } from "@/lib/regaliaPublica";
 import { googleConfigurado, limpiarFuente } from "@/lib/manada";
+import { redirect } from "next/navigation";
+import { leerCampana } from "@/lib/campanaServidor";
+import { estadoCampana } from "@/lib/campana";
 
 export const metadata = {
   title: "Unite a la manada",
@@ -28,6 +31,15 @@ export default async function ManadaPage({
   searchParams: Promise<{ o?: string; error?: string }>;
 }) {
   const { o, error } = await searchParams;
+  // Mientras dure la Navidad AllPet 2026 (y hasta el aviso final), los QR y
+  // enlaces viejos de La manada llevan al sorteo, que también hace a la
+  // persona miembro. El origen (?o=qr-tienda) viaja con ella.
+  if (estadoCampana(await leerCampana()) !== "ninguna") {
+    const p = new URLSearchParams();
+    if (o) p.set("o", limpiarFuente(o));
+    if (error) p.set("error", error.replace(/[^a-z-]/g, "").slice(0, 40));
+    redirect(`/navidad${p.size ? `?${p}` : ""}#registro`);
+  }
   const regalia = await regaliaVigente();
   const conRegalia = regalia?.activa && regalia.texto;
 

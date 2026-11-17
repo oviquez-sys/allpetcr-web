@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { urlWhatsApp } from "@/lib/negocio";
 
 /**
@@ -24,7 +25,18 @@ const RUTAS_SIN_BOTON = [/^\/producto\//, /^\/carrito/, /^\/checkout/];
 export default function BotonWhatsAppFlotante() {
   const ruta = usePathname() ?? "";
   const href = urlWhatsApp("Hola, les escribo desde allpetcr.com");
-  if (!href || RUTAS_SIN_BOTON.some((r) => r.test(ruta))) return null;
+  // En la portada y en /navidad (16/11/2026) el botón aparece recién al bajar:
+  // en un celular chico tapaba el botón «Registrarme para el sorteo».
+  const esperarScroll = ruta === "/" || ruta === "/navidad";
+  const [bajo, setBajo] = useState(false);
+  useEffect(() => {
+    if (!esperarScroll) return;
+    const revisar = () => setBajo(window.scrollY > 320);
+    revisar();
+    window.addEventListener("scroll", revisar, { passive: true });
+    return () => window.removeEventListener("scroll", revisar);
+  }, [esperarScroll]);
+  if (!href || RUTAS_SIN_BOTON.some((r) => r.test(ruta)) || (esperarScroll && !bajo)) return null;
 
   return (
     <a

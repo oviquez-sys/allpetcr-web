@@ -57,7 +57,10 @@ export const negocio = {
 
   direccion: {
     /** Ej: "200 m norte de la iglesia, Local 3" */
-    linea: "De la entrada principal de la UNA, 100 m oeste y 15 m norte",
+    // 16/11/2026, decisión de Oscar: la referencia oficial es la de la
+    // tarjeta de Navidad (antes: «De la entrada principal de la UNA, 100 m
+    // oeste y 15 m norte»). Si cambia, cambia aquí y en todo el sitio.
+    linea: "25 m al norte, en diagonal a FarmaValue Heredia",
     /** Ej: "San José" */
     canton: "Heredia Central",
     /** Ej: "San José" */

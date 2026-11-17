@@ -1,5 +1,6 @@
 import { formatoColones, presentacionVisible } from "./formato";
 import type { ResultadoCheckout } from "./checkoutServidor";
+import type { ResumenBeneficios } from "./campana";
 
 export interface DatosPedidoWhatsApp {
   nombre: string;
@@ -19,6 +20,13 @@ export interface DatosPedidoWhatsApp {
   codigoManada?: string;
   /** Campaña por la que entró (lib/origenCampana.ts), si la hubo. */
   origen?: string;
+  /** Número que el ERP le dio al pedido (WEB-12), para que la caja lo
+   *  encuentre y le acredite los números del sorteo a esta persona. */
+  numeroPedido?: string;
+  /** Lo que la campaña le da a este pedido, según el ERP. */
+  sorteo?: ResumenBeneficios | null;
+  /** Se inscribió al sorteo al preparar este pedido. */
+  inscritoAhora?: boolean;
 }
 
 /** Genera el mensaje solo con las líneas que el servidor acaba de verificar. */
@@ -26,7 +34,7 @@ export function crearTextoPedido(
   resultado: ResultadoCheckout,
   datos: DatosPedidoWhatsApp,
 ): string {
-  const lineas = ["*Pedido desde allpetcr.com*", ""];
+  const lineas = [datos.numeroPedido ? `*Pedido ${datos.numeroPedido} desde allpetcr.com*` : "*Pedido desde allpetcr.com*", ""];
 
   for (const item of resultado.items) {
     const presentacion = presentacionVisible(item.presentacion);
@@ -36,10 +44,13 @@ export function crearTextoPedido(
     );
   }
 
+  const envioGratis = datos.entrega === "coordinar" && datos.sorteo?.envioGratis === true;
   lineas.push(
     "",
     `*Subtotal de productos: ${formatoColones(resultado.total)}*`,
-    "Envío, descuentos, total final y pago: por confirmar con la tienda antes de pagar.",
+    envioGratis
+      ? "Envío: GRATIS (pedido de más de ₡20.000 dentro de la zona de Heredia). Descuentos, total final y pago: por confirmar con la tienda antes de pagar."
+      : "Envío, descuentos, total final y pago: por confirmar con la tienda antes de pagar.",
     "",
     `Nombre: ${datos.nombre.trim()}`,
     `Teléfono: ${datos.telefono.trim()}`,
@@ -64,6 +75,8 @@ export function crearTextoPedido(
   if (datos.codigoManada?.trim()) {
     lineas.push(`Código La manada: ${datos.codigoManada.trim()} (validar descuento de primera compra)`);
   }
+  if (datos.inscritoAhora) lineas.push("Sorteo de Navidad: me inscribí al preparar este pedido.");
+  if (datos.sorteo?.numeros) lineas.push(`Sorteo de Navidad: ${datos.sorteo.numeros}`);
   if (datos.nota?.trim()) lineas.push(`Nota: ${datos.nota.trim()}`);
   if (datos.origen?.trim()) lineas.push(`Origen: ${datos.origen.trim()}`);
   return lineas.join("\n");

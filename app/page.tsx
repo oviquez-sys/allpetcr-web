@@ -9,6 +9,10 @@ import Marcas from "@/components/inicio/Marcas";
 import Comunidad from "@/components/inicio/Comunidad";
 import BandaManada from "@/components/manada/BandaManada";
 import { regaliaVigente } from "@/lib/regaliaPublica";
+import HeroCampana from "@/components/campana/HeroCampana";
+import BandaCampana from "@/components/campana/BandaCampana";
+import { leerCampana } from "@/lib/campanaServidor";
+import { CAMPANA_IMPRESA, estadoCampana } from "@/lib/campana";
 import { ESPECIES, esParaEspecie, hrefEspecie, hrefCats, idsRama, RAICES_ALIMENTO } from "@/lib/navegacion";
 import { ACTIVIDADES } from "@/lib/contenidoInicio";
 import { armarVitrina } from "@/lib/vitrina";
@@ -79,7 +83,11 @@ export default async function HomePage() {
   // Se arma en cada visita (nunca en la compilación, que no tiene ERP), pero
   // con la copia compartida del catálogo: ver "DOS PUERTAS" en lib/data.ts.
   await connection();
-  const [productos, categorias, regalia] = await Promise.all([getProductosPublico(), getCategoriasPublico(), regaliaVigente()]);
+  const [productos, categorias, regalia, campana] = await Promise.all([
+    getProductosPublico(), getCategoriasPublico(), regaliaVigente(), leerCampana(),
+  ]);
+  // Navidad AllPet 2026: el QR de la tarjeta lleva a esta portada.
+  const estadoNavidad = estadoCampana(campana);
 
   const disponibles = productos.filter((p) => p.disponible);
   const nombrePorId = new Map(categorias.map((c) => [c.id, c.nombre]));
@@ -138,6 +146,14 @@ export default async function HomePage() {
 
   return (
     <>
+      {/* ── 0. CAMPAÑA (16/11/2026) ────────────────────────────────────────
+          Primer bloque bajo el encabezado mientras dure la Navidad AllPet
+          2026: quien escanea la tarjeta tiene que ver lo mismo que tiene en
+          la mano. Lo decide el ERP (lib/campana.ts); sin campaña no aparece. */}
+      {estadoNavidad !== "ninguna" && (
+        <HeroCampana estado={estadoNavidad} sorteoEn={campana.erp?.sorteo_en ?? CAMPANA_IMPRESA.sorteo} />
+      )}
+
       {/* ── 1. HERO: LA TIENDA REAL ───────────────────────────────────────
           27/10/2026, a pedido de Oscar ("lo que más quiero es la confianza
           del cliente"): la foto de portada es la fachada real del local en
@@ -302,8 +318,12 @@ export default async function HomePage() {
       {/* ── 3b. LA MANADA ───────────────────────────────────────────────────
           Después de ver producto y antes de la pausa: quien llegó hasta acá
           ya se interesó, y es el momento de ofrecerle el regalo. */}
-      <BandaManada porcentaje={regalia?.activa && regalia.porcentaje ? regalia.porcentaje : null}
-        sinAlimentos={!!regalia?.excluye_alimentos} />
+      {estadoNavidad === "abierta" ? (
+        <BandaCampana zonas={campana.erp?.envio_gratis?.zonas ?? []} />
+      ) : (
+        <BandaManada porcentaje={regalia?.activa && regalia.porcentaje ? regalia.porcentaje : null}
+          sinAlimentos={!!regalia?.excluye_alimentos} />
+      )}
 
       {/* ── 4. BANDA LIFESTYLE ──────────────────────────────────────────── */}
       <BandaLifestyle

@@ -6,8 +6,8 @@ export const metadata = {
   // Sin sufijo manual: app/layout.tsx ya agrega " | AllPetcr.com" vía su template.
   title: "Sobre nosotros",
   description:
-    "Somos Oscar y Francisco. AllPetcr.com es nuestra tienda de productos para perros y gatos en Heredia, " +
-    "a 100 m de la entrada principal de la UNA. Comprá en la tienda o en línea y confirmá por WhatsApp.",
+    "Somos Oscar y Francisco. AllPetcr.com es nuestra tienda de productos para perros y gatos en Heredia " +
+    "centro, en diagonal a FarmaValue. Comprá en la tienda o en línea y confirmá por WhatsApp.",
   alternates: { canonical: "/sobre-nosotros" },
 };
 

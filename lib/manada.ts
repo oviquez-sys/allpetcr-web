@@ -21,6 +21,8 @@ import { sitioUrl } from "@/lib/sitio";
 
 export const COOKIE_OAUTH = "manada_oauth";
 export const COOKIE_BIENVENIDA = "manada_bienvenida";
+/** Resultado de inscribirse al sorteo con Google (firmado, 1 hora, solo /navidad). */
+export const COOKIE_RESULTADO_CAMPANA = "campana_resultado";
 /** Marca de "ya es de la manada" para dejar de mostrarle las invitaciones.
  * Visible al navegador a propósito (no httpOnly): no tiene nada secreto, solo
  * esconde avisos, y los avisos se deciden en el navegador. */

@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { negocio, direccionCompleta } from "@/lib/negocio";
+import { connection } from "next/server";
+import { leerCampana } from "@/lib/campanaServidor";
+import { fechaLarga, zonasLegibles } from "@/lib/campana";
 
 export const metadata = {
   title: "Entregas y cómo comprar",
@@ -18,17 +21,38 @@ export const metadata = {
  * y que el total completo llega antes de aceptar. Cuando haya tarifas por
  * zona, van en la sección "Envío a domicilio".
  */
-export default function EntregasPage() {
+export default async function EntregasPage() {
+  await connection();
+  // Navidad AllPet 2026 (16/11/2026): el envío gratis lo define el ERP
+  // (vigencia, monto y zonas). Aquí solo se publica lo que el ERP dice.
+  const campana = (await leerCampana()).erp;
+  const envioGratis = campana?.activa && campana.envio_gratis?.activo ? campana.envio_gratis : null;
   return <section className="mx-auto max-w-2xl px-6 py-16 text-navy-500">
     <h1 className="font-display text-headline">Entregas y cómo comprar</h1>
 
+    {envioGratis && (
+      <div className="mt-8 rounded-card border border-[#B3261E]/25 bg-[#FDF3F2] p-5">
+        <h2 className="text-xl">🎄 Envío gratis de Navidad</h2>
+        <p className="mt-2 leading-relaxed">
+          En pedidos web de más de ₡20.000 en productos, el envío es gratis en nuestra zona de cobertura en
+          Heredia{envioGratis.zonas.length ? `: distritos ${zonasLegibles(envioGratis.zonas)} del cantón central` : ""}.
+          Vale hasta el {fechaLarga(envioGratis.hasta)}.
+        </p>
+        <p className="mt-2 text-[15px] leading-relaxed text-navy-400">
+          Un pedido de ₡20.000 exactos no califica: tiene que superar ese monto. El costo del envío no
+          cuenta para el monto. Fuera de esa zona, o en pedidos de ₡20.000 o menos, el envío se cotiza
+          como siempre. Al confirmar el pedido te mostramos si tu dirección califica.
+        </p>
+      </div>
+    )}
+
     <h2 className="mt-8 text-xl">Retiro en tienda</h2>
-    <p className="mt-3 leading-relaxed">Retirá sin costo en nuestra tienda: {direccionCompleta().replace(/^De /, "de ")}. Esperá la confirmación de que tu pedido está listo antes de visitarnos.</p>
+    <p className="mt-3 leading-relaxed">Retirá sin costo en nuestra tienda: {direccionCompleta()}. Esperá la confirmación de que tu pedido está listo antes de visitarnos.</p>
     <p className="mt-3 leading-relaxed">{negocio.horarioTexto}</p>
 
     <h2 className="mt-8 text-xl">Envío a domicilio</h2>
     <p className="mt-3 leading-relaxed">
-      Todavía no tenemos tarifas fijas: el costo y el plazo dependen de la dirección de entrega, así que
+      {envioGratis ? "Fuera del envío gratis de Navidad, todavía" : "Todavía"} no tenemos tarifas fijas: el costo y el plazo dependen de la dirección de entrega, así que
       te los cotizamos para cada pedido. Así funciona:
     </p>
     <ol className="mt-3 list-decimal space-y-3 pl-5 leading-relaxed">
@@ -58,6 +82,12 @@ export default function EntregasPage() {
       <li>Coordiná con la tienda la entrega, el total y el medio de pago.</li>
     </ol>
     <p className="mt-5">La web no cobra ni reserva productos al preparar el mensaje.</p>
+    {campana?.activa && (
+      <p className="mt-3">
+        Si participás en el <Link href="/navidad" className="underline underline-offset-2">sorteo de Navidad</Link>,
+        cada compra te suma números al cobrarse, y las de más de ₡20.000 te dan uno de bono.
+      </p>
+    )}
     <p className="mt-3">
       ¿Tenés un código de <Link href="/manada" className="underline underline-offset-2">La manada</Link>?
       Escribilo al confirmar el pedido y te confirmamos el total con el descuento antes de que pagués.

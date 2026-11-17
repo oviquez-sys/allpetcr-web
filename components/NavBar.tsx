@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import AvisoBarra from "@/components/manada/AvisoBarra";
+import AvisoCampanaBarra from "@/components/campana/AvisoCampanaBarra";
+import type { EstadoCampana } from "@/lib/campana";
 import { fechaCorta, HREF_OFERTAS, type ResumenOfertas } from "@/lib/ofertas";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -57,8 +59,10 @@ function IconoBuscar({ className = "" }: { className?: string }) {
   );
 }
 
-export default function NavBar({ navegacion, fraseManada = null, ofertas = null }: {
+export default function NavBar({ navegacion, fraseManada = null, ofertas = null, campana = "ninguna" }: {
   navegacion: SeccionNav[]; fraseManada?: string | null; ofertas?: ResumenOfertas | null;
+  /** Navidad AllPet 2026 (16/11/2026): manda sobre ofertas y La manada. */
+  campana?: EstadoCampana;
 }) {
   const { unidades, listo } = useCarrito();
   const [abierto, setAbierto] = useState(false);
@@ -157,13 +161,15 @@ export default function NavBar({ navegacion, fraseManada = null, ofertas = null 
           escritorio: son tareas de quien ya compró, no de quien explora, y
           en la fila principal le quitaban aire al menú. En móvil siguen
           dentro del menú desplegable. */}
-      <div className={`${ofertas ? "bg-orange-700 text-white" : "bg-navy-500 text-crema-200"} text-[12px] font-light`}>
+      <div className={`${campana !== "ninguna" ? "bg-[#B3261E] text-white" : ofertas ? "bg-orange-700 text-white" : "bg-navy-500 text-crema-200"} text-[12px] font-light`}>
         <div className="mx-auto flex max-w-contenido items-center justify-center gap-6 px-6 py-1.5 lg:justify-between">
           {/* Con una promoción vigente, la línea la anuncia (04/11/2026) con
               su vigencia, que es lo que pide el MEIC. Si no, la invitación a
               la manada (14/10/2026); a quien ya se unió, la de siempre. */}
           <p>
-            {ofertas ? (
+            {campana !== "ninguna" ? (
+              <AvisoCampanaBarra estado={campana} />
+            ) : ofertas ? (
               <Link href={HREF_OFERTAS}
                 className="inline-flex items-center gap-1.5 font-medium underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
                 <span aria-hidden="true">🔥</span>
@@ -399,9 +405,15 @@ export default function NavBar({ navegacion, fraseManada = null, ofertas = null 
                 <Link href="/catalogo" className={enlaceMovil}>
                   Todo el catálogo
                 </Link>
-                <Link href="/manada?o=web-menu" className={enlaceMovil}>
-                  🐾 La manada{fraseManada ? ` · ${fraseManada}` : ""}
-                </Link>
+                {campana === "abierta" ? (
+                  <Link href="/navidad?o=web-menu#registro" className={enlaceMovil}>
+                    🎄 Sorteo de Navidad · Registrate gratis
+                  </Link>
+                ) : (
+                  <Link href="/manada?o=web-menu" className={enlaceMovil}>
+                    🐾 La manada{fraseManada ? ` · ${fraseManada}` : ""}
+                  </Link>
+                )}
               </li>
               <li>
                 <Link href="/recompra" className={enlaceMovil}>

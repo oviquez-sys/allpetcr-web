@@ -9,6 +9,8 @@ import { formatoColones, presentacionVisible, tinteDeSku } from "@/lib/formato";
 import { enOferta } from "@/lib/ofertas";
 import { TEXTO_CONSULTA } from "@/lib/publicacion";
 import type { Producto } from "@/lib/types";
+import CajaSorteo from "@/components/campana/CajaSorteo";
+import { useBeneficiosCampana } from "@/components/campana/useBeneficiosCampana";
 
 function Cantidad({
   valor, onCambio, nombre,
@@ -55,12 +57,19 @@ function Cantidad({
   );
 }
 
-export default function CarritoCliente({ productos }: { productos: Producto[] }) {
+export default function CarritoCliente({ productos, campanaAbierta = false }: {
+  productos: Producto[];
+  /** Navidad AllPet 2026: mostrar números del sorteo (16/11/2026). */
+  campanaAbierta?: boolean;
+}) {
   const { lineas, cambiarCantidad, quitar, vaciar, listo } = useCarrito();
   const { items, total, hayProblemas } = useMemo(
     () => resolverCarrito(lineas, productos),
     [lineas, productos],
   );
+  // Los números del sorteo y el bono los calcula el ERP con SUS precios.
+  const lineasComprables = items.filter((i) => sePuedePedir(i.producto)).map((i) => ({ sku: i.sku, cantidad: i.cantidad }));
+  const { resumen, cargando } = useBeneficiosCampana({ lineas: lineasComprables, entrega: "RET" }, campanaAbierta && listo);
 
   // Mientras se lee localStorage no se sabe si el carrito tiene algo. Mostrar
   // "vacío" y luego cambiarlo es peor que mostrar un espacio neutro un instante.
@@ -267,6 +276,8 @@ export default function CarritoCliente({ productos }: { productos: Producto[] })
                 {formatoColones(total)}
               </span>
             </div>
+
+            <CajaSorteo resumen={resumen} cargando={cargando} invitarRegistro />
 
             <p className="mt-4 text-[11.5px] font-light leading-relaxed text-navy-400">
               Los precios incluyen impuestos. El pedido se confirma por

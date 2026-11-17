@@ -1,7 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { erpPost } from "@/lib/erpServidor";
+import { erpPost, ErpRespuestaError } from "@/lib/erpServidor";
+import { inscribirEnErp, mensajeDelErp, type RespuestaInscripcionErp } from "@/lib/campanaServidor";
+import { CAMPANA_IMPRESA, COOKIE_PARTICIPA } from "@/lib/campana";
 import {
-  COOKIE_BIENVENIDA, COOKIE_MIEMBRO, COOKIE_OAUTH, opcionesMiembro, aBienvenida, canjearCodigoGoogle, firmar, opcionesCookie,
+  COOKIE_BIENVENIDA, COOKIE_MIEMBRO, COOKIE_OAUTH, COOKIE_RESULTADO_CAMPANA, opcionesMiembro, aBienvenida, canjearCodigoGoogle, firmar, opcionesCookie,
   verificar, type RespuestaRegistroErp,
 } from "@/lib/manada";
 import { sitioUrl } from "@/lib/sitio";
@@ -12,6 +14,8 @@ interface DatosIda {
   telefono: string;
   promos: boolean;
   fuente: string;
+  /** "campana" si vino del formulario del sorteo (16/11/2026). */
+  destino?: string;
 }
 
 /** Vuelta de Google: canjea el código, registra en el ERP y lleva a la
@@ -19,8 +23,10 @@ interface DatosIda {
  * mensaje claro, nunca a una página de error técnica. */
 export async function GET(request: NextRequest) {
   const url = request.nextUrl;
+  const idaPrevia = verificar<DatosIda>(request.cookies.get(COOKIE_OAUTH)?.value);
+  const pagina = idaPrevia?.destino === "campana" ? "/navidad" : "/manada";
   const volver = (error: string) => {
-    const r = NextResponse.redirect(`${sitioUrl}/manada?error=${error}#registro`, 303);
+    const r = NextResponse.redirect(`${sitioUrl}${pagina}?error=${error}#registro`, 303);
     r.cookies.delete({ name: COOKIE_OAUTH, path: "/api/manada/google" });
     return r;
   };
@@ -41,6 +47,28 @@ export async function GET(request: NextRequest) {
     cuenta = await canjearCodigoGoogle(codigo, ida.nonce);
   } catch {
     return volver("google");
+  }
+
+  if (ida.destino === "campana") {
+    let r: RespuestaInscripcionErp;
+    try {
+      r = await inscribirEnErp({
+        nombre: cuenta.nombre, email: cuenta.email, telefono: ida.telefono,
+        acepta_promociones: ida.promos, origen: ida.fuente,
+        google_sub: cuenta.sub, verificado: true,
+      });
+    } catch (e) {
+      const cerrada = e instanceof ErpRespuestaError && e.status === 400 && /cerraron|activa|empieza/i.test(mensajeDelErp(e.cuerpo));
+      return volver(cerrada ? "cerrada" : "sistema");
+    }
+    const listo = NextResponse.redirect(`${sitioUrl}/navidad?listo=1#registro`, 303);
+    listo.cookies.delete({ name: COOKIE_OAUTH, path: "/api/manada/google" });
+    listo.cookies.set(COOKIE_RESULTADO_CAMPANA,
+      firmar({ nombre: cuenta.nombre, numeros: r.numeros, ya: r.ya_participaba === true }, 3600),
+      opcionesCookie(3600, "/navidad"));
+    listo.cookies.set(COOKIE_MIEMBRO, "1", opcionesMiembro);
+    listo.cookies.set(COOKIE_PARTICIPA, CAMPANA_IMPRESA.slug, { ...opcionesMiembro, httpOnly: false });
+    return listo;
   }
 
   let registro: RespuestaRegistroErp;

@@ -12,6 +12,10 @@ import type { ResultadoCheckout } from "@/lib/checkoutServidor";
 import { crearTextoPedido } from "@/lib/pedidoWhatsApp";
 import { guardarBorrador, leerBorrador } from "@/lib/borradorCheckout";
 import { leerOrigen } from "@/lib/origenCampana";
+import CajaSorteo from "@/components/campana/CajaSorteo";
+import { useBeneficiosCampana } from "@/components/campana/useBeneficiosCampana";
+import { resumirBeneficios, zonasLegibles, type BeneficiosErp } from "@/lib/campana";
+import { clavePedido } from "@/lib/clavePedido";
 
 type Entrega = "retiro" | "coordinar";
 
@@ -43,12 +47,15 @@ export default function CheckoutCliente({
   productos,
   porcentajeManada = null,
   manadaSinAlimentos = false,
+  campana = null,
 }: {
   productos: Producto[];
   /** Porcentaje de la regalía de La manada vigente en el ERP, o null. */
   porcentajeManada?: string | null;
   /** La regalía no rebaja el alimento (05/11/2026). */
   manadaSinAlimentos?: boolean;
+  /** Navidad AllPet 2026 (16/11/2026): null si no hay campaña abierta. */
+  campana?: { zonas: string[] } | null;
 }) {
   const { lineas, listo } = useCarrito();
   const [catalogo, setCatalogo] = useState(productos);
@@ -81,6 +88,10 @@ export default function CheckoutCliente({
   // art. 190 y Ley 8968 art. 5). Nunca viene marcada de antemano (art. 188).
   const [aceptaTerminos, setAceptaTerminos] = useState(false);
   const [recordatorioDias, setRecordatorioDias] = useState<number | null>(null);
+  // Sorteo de Navidad: inscribirse desde el pedido (la casilla incluye
+  // aceptar las bases, como en /navidad) y lo que el ERP anotó del pedido.
+  const [inscribirSorteo, setInscribirSorteo] = useState(false);
+  const [anotado, setAnotado] = useState<{ numero: string | null; beneficios: BeneficiosErp | null; inscrito: string | null } | null>(null);
   const refNombre = useRef<HTMLInputElement>(null);
   const refTelefono = useRef<HTMLInputElement>(null);
   const refPreparado = useRef<HTMLHeadingElement>(null);
@@ -111,6 +122,18 @@ export default function CheckoutCliente({
   useEffect(() => { if (enviado) refPreparado.current?.focus(); }, [enviado]);
 
   const sinWhatsApp = faltante(negocio.whatsapp);
+
+  // Lo que la campaña le da a ESTE pedido, calculado por el ERP. Se vuelve a
+  // preguntar cuando cambian las líneas, la entrega, la dirección o el
+  // teléfono (con el teléfono el ERP sabe si la persona ya participa).
+  const telefonoOcho = telefono.replace(/\D/g, "").replace(/^506(?=\d{8}$)/, "");
+  const { resumen: resumenSorteo, cargando: cargandoSorteo } = useBeneficiosCampana({
+    lineas: comprables.map((i) => ({ sku: i.sku, cantidad: i.cantidad })),
+    entrega: entrega === "coordinar" ? "ENV" : "RET",
+    canton: entrega === "coordinar" ? direccion.canton : "",
+    distrito: entrega === "coordinar" ? direccion.distrito : "",
+    telefono: telefonoOcho.length === 8 ? telefonoOcho : "",
+  }, Boolean(campana) && listo && !enviado);
 
   // Devuelve los errores directamente en vez de solo actualizar el estado:
   // `enviar` necesita saber YA, en el mismo tick, cuál campo falló para
@@ -191,8 +214,48 @@ export default function CheckoutCliente({
         setErrorPedido(`Los precios cambiaron. ${diferencias}. Revisá el resumen antes de preparar nuevamente el pedido.`);
         return;
       }
+      // Anotar el pedido en el ERP (WEB-n): así la caja lo encuentra y, al
+      // cobrarlo, le acredita los números a esta persona. Si el ERP no
+      // responde, el pedido sale igual por WhatsApp, sin número.
+      let anotacion: { numero: string | null; beneficios: BeneficiosErp | null; inscrito: string | null } =
+        { numero: null, beneficios: null, inscrito: null };
+      try {
+        const lineasPedido = lineas.map(({ sku, cantidad }) => ({ sku, cantidad }));
+        const datosPedido = {
+          nombre, telefono, entrega: entrega === "coordinar" ? "ENV" : "RET", lineas: lineasPedido,
+          provincia: entrega === "coordinar" ? direccion.provincia : "",
+          canton: entrega === "coordinar" ? direccion.canton : "",
+          distrito: entrega === "coordinar" ? direccion.distrito : "",
+          senas: entrega === "coordinar" ? direccion.senas : "",
+          nota, origen: leerOrigen(),
+        };
+        const r = await fetch("/api/pedidos/por-confirmar", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...datosPedido, clave: clavePedido(datosPedido),
+            inscribir: Boolean(campana) && inscribirSorteo, acepta_bases: inscribirSorteo, fuente: "checkout",
+          }),
+          signal: AbortSignal.timeout(20000),
+        });
+        if (r.ok) {
+          const d = await r.json();
+          anotacion = { numero: d.numero ?? null, beneficios: d.beneficios ?? null, inscrito: d.inscrito ?? null };
+        }
+      } catch {
+        // Sin número: el pedido igual se manda por WhatsApp.
+      }
+      if (pedidoActual.current !== pedidoVerificado) {
+        setErrorPedido("El carrito cambió durante la confirmación. Revisá el resumen actualizado y prepará nuevamente el pedido.");
+        return;
+      }
+      setAnotado(anotacion);
       setMensajePreparado(crearTextoPedido(resultado, {
         nombre, telefono, entrega, direccion, nota, codigoManada, origen: leerOrigen(),
+        numeroPedido: anotacion.numero ?? undefined,
+        sorteo: resumirBeneficios(anotacion.beneficios,
+          anotacion.inscrito === "si" || anotacion.inscrito === "ya"),
+        inscritoAhora: anotacion.inscrito === "si",
       }));
     // Guardamos solo una copia local del pedido preparado. Al volver a pedir,
     // se resuelve otra vez contra el catálogo actual: este historial nunca
@@ -235,9 +298,21 @@ export default function CheckoutCliente({
           <h1 ref={refPreparado} tabIndex={-1} className="mt-7 font-display text-headline text-navy-500">
             Pedido preparado
           </h1>
+          {anotado?.numero && (
+            <p className="mt-2 text-[15px] font-semibold text-navy-500">Pedido {anotado.numero}</p>
+          )}
           <p className="mt-3 text-[15px] font-light leading-relaxed text-navy-400">
             Revisá el texto y abrí WhatsApp para enviarlo. Prepararlo no confirma ni reserva productos. Tu carrito se conserva.
           </p>
+          {anotado?.beneficios && (
+            <div className="text-left">
+              <CajaSorteo resumen={resumirBeneficios(anotado.beneficios, anotado.inscrito === "si" || anotado.inscrito === "ya")}
+                cargando={false} mostrarEnvio={entrega === "coordinar"} />
+            </div>
+          )}
+          {anotado?.inscrito === "si" && (
+            <p className="mt-3 text-[15px] font-semibold text-emerald-800">¡Ya estás participando en el sorteo!</p>
+          )}
           <textarea aria-label="Texto del pedido preparado" readOnly value={mensajePreparado} rows={10} className="mt-5 w-full rounded-lg border border-crema-400 p-3 text-left text-sm text-navy-500" />
           <a href={urlWhatsApp(mensajePreparado)} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block rounded-full bg-navy-500 px-6 py-3 text-white">Abrir WhatsApp para enviar</a>
           <button type="button" onClick={async () => {
@@ -450,7 +525,9 @@ export default function CheckoutCliente({
             <div className="mt-4 space-y-3">
               {([
                 ["retiro", "Retiro en tienda", "Sin costo. Te avisamos cuando esté listo."],
-                ["coordinar", "Coordinar envío", "Completá la dirección. Costo y plazo se confirman por WhatsApp."],
+                ["coordinar", "Coordinar envío", campana
+                  ? `Completá la dirección. En pedidos de más de ₡20.000 a ${zonasLegibles(campana.zonas) || "nuestra zona de Heredia"}, el envío es gratis; si no, costo y plazo se confirman por WhatsApp.`
+                  : "Completá la dirección. Costo y plazo se confirman por WhatsApp."],
               ] as const).map(([valor, titulo, detalle]) => (
                 <label
                   key={valor}
@@ -525,6 +602,21 @@ export default function CheckoutCliente({
             />
           </div>
 
+          {campana && !resumenSorteo?.participa && (
+            <div className="mt-8 rounded-card border border-[#B3261E]/25 bg-[#FDF3F2] p-4">
+              <label className="flex cursor-pointer items-start gap-3 text-sm text-navy-500">
+                <input type="checkbox" checked={inscribirSorteo} onChange={(e) => setInscribirSorteo(e.target.checked)}
+                  className="mt-0.5 h-5 w-5 shrink-0 accent-navy-500" />
+                <span>
+                  <strong className="font-semibold">🎄 Quiero participar en el sorteo de Navidad</strong> con este nombre y
+                  teléfono, y acepto las{" "}
+                  <Link href="/navidad#bases" target="_blank" className="underline underline-offset-2">bases del sorteo</Link>.
+                  Así esta compra ya te suma números.
+                </span>
+              </label>
+            </div>
+          )}
+
           <div className="mt-8">
             <label className="flex items-start gap-3 text-sm text-navy-500">
               <input
@@ -589,6 +681,7 @@ export default function CheckoutCliente({
                 {formatoColones(totalComprable)}
               </span>
             </div>
+            <CajaSorteo resumen={resumenSorteo} cargando={cargandoSorteo} mostrarEnvio={entrega === "coordinar"} />
             <p className="mt-3 text-[12.5px] font-light leading-relaxed text-navy-400">
               Este es el subtotal de los productos. Si elegís envío, te confirmamos por WhatsApp la
               cobertura, el costo y el plazo. Antes de que aceptés la compra te enviamos el resumen

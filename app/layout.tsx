@@ -14,6 +14,8 @@ import { construirNavegacion } from "@/lib/navegacion";
 import { getNavegacion, getResumenOfertas } from "@/lib/navegacionServidor";
 import { sitioIndexable } from "@/lib/sitio";
 import { frasePorcentaje, regaliaVigente } from "@/lib/regaliaPublica";
+import { leerCampana } from "@/lib/campanaServidor";
+import { estadoCampana } from "@/lib/campana";
 
 const titulo = "AllPetcr.com | Tienda de mascotas en Heredia";
 /** Imagen al compartir el sitio (auditoría F8-01): foto de la portada con el
@@ -122,7 +124,8 @@ export default async function RootLayout({
           <AvisoConfiguracion />
           <RecordarOrigen />
           <NavBar navegacion={navegacion} fraseManada={frasePorcentaje(await regaliaVigente())}
-            ofertas={await getResumenOfertas().catch(() => null)} />
+            ofertas={await getResumenOfertas().catch(() => null)}
+            campana={estadoCampana(await leerCampana())} />
           <AvisoRecompra />
           <main id="contenido" className="min-h-screen">
             {children}
