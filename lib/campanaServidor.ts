@@ -37,6 +37,18 @@ export interface RespuestaInscripcionErp {
   cliente_nuevo: boolean;
   miembro_nuevo: boolean;
   campana: string;
+  /** Llave de un solo uso para /manada/mascota, solo si todavía no ganó el
+   *  número extra por su mascota (17/11/2026). */
+  token_mascotas?: string;
+  /** "pendiente": puede ganarlo; "otorgado": ya lo tiene. */
+  bono_mascota?: "pendiente" | "otorgado";
+}
+
+/** Enlace al formulario de la mascota, si el ERP dio la llave. */
+export function enlaceMascota(r: Pick<RespuestaInscripcionErp, "token_mascotas">): string | null {
+  return typeof r.token_mascotas === "string" && /^[A-Za-z0-9_-]{16,200}$/.test(r.token_mascotas)
+    ? `/manada/mascota?t=${encodeURIComponent(r.token_mascotas)}`
+    : null;
 }
 
 export function inscribirEnErp(datos: {

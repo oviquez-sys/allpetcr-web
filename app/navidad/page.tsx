@@ -46,7 +46,7 @@ export default async function NavidadPage({
   const estado = estadoCampana(lectura);
   const c = lectura.erp;
   const sorteoEn = c?.sorteo_en ?? CAMPANA_IMPRESA.sorteo;
-  const resultado = verificar<{ nombre?: string; numeros?: number; ya?: boolean }>(
+  const resultado = verificar<{ nombre?: string; numeros?: number; ya?: boolean; mascotaUrl?: string | null; bonoMascota?: string | null }>(
     (await cookies()).get(COOKIE_RESULTADO_CAMPANA)?.value,
   );
 
@@ -77,7 +77,11 @@ export default async function NavidadPage({
                 googleActivo={googleConfigurado()}
                 comoLlegar={negocio.resenasUrl}
                 fecha={fechaLarga(sorteoEn)}
-                resultadoInicial={resultado ? { nombre: resultado.nombre, numeros: resultado.numeros ?? null, ya: Boolean(resultado.ya) } : null}
+                resultadoInicial={resultado ? {
+                  nombre: resultado.nombre, numeros: resultado.numeros ?? null, ya: Boolean(resultado.ya),
+                  mascotaUrl: resultado.mascotaUrl?.startsWith("/manada/mascota?t=") ? resultado.mascotaUrl : null,
+                  bonoMascota: resultado.bonoMascota === "otorgado",
+                } : null}
                 errorInicial={error ? ERRORES[error] : undefined}
               />
             ) : (
@@ -102,6 +106,7 @@ export default async function NavidadPage({
                   <li><strong className="font-medium text-navy-500">1.</strong> Registrarte te da 1 número.</li>
                   <li><strong className="font-medium text-navy-500">2.</strong> Cada compra en la tienda o en la web, ya registrado, te da 1 número más.</li>
                   <li><strong className="font-medium text-navy-500">3.</strong> Si la compra supera ₡20.000, te da otro número de bono.</li>
+                  <li><strong className="font-medium text-navy-500">4.</strong> Contarnos de tu mascota (nombre, perro o gato y edad) te da 1 número extra, una sola vez.</li>
                 </ol>
                 <div className="mt-5">
                   <BeneficiosCampana zonas={c?.envio_gratis?.zonas ?? []} />

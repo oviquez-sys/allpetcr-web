@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 
 interface Mascota {
@@ -49,12 +50,20 @@ function listaDeNombres(nombres: string[]) {
   return nombres.length > 1 ? `${nombres.slice(0, -1).join(", ")} y ${nombres.at(-1)}` : nombres[0];
 }
 
-export default function FormularioMascotas({ token }: { token: string }) {
+/**
+ * `conSorteo` (17/11/2026, decisión de Oscar): durante la Navidad AllPet 2026,
+ * registrar al menos una mascota con nombre, especie y edad aproximada da 1
+ * número extra para el sorteo, una sola vez por persona. La foto sigue
+ * siendo opcional y privada. Lo da el ERP; aquí solo se pide la edad y se
+ * muestra lo que el ERP confirmó.
+ */
+export default function FormularioMascotas({ token, conSorteo = false }: { token: string; conSorteo?: boolean }) {
   const [mascotas, setMascotas] = useState<Mascota[]>([vacia()]);
   const [enviando, setEnviando] = useState(false);
   const [cargandoFoto, setCargandoFoto] = useState<number | null>(null);
   const [error, setError] = useState("");
   const [listo, setListo] = useState(false);
+  const [extra, setExtra] = useState<{ numeroExtra: boolean; numeros: number | null } | null>(null);
 
   const cambiar = (i: number, campo: keyof Mascota, valor: string) =>
     setMascotas((ms) => ms.map((m, j) => (j === i ? { ...m, [campo]: valor } : m)));
@@ -84,6 +93,12 @@ export default function FormularioMascotas({ token }: { token: string }) {
         : "Falta el nombre o si es perro o gato.");
       return;
     }
+    // Con sorteo: al menos una mascota con edad, que es lo que da el número
+    // extra (y lo que sirve para avisarle de su alimento y su cumpleaños).
+    if (conSorteo && !mascotas.some((m) => m.edad_anios !== "" || m.edad_meses !== "")) {
+      setError("Para el número extra, decinos la edad aproximada (aunque sea solo los años).");
+      return;
+    }
     setEnviando(true);
     try {
       const r = await fetch("/api/manada/mascotas", {
@@ -102,7 +117,11 @@ export default function FormularioMascotas({ token }: { token: string }) {
       if (!r.ok) {
         setError(d.error ?? "No pudimos guardarlo. Probá de nuevo.");
       } else {
+        setExtra({ numeroExtra: d.numeroExtra === true, numeros: typeof d.numeros === "number" ? d.numeros : null });
         setListo(true);
+        // La confirmación es más corta que el formulario: sin esto quedaba
+        // a la vista el pie de página y el cliente no veía el «listo».
+        window.scrollTo({ top: 0, behavior: "smooth" });
       }
     } catch {
       setError("Sin conexión. Revisá el internet y probá de nuevo.");
@@ -130,6 +149,17 @@ export default function FormularioMascotas({ token }: { token: string }) {
           {nombres.length > 1 ? "Gracias por presentárnoslos. Los esperamos en la tienda."
             : "Gracias por presentárnoslo. Lo esperamos en la tienda."}
         </p>
+        {extra?.numeroExtra && (
+          <p className="mt-5 rounded-lg bg-emerald-50 px-4 py-3 text-[15px] font-medium text-emerald-800">
+            🎄 Sumaste 1 número extra para el sorteo de Navidad
+            {extra.numeros ? `: ya llevás ${extra.numeros}.` : "."}
+          </p>
+        )}
+        {conSorteo && (
+          <Link href="/catalogo" className="mt-6 inline-flex h-12 items-center rounded-full bg-navy-500 px-7 text-[15px] font-medium text-crema-100 hover:bg-navy-600">
+            Ver productos
+          </Link>
+        )}
       </div>
     );
   }
@@ -189,7 +219,7 @@ export default function FormularioMascotas({ token }: { token: string }) {
           </div>
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label htmlFor={`m${i}-anios`} className={rotulo}>Años</label>
+              <label htmlFor={`m${i}-anios`} className={rotulo}>{conSorteo ? "Edad: años" : "Años"}</label>
               <select id={`m${i}-anios`} value={m.edad_anios} className={campo}
                 onChange={(e) => cambiar(i, "edad_anios", e.target.value)}>
                 <option value="">—</option>

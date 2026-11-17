@@ -9,6 +9,7 @@ import { REFERENCIA_LOCAL } from "@/lib/campana";
  */
 export default function ResultadoCampana({
   nombre, numeros, yaParticipaba, comoLlegar, fecha, onOtraPersona,
+  mascotaUrl = null, bonoMascota = false, sinDatos = false,
 }: {
   nombre?: string;
   numeros: number | null;
@@ -16,6 +17,13 @@ export default function ResultadoCampana({
   comoLlegar: string;
   fecha: string;
   onOtraPersona?: () => void;
+  /** Enlace al formulario de la mascota: 1 número extra (17/11/2026). */
+  mascotaUrl?: string | null;
+  /** Ya ganó el número extra por su mascota. */
+  bonoMascota?: boolean;
+  /** Se sabe que participa solo por la cookie de este celular (no hay
+   *  respuesta del ERP a mano, ni enlace de la mascota). */
+  sinDatos?: boolean;
 }) {
   const primerNombre = (nombre ?? "").trim().split(/\s+/)[0];
   return (
@@ -33,6 +41,31 @@ export default function ResultadoCampana({
         )}
       </p>
       <p className="mt-1 text-[14px] text-navy-400">Sorteo · {fecha}. Te avisamos por WhatsApp si ganás.</p>
+
+      {/* Número extra por la mascota (decisión de Oscar, 17/11/2026): una
+          vez por persona, con nombre, especie y edad; foto opcional. */}
+      {mascotaUrl ? (
+        <div className="mt-6 rounded-xl bg-emerald-50 p-5 text-left ring-1 ring-emerald-200">
+          <p className="text-[16px] font-semibold text-emerald-900">🐾 Ganá 1 número extra</p>
+          <p className="mt-1 text-[14.5px] leading-relaxed text-emerald-900/80">
+            Contanos de tu mascota: cómo se llama, si es perro o gato y su edad. Tarda un minuto.
+          </p>
+          <Link href={mascotaUrl}
+            className="mt-4 inline-flex h-12 w-full items-center justify-center rounded-full bg-emerald-700 px-6 text-[15px] font-semibold text-white hover:bg-emerald-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2 sm:w-auto">
+            Registrar a mi mascota
+          </Link>
+        </div>
+      ) : bonoMascota ? (
+        <p className="mt-3 text-[14px] font-medium text-emerald-800">Incluye el número extra por tu mascota. 🐾</p>
+      ) : sinDatos && onOtraPersona ? (
+        <p className="mt-4 text-[14px] text-navy-400">
+          ¿Te falta registrar a tu mascota para el número extra?{" "}
+          <button type="button" onClick={onOtraPersona} className="font-medium text-navy-500 underline underline-offset-2">
+            Volvé a poner tu nombre y WhatsApp
+          </button>{" "}
+          y te mostramos el enlace.
+        </p>
+      ) : null}
 
       <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
         <Link href="/catalogo"

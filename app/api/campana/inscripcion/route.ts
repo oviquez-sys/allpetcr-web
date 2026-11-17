@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { ErpNoConfiguradoError, ErpRespuestaError } from "@/lib/erpServidor";
-import { inscribirEnErp, mensajeDelErp } from "@/lib/campanaServidor";
+import { enlaceMascota, inscribirEnErp, mensajeDelErp } from "@/lib/campanaServidor";
 import { CAMPANA_IMPRESA, COOKIE_PARTICIPA } from "@/lib/campana";
 import { COOKIE_MIEMBRO, ipDe, limpiarFuente, limpiarTelefono, opcionesMiembro, permitido } from "@/lib/manada";
 
@@ -57,6 +57,8 @@ export async function POST(request: Request) {
       ok: true,
       yaParticipaba: r.ya_participaba === true,
       numeros: typeof r.numeros === "number" ? r.numeros : null,
+      mascotaUrl: enlaceMascota(r),
+      bonoMascota: r.bono_mascota === "otorgado" ? "otorgado" : null,
     });
     respuesta.cookies.set(COOKIE_MIEMBRO, "1", opcionesMiembro);
     respuesta.cookies.set(COOKIE_PARTICIPA, CAMPANA_IMPRESA.slug, { ...opcionesMiembro, httpOnly: false });

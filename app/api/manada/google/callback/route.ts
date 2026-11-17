@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { erpPost, ErpRespuestaError } from "@/lib/erpServidor";
-import { inscribirEnErp, mensajeDelErp, type RespuestaInscripcionErp } from "@/lib/campanaServidor";
+import { enlaceMascota, inscribirEnErp, mensajeDelErp, type RespuestaInscripcionErp } from "@/lib/campanaServidor";
 import { CAMPANA_IMPRESA, COOKIE_PARTICIPA } from "@/lib/campana";
 import {
   COOKIE_BIENVENIDA, COOKIE_MIEMBRO, COOKIE_OAUTH, COOKIE_RESULTADO_CAMPANA, opcionesMiembro, aBienvenida, canjearCodigoGoogle, firmar, opcionesCookie,
@@ -64,7 +64,10 @@ export async function GET(request: NextRequest) {
     const listo = NextResponse.redirect(`${sitioUrl}/navidad?listo=1#registro`, 303);
     listo.cookies.delete({ name: COOKIE_OAUTH, path: "/api/manada/google" });
     listo.cookies.set(COOKIE_RESULTADO_CAMPANA,
-      firmar({ nombre: cuenta.nombre, numeros: r.numeros, ya: r.ya_participaba === true }, 3600),
+      firmar({
+        nombre: cuenta.nombre, numeros: r.numeros, ya: r.ya_participaba === true,
+        mascotaUrl: enlaceMascota(r), bonoMascota: r.bono_mascota === "otorgado" ? "otorgado" : null,
+      }, 3600),
       opcionesCookie(3600, "/navidad"));
     listo.cookies.set(COOKIE_MIEMBRO, "1", opcionesMiembro);
     listo.cookies.set(COOKIE_PARTICIPA, CAMPANA_IMPRESA.slug, { ...opcionesMiembro, httpOnly: false });

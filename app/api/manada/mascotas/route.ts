@@ -26,8 +26,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Demasiados intentos. Esperá unos minutos." }, { status: 429 });
   }
   try {
-    await erpPost("/api/manada/mascotas/", { token: datos.token, mascotas: datos.mascotas });
-    return NextResponse.json({ ok: true }, { status: 201 });
+    // Durante el sorteo de Navidad el ERP dice si esta vez se ganó el número
+    // extra (`numero_extra`) y cuántos números lleva la persona (`numeros`).
+    const r = await erpPost<{ numero_extra?: boolean; numeros?: number } | null>(
+      "/api/manada/mascotas/", { token: datos.token, mascotas: datos.mascotas });
+    return NextResponse.json({
+      ok: true,
+      numeroExtra: r?.numero_extra === true,
+      numeros: typeof r?.numeros === "number" ? r.numeros : null,
+    }, { status: 201 });
   } catch (e) {
     if (e instanceof ErpRespuestaError && e.status === 400) {
       // El ERP explica qué falta ("Falta el nombre de la mascota 2"): se

@@ -23,7 +23,7 @@ interface Props {
   comoLlegar: string;
   fecha: string;
   /** Resultado al volver de Google (cookie firmada), si lo hay. */
-  resultadoInicial?: { nombre?: string; numeros: number | null; ya: boolean } | null;
+  resultadoInicial?: { nombre?: string; numeros: number | null; ya: boolean; mascotaUrl?: string | null; bonoMascota?: boolean } | null;
   /** Mensaje de error al volver de Google, si lo hay. */
   errorInicial?: string;
 }
@@ -31,7 +31,7 @@ interface Props {
 type Estado =
   | { tipo: "inicial" }
   | { tipo: "enviando" }
-  | { tipo: "listo"; nombre?: string; numeros: number | null; ya: boolean }
+  | { tipo: "listo"; nombre?: string; numeros: number | null; ya: boolean; mascotaUrl?: string | null; bonoMascota?: boolean; soloCookie?: boolean }
   | { tipo: "error"; mensaje: string; reintentar: boolean; campo?: string }
   | { tipo: "cerrada"; mensaje: string };
 
@@ -52,7 +52,7 @@ export default function FormularioCampana({ fuente, googleActivo, comoLlegar, fe
   const [bases, setBases] = useState(false);
   const [promos, setPromos] = useState(false);
   const [estado, setEstado] = useState<Estado>(
-    resultadoInicial ? { tipo: "listo", nombre: resultadoInicial.nombre, numeros: resultadoInicial.numeros, ya: resultadoInicial.ya }
+    resultadoInicial ? { tipo: "listo", ...resultadoInicial }
       : errorInicial ? { tipo: "error", mensaje: errorInicial, reintentar: false } : { tipo: "inicial" },
   );
   const refResultado = useRef<HTMLDivElement>(null);
@@ -65,7 +65,7 @@ export default function FormularioCampana({ fuente, googleActivo, comoLlegar, fe
   // opción de inscribir a otra persona de la casa.
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- lectura única de una cookie al montar
-    if (!resultadoInicial && !errorInicial && yaParticipaEnNavegador()) setEstado({ tipo: "listo", numeros: null, ya: true });
+    if (!resultadoInicial && !errorInicial && yaParticipaEnNavegador()) setEstado({ tipo: "listo", numeros: null, ya: true, soloCookie: true });
   }, [resultadoInicial, errorInicial]);
 
   useEffect(() => {
@@ -95,6 +95,8 @@ export default function FormularioCampana({ fuente, googleActivo, comoLlegar, fe
         return setEstado({
           tipo: "listo", nombre, numeros: typeof d.numeros === "number" ? d.numeros : null,
           ya: Boolean(d.yaParticipaba) && !huboFalla.current,
+          mascotaUrl: typeof d.mascotaUrl === "string" ? d.mascotaUrl : null,
+          bonoMascota: d.bonoMascota === "otorgado",
         });
       }
       if (r.status === 409 || d.cerrada) return setEstado({ tipo: "cerrada", mensaje: d.error ?? "Las inscripciones ya cerraron." });
@@ -120,6 +122,8 @@ export default function FormularioCampana({ fuente, googleActivo, comoLlegar, fe
       <div ref={refResultado}>
         <ResultadoCampana nombre={estado.nombre} numeros={estado.numeros} yaParticipaba={estado.ya}
           comoLlegar={comoLlegar} fecha={fecha}
+          mascotaUrl={estado.mascotaUrl ?? null} bonoMascota={Boolean(estado.bonoMascota)}
+          sinDatos={Boolean(estado.soloCookie)}
           onOtraPersona={() => { huboFalla.current = false; setNombre(""); setTelefono(""); setEmail(""); setBases(false); setPromos(false); setEstado({ tipo: "inicial" }); }} />
       </div>
     );

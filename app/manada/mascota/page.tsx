@@ -3,6 +3,8 @@ import { cookies } from "next/headers";
 import FormularioMascotas from "@/components/manada/FormularioMascotas";
 import { erpGet } from "@/lib/erpServidor";
 import { COOKIE_BIENVENIDA, verificar, type Bienvenida } from "@/lib/manada";
+import { leerCampana } from "@/lib/campanaServidor";
+import { estadoCampana } from "@/lib/campana";
 
 export const metadata = {
   title: "Tu peludo también es parte de la manada",
@@ -14,6 +16,10 @@ export const metadata = {
 export default async function MascotaPage({ searchParams }: { searchParams: Promise<{ t?: string }> }) {
   const { t } = await searchParams;
   const token = t || verificar<Bienvenida>((await cookies()).get(COOKIE_BIENVENIDA)?.value)?.token_mascotas || "";
+
+  // Sorteo de Navidad (17/11/2026): mientras está abierto, contar de la
+  // mascota da 1 número extra (lo otorga el ERP, una vez por persona).
+  const conSorteo = estadoCampana(await leerCampana()) === "abierta";
 
   let estado: { valido: boolean; nombre?: string } = { valido: false };
   if (token) {
@@ -31,11 +37,24 @@ export default async function MascotaPage({ searchParams }: { searchParams: Prom
         <h1 className="mt-3 font-display text-headline text-navy-500">Tu peludo también es parte de la manada</h1>
         {estado.valido ? (
           <>
-            <p className="mt-3 text-[15px] font-light leading-relaxed text-navy-400">
-              {estado.nombre ? `${estado.nombre}, c` : "C"}ontanos quién es y subí su foto: así lo conocemos por su nombre
-              y te recomendamos lo que de verdad le sirve. Lo que no sepás, dejalo en blanco.
-            </p>
-            <FormularioMascotas token={token} />
+            {conSorteo ? (
+              <>
+                <p className="mt-4 rounded-lg bg-emerald-50 px-4 py-3 text-[15px] font-medium text-emerald-800">
+                  🎄 Ganá 1 número extra para el sorteo de Navidad
+                </p>
+                <p className="mt-3 text-[15px] font-light leading-relaxed text-navy-400">
+                  {estado.nombre ? `${estado.nombre}, d` : "D"}ecinos cómo se llama, si es perro o gato y su edad
+                  aproximada. Raza, peso y foto son opcionales. Así te avisamos cuando se le esté acabando el
+                  alimento y te saludamos en su cumpleaños.
+                </p>
+              </>
+            ) : (
+              <p className="mt-3 text-[15px] font-light leading-relaxed text-navy-400">
+                {estado.nombre ? `${estado.nombre}, c` : "C"}ontanos quién es y subí su foto: así lo conocemos por su nombre
+                y te recomendamos lo que de verdad le sirve. Lo que no sepás, dejalo en blanco.
+              </p>
+            )}
+            <FormularioMascotas token={token} conSorteo={conSorteo} />
           </>
         ) : (
           <div className="mt-6 rounded-card bg-white p-6 ring-1 ring-crema-400">
