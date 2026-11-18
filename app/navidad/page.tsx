@@ -99,6 +99,21 @@ export default async function NavidadPage({
           </div>
 
           <div className="space-y-10">
+            {/* El premio (17/11/2026, decisión de Oscar): los productos los
+                escoge la tienda; quien gana elige solo si la quiere para perro
+                o para gato. Dicho aquí y en las bases, para que nadie espere
+                escoger los productos que quiera. */}
+            {estado !== "finalizada" && (
+              <div>
+                <h2 className="text-sm font-medium uppercase tracking-wider text-navy-500">El premio</h2>
+                <p className="mt-4 text-[15px] leading-relaxed text-navy-400">
+                  Una canasta con 15 productos <strong className="font-medium text-navy-500">escogidos por AllPetcr.com</strong>.
+                  Si ganás, elegís si la querés en versión para perro o para gato. Los productos no se pueden cambiar
+                  ni canjear por dinero.
+                </p>
+              </div>
+            )}
+
             {estado !== "finalizada" && (
               <div>
                 <h2 className="text-sm font-medium uppercase tracking-wider text-navy-500">Cómo sumar más números</h2>
