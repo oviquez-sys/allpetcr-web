@@ -10,6 +10,11 @@
  *
  * Vive en sessionStorage: dura lo que la pestaña y nunca sale del navegador
  * salvo dentro del mensaje que el propio cliente envía.
+ *
+ * Sin UTM vale el código corto `?o=` (24/11/2026). Es el que usan los enlaces
+ * del plan de Navidad (biografía, anuncios, Google, QR de la caja, catálogo
+ * de WhatsApp). Antes solo lo leía /navidad para la inscripción; ahora el
+ * pedido también dice de dónde vino, con el mismo código.
  */
 export const CLAVE_ORIGEN = "allpet:origen-campana";
 
@@ -19,9 +24,13 @@ const LIMPIO = /^[a-z0-9_.-]{1,60}$/i;
  *  "instagram / lanzamiento_20261019". Solo letras, números y _ . - */
 export function origenDesdeUrl(busqueda: string): string | null {
   const p = new URLSearchParams(busqueda);
+  if (!p.get("utm_source")) {
+    const codigo = p.get("o");
+    return codigo && LIMPIO.test(codigo) ? codigo : null;
+  }
   const partes = [p.get("utm_source"), p.get("utm_campaign"), p.get("utm_content")]
     .filter((v): v is string => Boolean(v && LIMPIO.test(v)));
-  return partes.length > 0 && p.get("utm_source") ? partes.join(" / ") : null;
+  return partes.length > 0 ? partes.join(" / ") : null;
 }
 
 export function recordarOrigen(busqueda: string): void {

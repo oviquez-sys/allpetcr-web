@@ -17,4 +17,14 @@ describe("origenDesdeUrl", () => {
     expect(origenDesdeUrl("?utm_source=insta<script>")).toBeNull();
     expect(origenDesdeUrl("?utm_source=instagram&utm_campaign=hola mundo")).toBe("instagram");
   });
+
+  it("sin UTM usa el código corto ?o= de los enlaces del plan (24/11/2026)", () => {
+    expect(origenDesdeUrl("?o=ig-anuncio3")).toBe("ig-anuncio3");
+    expect(origenDesdeUrl("?o=whatsapp-catalogo")).toBe("whatsapp-catalogo");
+    expect(origenDesdeUrl("?o=mal<script>")).toBeNull();
+  });
+
+  it("si vienen los dos, manda la UTM", () => {
+    expect(origenDesdeUrl("?utm_source=google&utm_campaign=novedad&o=qr-caja")).toBe("google / novedad");
+  });
 });
