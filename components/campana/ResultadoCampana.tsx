@@ -48,7 +48,7 @@ export default function ResultadoCampana({
         <div className="mt-6 rounded-xl bg-emerald-50 p-5 text-left ring-1 ring-emerald-200">
           <p className="text-[16px] font-semibold text-emerald-900">🐾 Ganá 1 número extra</p>
           <p className="mt-1 text-[14.5px] leading-relaxed text-emerald-900/80">
-            Contanos de tu mascota: cómo se llama, si es perro o gato y su edad. Tarda un minuto.
+            Contanos de tu mascota: cómo se llama, qué animal es y su edad. Perros, gatos, conejos, hámsters y demás. Tarda un minuto.
           </p>
           <Link href={mascotaUrl}
             className="mt-4 inline-flex h-12 w-full items-center justify-center rounded-full bg-emerald-700 px-6 text-[15px] font-semibold text-white hover:bg-emerald-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2 sm:w-auto">

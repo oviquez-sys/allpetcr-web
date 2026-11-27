@@ -43,7 +43,7 @@ export default async function MascotaPage({ searchParams }: { searchParams: Prom
                   🎄 Ganá 1 número extra para el sorteo de Navidad
                 </p>
                 <p className="mt-3 text-[15px] font-light leading-relaxed text-navy-400">
-                  {estado.nombre ? `${estado.nombre}, d` : "D"}ecinos cómo se llama, si es perro o gato y su edad
+                  {estado.nombre ? `${estado.nombre}, d` : "D"}ecinos cómo se llama, qué animal es (perro, gato, conejo, hámster u otro) y su edad
                   aproximada. Raza, peso y foto son opcionales. Así te avisamos cuando se le esté acabando el
                   alimento y te saludamos en su cumpleaños.
                 </p>

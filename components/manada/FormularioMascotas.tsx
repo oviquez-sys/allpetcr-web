@@ -5,7 +5,7 @@ import { useState } from "react";
 
 interface Mascota {
   nombre: string;
-  especie: "" | "PER" | "GAT" | "OTR";
+  especie: "" | "PER" | "GAT" | "CON" | "ROE" | "OTR";
   raza: string;
   edad_anios: string;
   edad_meses: string;
@@ -31,6 +31,10 @@ const rotulo = "mb-1 block text-sm text-navy-500";
 const ESPECIES: { valor: Mascota["especie"]; texto: string }[] = [
   { valor: "PER", texto: "Perro" },
   { valor: "GAT", texto: "Gato" },
+  // Conejos y roedores desde el 26/11/2026 (pedido de Oscar). Mismas claves
+  // que el ERP (manada.Mascota.Especie).
+  { valor: "CON", texto: "Conejo" },
+  { valor: "ROE", texto: "Hámster o roedor" },
   { valor: "OTR", texto: "Otro" },
 ];
 
@@ -89,8 +93,8 @@ export default function FormularioMascotas({ token, conSorteo = false }: { token
     setError("");
     const falta = mascotas.findIndex((m) => !m.nombre.trim() || !m.especie);
     if (falta >= 0) {
-      setError(mascotas.length > 1 ? `Al peludo ${falta + 1} le falta el nombre o si es perro o gato.`
-        : "Falta el nombre o si es perro o gato.");
+      setError(mascotas.length > 1 ? `A la mascota ${falta + 1} le falta el nombre o qué animal es.`
+        : "Falta el nombre o qué animal es.");
       return;
     }
     // Con sorteo: al menos una mascota con edad, que es lo que da el número
@@ -202,7 +206,7 @@ export default function FormularioMascotas({ token, conSorteo = false }: { token
             <input id={`m${i}-nombre`} value={m.nombre} maxLength={60} className={campo}
               onChange={(e) => cambiar(i, "nombre", e.target.value)} />
           </div>
-          <div role="radiogroup" aria-label="Especie" className="grid grid-cols-3 gap-2">
+          <div role="radiogroup" aria-label="Qué animal es" className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {ESPECIES.map((es) => (
               <button key={es.valor} type="button" role="radio" aria-checked={m.especie === es.valor}
                 onClick={() => cambiar(i, "especie", es.valor)}
@@ -213,7 +217,7 @@ export default function FormularioMascotas({ token, conSorteo = false }: { token
             ))}
           </div>
           <div>
-            <label htmlFor={`m${i}-raza`} className={rotulo}>Raza <span className="text-navy-400">(o «zaguate»)</span></label>
+            <label htmlFor={`m${i}-raza`} className={rotulo}>Raza o tipo <span className="text-navy-400">(«zaguate», «hámster sirio»…)</span></label>
             <input id={`m${i}-raza`} value={m.raza} maxLength={80} className={campo}
               onChange={(e) => cambiar(i, "raza", e.target.value)} />
           </div>
